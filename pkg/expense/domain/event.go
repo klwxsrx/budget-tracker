@@ -11,53 +11,53 @@ const (
 )
 
 type AccountCreated struct {
-	ID             AccountID
-	Title          string
-	Currency       Currency
-	InitialBalance int
+	ID             AccountID `json:"id"`
+	Title          string    `json:"title"`
+	Currency       Currency  `json:"currency"`
+	InitialBalance int       `json:"initial_balance"`
 }
 
 func (e *AccountCreated) GetAggregateID() event.AggregateID {
 	return event.AggregateID{UUID: e.ID.UUID}
 }
 
-func (e *AccountCreated) GetAggregateName() string {
+func (e *AccountCreated) GetAggregateName() event.AggregateName {
 	return accountAggregateName
 }
 
-func (e *AccountCreated) GetType() string {
+func (e *AccountCreated) GetType() event.Type {
 	return AccountCreatedEvent
 }
 
 type AccountTitleChanged struct {
-	ID    AccountID
-	Title string
+	ID    AccountID `json:"id"`
+	Title string    `json:"title"`
 }
 
 func (e *AccountTitleChanged) GetAggregateID() event.AggregateID {
 	return event.AggregateID{UUID: e.ID.UUID}
 }
 
-func (e *AccountTitleChanged) GetAggregateName() string {
+func (e *AccountTitleChanged) GetAggregateName() event.AggregateName {
 	return accountAggregateName
 }
 
-func (e *AccountTitleChanged) GetType() string {
+func (e *AccountTitleChanged) GetType() event.Type {
 	return AccountTitleChangedEvent
 }
 
 type AccountDeleted struct {
-	ID AccountID
+	ID AccountID `json:"id"`
 }
 
 func (e *AccountDeleted) GetAggregateID() event.AggregateID {
 	return event.AggregateID{UUID: e.ID.UUID}
 }
 
-func (e *AccountDeleted) GetAggregateName() string {
+func (e *AccountDeleted) GetAggregateName() event.AggregateName {
 	return accountAggregateName
 }
 
-func (e *AccountDeleted) GetType() string {
+func (e *AccountDeleted) GetType() event.Type {
 	return AccountDeletedEvent
 }

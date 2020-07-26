@@ -10,19 +10,19 @@ import (
 )
 
 type EventDeserializer interface {
-	Deserialize(event *messaging.Event) (event.Event, error)
+	Deserialize(event *messaging.StoredEvent) (event.Event, error)
 }
 
 type eventDeserializer struct{}
 
-func (ed *eventDeserializer) Deserialize(event *messaging.Event) (event.Event, error) {
+func (ed *eventDeserializer) Deserialize(event *messaging.StoredEvent) (event.Event, error) {
 	switch event.Type {
 	case domain.AccountCreatedEvent:
-		return ed.deserializeAccountCreatedEvent(event.Payload)
+		return ed.deserializeAccountCreatedEvent(event.EventData)
 	case domain.AccountTitleChangedEvent:
-		return ed.deserializeAccountTitleChangedEvent(event.Payload)
+		return ed.deserializeAccountTitleChangedEvent(event.EventData)
 	case domain.AccountDeletedEvent:
-		return ed.deserializeAccountDeletedEvent(event.Payload)
+		return ed.deserializeAccountDeletedEvent(event.EventData)
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown event, %v", event.Type))
 	}

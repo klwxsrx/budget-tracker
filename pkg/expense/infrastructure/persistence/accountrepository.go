@@ -24,7 +24,7 @@ func (ar *accountRepository) Update(a *domain.Account) error {
 
 func (ar *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error) {
 	state := &domain.AccountState{}
-	storedEvents, err := ar.store.Get(messaging.AggregateID{UUID: id.UUID})
+	storedEvents, err := ar.store.Get(event.AggregateID{UUID: id.UUID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events, %v", err)
 	}

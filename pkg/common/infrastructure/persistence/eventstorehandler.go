@@ -11,16 +11,7 @@ type eventStoreEventHandler struct {
 }
 
 func (eh *eventStoreEventHandler) Handle(e event.Event) error {
-	ev, err := messaging.NewEvent(
-		messaging.EventType(e.GetType()),
-		messaging.AggregateID{UUID: e.GetAggregateID().UUID},
-		messaging.AggregateName(e.GetAggregateName()),
-		e,
-	)
-	if err != nil {
-		return fmt.Errorf("can't create message from domain event, %v", err)
-	}
-	err = eh.store.Append(ev)
+	err := eh.store.Append(e)
 	if err != nil {
 		return fmt.Errorf("can't append event to store, %v", err)
 	}

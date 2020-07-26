@@ -5,11 +5,13 @@ import "github.com/google/uuid"
 type AggregateID struct {
 	uuid.UUID
 }
+type AggregateName string
+type Type string
 
 type Event interface {
 	GetAggregateID() AggregateID
-	GetAggregateName() string
-	GetType() string
+	GetAggregateName() AggregateName
+	GetType() Type
 }
 
 type Handler interface {
