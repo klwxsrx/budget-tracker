@@ -2,7 +2,9 @@ package event
 
 import "github.com/google/uuid"
 
-type AggregateID uuid.UUID
+type AggregateID struct {
+	uuid.UUID
+}
 
 type Event interface {
 	GetAggregateID() AggregateID

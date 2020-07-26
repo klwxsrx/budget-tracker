@@ -41,11 +41,11 @@ type AccountState struct {
 
 func (a *AccountState) Apply(e event.Event) error {
 	switch e.GetType() {
-	case accountCreatedEvent:
+	case AccountCreatedEvent:
 		return a.applyAccountCreatedEvent(e)
-	case accountTitleChangedEvent:
+	case AccountTitleChangedEvent:
 		return a.applyTitleChangedEvent(e)
-	case accountDeletedEvent:
+	case AccountDeletedEvent:
 		return a.applyAccountDeletedEvent(e)
 	default:
 		return UnknownEventType

@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	accountCreatedEvent      = "account_created"
-	accountTitleChangedEvent = "account_title_changed"
-	accountDeletedEvent      = "account_deleted"
+	AccountCreatedEvent      = "expense.account_created"
+	AccountTitleChangedEvent = "expense.account_title_changed"
+	AccountDeletedEvent      = "expense.account_deleted"
 )
 
 type AccountCreated struct {
@@ -18,7 +18,7 @@ type AccountCreated struct {
 }
 
 func (e *AccountCreated) GetAggregateID() event.AggregateID {
-	return event.AggregateID(e.ID.UUID)
+	return event.AggregateID{UUID: e.ID.UUID}
 }
 
 func (e *AccountCreated) GetAggregateName() string {
@@ -26,7 +26,7 @@ func (e *AccountCreated) GetAggregateName() string {
 }
 
 func (e *AccountCreated) GetType() string {
-	return accountCreatedEvent
+	return AccountCreatedEvent
 }
 
 type AccountTitleChanged struct {
@@ -35,7 +35,7 @@ type AccountTitleChanged struct {
 }
 
 func (e *AccountTitleChanged) GetAggregateID() event.AggregateID {
-	return event.AggregateID(e.ID.UUID)
+	return event.AggregateID{UUID: e.ID.UUID}
 }
 
 func (e *AccountTitleChanged) GetAggregateName() string {
@@ -43,7 +43,7 @@ func (e *AccountTitleChanged) GetAggregateName() string {
 }
 
 func (e *AccountTitleChanged) GetType() string {
-	return accountTitleChangedEvent
+	return AccountTitleChangedEvent
 }
 
 type AccountDeleted struct {
@@ -51,7 +51,7 @@ type AccountDeleted struct {
 }
 
 func (e *AccountDeleted) GetAggregateID() event.AggregateID {
-	return event.AggregateID(e.ID.UUID)
+	return event.AggregateID{UUID: e.ID.UUID}
 }
 
 func (e *AccountDeleted) GetAggregateName() string {
@@ -59,5 +59,5 @@ func (e *AccountDeleted) GetAggregateName() string {
 }
 
 func (e *AccountDeleted) GetType() string {
-	return accountDeletedEvent
+	return AccountDeletedEvent
 }
