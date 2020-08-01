@@ -1,12 +1,14 @@
 package mysql
 
 import (
+	"database/sql"
 	"github.com/jmoiron/sqlx"
 )
 
 type Client interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
 	Get(dest interface{}, query string, args ...interface{}) error
-	// TODO: add required methods from sqlx
+	Select(dest interface{}, query string, args ...interface{}) error
 }
 
 type ClientTransaction interface {
