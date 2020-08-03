@@ -11,28 +11,17 @@ type StoredEventID struct {
 }
 
 type StoredEvent struct {
-	Id            StoredEventID
-	Type          event.Type
-	AggregateID   event.AggregateID
-	AggregateName event.AggregateName
-	EventData     []byte
-	CreatedAt     time.Time
+	Id            StoredEventID       `db:"id"`
+	Type          event.Type          `db:"type"`
+	AggregateID   event.AggregateID   `db:"aggregate_id"`
+	AggregateName event.AggregateName `db:"aggregate_name"`
+	EventData     []byte              `db:"event_data"`
+	CreatedAt     time.Time           `db:"created_at"`
 }
 
 type EventStore interface {
 	Get(id event.AggregateID) ([]*StoredEvent, error)
 	GetFromID(id event.AggregateID, fromID StoredEventID) ([]*StoredEvent, error)
-	GetByName(t event.AggregateName) ([]*StoredEvent, error)
+	GetByName(name event.AggregateName) ([]*StoredEvent, error)
 	Append(e event.Event) error
-}
-
-func NewStoredEvent(
-	id StoredEventID,
-	typ event.Type,
-	aggregateID event.AggregateID,
-	aggregateName event.AggregateName,
-	eventData []byte,
-	createdAt time.Time,
-) *StoredEvent {
-	return &StoredEvent{id, typ, aggregateID, aggregateName, eventData, createdAt}
 }

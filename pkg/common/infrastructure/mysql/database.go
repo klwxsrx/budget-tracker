@@ -38,7 +38,7 @@ func (d *database) OpenConnection() error {
 		return err
 	}
 
-	d.db, err = sqlx.Open("mysql", d.config.String())
+	d.db, err = sqlx.Open("mysql", d.config.String()+"?parseTime=true")
 	if err == nil {
 		// Execute query to check connectivity. Ping method isn't working for some drivers
 		_, err = d.db.Exec("SELECT TRUE AS test_connection")

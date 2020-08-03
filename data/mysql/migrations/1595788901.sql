@@ -1,5 +1,6 @@
 CREATE TABLE `event` (
-    id BINARY(16) PRIMARY KEY,
+    surrogate_id INT AUTO_INCREMENT PRIMARY KEY,
+    id BINARY(16),
     type VARCHAR(255),
     aggregate_id BINARY(16),
     aggregate_name VARCHAR(255),
