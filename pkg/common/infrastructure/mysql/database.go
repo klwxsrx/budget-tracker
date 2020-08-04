@@ -25,8 +25,9 @@ type Database interface {
 }
 
 type database struct {
-	config Dsn
-	db     *sqlx.DB
+	config  Dsn
+	maxConn int
+	db      *sqlx.DB
 }
 
 func (d *database) OpenConnection() error {
@@ -37,11 +38,11 @@ func (d *database) OpenConnection() error {
 	if err != nil {
 		return err
 	}
+	d.db.SetMaxOpenConns(d.maxConn)
 
 	d.db, err = sqlx.Open("mysql", d.config.String()+"?parseTime=true")
 	if err == nil {
-		// Execute query to check connectivity. Ping method isn't working for some drivers
-		_, err = d.db.Exec("SELECT TRUE AS test_connection")
+		err = d.db.Ping()
 	}
 	return err
 }
@@ -60,6 +61,6 @@ func (d *database) GetClient() (TransactionalClient, error) {
 	return &client{d.db}, nil
 }
 
-func NewDatabase(config Dsn) Database {
-	return &database{config: config}
+func NewDatabase(config Dsn, maxConnections int) Database {
+	return &database{config: config, maxConn: maxConnections}
 }

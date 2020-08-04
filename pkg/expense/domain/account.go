@@ -8,8 +8,8 @@ import (
 )
 
 const (
+	AccountAggregateName  = "expense.account"
 	accountTitleMaxLength = 100
-	accountAggregateName  = "expense.account"
 )
 
 var (

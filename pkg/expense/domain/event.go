@@ -22,7 +22,7 @@ func (e *AccountCreated) GetAggregateID() event.AggregateID {
 }
 
 func (e *AccountCreated) GetAggregateName() event.AggregateName {
-	return accountAggregateName
+	return AccountAggregateName
 }
 
 func (e *AccountCreated) GetType() event.Type {
@@ -39,7 +39,7 @@ func (e *AccountTitleChanged) GetAggregateID() event.AggregateID {
 }
 
 func (e *AccountTitleChanged) GetAggregateName() event.AggregateName {
-	return accountAggregateName
+	return AccountAggregateName
 }
 
 func (e *AccountTitleChanged) GetType() event.Type {
@@ -55,7 +55,7 @@ func (e *AccountDeleted) GetAggregateID() event.AggregateID {
 }
 
 func (e *AccountDeleted) GetAggregateName() event.AggregateName {
-	return accountAggregateName
+	return AccountAggregateName
 }
 
 func (e *AccountDeleted) GetType() event.Type {
