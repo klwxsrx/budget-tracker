@@ -1,4 +1,4 @@
-package messaging
+package event
 
 import (
 	"github.com/google/uuid"
@@ -19,7 +19,7 @@ type StoredEvent struct {
 	CreatedAt     time.Time           `db:"created_at"`
 }
 
-type EventStore interface {
+type Store interface {
 	Get(id event.AggregateID) ([]*StoredEvent, error)
 	GetFromID(id event.AggregateID, fromID StoredEventID) ([]*StoredEvent, error)
 	GetByName(name event.AggregateName) ([]*StoredEvent, error)

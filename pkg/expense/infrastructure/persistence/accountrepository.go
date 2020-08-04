@@ -2,16 +2,16 @@ package persistence
 
 import (
 	"fmt"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/messaging"
-	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	commonDomain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
-	accountMessaging "github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/messaging"
+	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/serialization"
 )
 
 type accountRepository struct {
 	dispatcher   event.Dispatcher
-	store        messaging.EventStore
-	deserializer accountMessaging.EventDeserializer
+	store        event.Store
+	deserializer serialization.EventDeserializer
 }
 
 func (ar *accountRepository) Update(a *domain.Account) error {
@@ -24,7 +24,7 @@ func (ar *accountRepository) Update(a *domain.Account) error {
 
 func (ar *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error) {
 	state := &domain.AccountState{}
-	storedEvents, err := ar.store.Get(event.AggregateID{UUID: id.UUID})
+	storedEvents, err := ar.store.Get(commonDomain.AggregateID{UUID: id.UUID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events, %v", err)
 	}
@@ -61,8 +61,8 @@ func (ar *accountRepository) Exists(spec domain.AccountSpecification) (bool, err
 	return false, nil
 }
 
-func (ar *accountRepository) buildAccountsFromEvents(events []*messaging.StoredEvent) ([]*domain.Account, error) {
-	states := make(map[event.AggregateID]*domain.AccountState)
+func (ar *accountRepository) buildAccountsFromEvents(events []*event.StoredEvent) ([]*domain.Account, error) {
+	states := make(map[commonDomain.AggregateID]*domain.AccountState)
 	for _, storedEvent := range events {
 		domainEvent, err := ar.deserializer.Deserialize(storedEvent)
 		if err != nil {

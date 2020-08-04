@@ -13,12 +13,3 @@ type Event interface {
 	GetAggregateName() AggregateName
 	GetType() Type
 }
-
-type Handler interface {
-	Handle(e Event) error
-}
-
-type Dispatcher interface {
-	Dispatch(events []Event) error
-	Subscribe(h Handler)
-}

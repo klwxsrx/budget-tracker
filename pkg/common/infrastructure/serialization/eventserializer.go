@@ -3,13 +3,13 @@ package serialization
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/serialization"
-	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 )
 
 type eventSerializer struct{}
 
-func (es *eventSerializer) Serialize(event event.Event) (string, error) {
+func (es *eventSerializer) Serialize(event domain.Event) (string, error) {
 	result, err := json.Marshal(event)
 	if err != nil {
 		return "", fmt.Errorf("can't serialize event - %s, %v", event, err)
@@ -17,6 +17,6 @@ func (es *eventSerializer) Serialize(event event.Event) (string, error) {
 	return string(result), nil
 }
 
-func NewEventSerializer() serialization.EventSerializer {
+func NewEventSerializer() event.Serializer {
 	return &eventSerializer{}
 }

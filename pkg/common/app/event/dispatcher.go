@@ -2,8 +2,17 @@ package event
 
 import "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 
+type Handler interface {
+	Handle(e event.Event) error
+}
+
+type Dispatcher interface {
+	Dispatch(events []event.Event) error
+	Subscribe(h Handler)
+}
+
 type dispatcher struct {
-	handlers []event.Handler
+	handlers []Handler
 }
 
 func (d *dispatcher) Dispatch(events []event.Event) error {
@@ -18,10 +27,10 @@ func (d *dispatcher) Dispatch(events []event.Event) error {
 	return nil
 }
 
-func (d *dispatcher) Subscribe(h event.Handler) {
+func (d *dispatcher) Subscribe(h Handler) {
 	d.handlers = append(d.handlers, h)
 }
 
-func NewDispatcher() event.Dispatcher {
-	return &dispatcher{make([]event.Handler, 0)}
+func NewDispatcher() Dispatcher {
+	return &dispatcher{make([]Handler, 0)}
 }

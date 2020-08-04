@@ -2,26 +2,25 @@ package persistence
 
 import (
 	"github.com/google/uuid"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/messaging"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/serialization"
-	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"strings"
 	"time"
 )
 
 type eventStore struct {
-	db mysql.Client
-	serialization.EventSerializer
+	db         mysql.Client
+	serializer event.Serializer
 }
 
-func (es *eventStore) Get(id event.AggregateID) ([]*messaging.StoredEvent, error) {
+func (es *eventStore) Get(id domain.AggregateID) ([]*event.StoredEvent, error) {
 	return selectEvents(es.db, []string{
 		"aggregate_id = UUID_TO_BIN(?)",
 	}, id.String())
 }
 
-func (es *eventStore) GetFromID(id event.AggregateID, fromID messaging.StoredEventID) ([]*messaging.StoredEvent, error) {
+func (es *eventStore) GetFromID(id domain.AggregateID, fromID event.StoredEventID) ([]*event.StoredEvent, error) {
 	var surrogateId int
 	err := es.db.Get(&surrogateId, "SELECT surrogate_id FROM event WHERE id = UUID_TO_BIN(?)", fromID.String())
 	if err != nil {
@@ -33,14 +32,14 @@ func (es *eventStore) GetFromID(id event.AggregateID, fromID messaging.StoredEve
 	}, id.String(), surrogateId)
 }
 
-func (es *eventStore) GetByName(name event.AggregateName) ([]*messaging.StoredEvent, error) {
+func (es *eventStore) GetByName(name domain.AggregateName) ([]*event.StoredEvent, error) {
 	return selectEvents(es.db, []string{
 		"aggregate_name = ?",
 	}, string(name))
 }
 
-func (es *eventStore) Append(e event.Event) error {
-	eventData, err := es.EventSerializer.Serialize(e)
+func (es *eventStore) Append(e domain.Event) error {
+	eventData, err := es.serializer.Serialize(e)
 	if err != nil {
 		return err
 	}
@@ -58,8 +57,8 @@ func (es *eventStore) Append(e event.Event) error {
 	return err
 }
 
-func selectEvents(db mysql.Client, conditions []string, args ...interface{}) ([]*messaging.StoredEvent, error) {
-	var events []*messaging.StoredEvent
+func selectEvents(db mysql.Client, conditions []string, args ...interface{}) ([]*event.StoredEvent, error) {
+	var events []*event.StoredEvent
 	err := db.Select(&events,
 		"SELECT "+
 			"BIN_TO_UUID(id) AS id, "+
@@ -73,6 +72,6 @@ func selectEvents(db mysql.Client, conditions []string, args ...interface{}) ([]
 	return events, err
 }
 
-func NewEventStore(client mysql.Client, serializer serialization.EventSerializer) messaging.EventStore {
+func NewEventStore(client mysql.Client, serializer event.Serializer) event.Store {
 	return &eventStore{client, serializer}
 }
