@@ -1,9 +1,11 @@
 package app
 
-import "github.com/klwxsrx/expense-tracker/pkg/expense/domain"
+import (
+	domain "github.com/klwxsrx/expense-tracker/pkg/expense/domain/account"
+)
 
 type DomainRegistry interface {
-	AccountService() domain.AccountService
+	AccountService() domain.Service
 }
 
 type Transaction interface {

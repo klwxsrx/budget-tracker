@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/event"
 	commonDomain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
-	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
+	domain "github.com/klwxsrx/expense-tracker/pkg/expense/domain/account"
 )
 
 type EventDeserializer interface {
@@ -17,11 +17,11 @@ type eventDeserializer struct{}
 
 func (ed *eventDeserializer) Deserialize(event *event.StoredEvent) (commonDomain.Event, error) {
 	switch event.Type {
-	case domain.AccountCreatedEvent:
+	case domain.CreatedEventType:
 		return ed.deserializeAccountCreatedEvent(event.EventData)
-	case domain.AccountTitleChangedEvent:
+	case domain.TitleChangedEventType:
 		return ed.deserializeAccountTitleChangedEvent(event.EventData)
-	case domain.AccountDeletedEvent:
+	case domain.DeletedEventType:
 		return ed.deserializeAccountDeletedEvent(event.EventData)
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown event, %v", event.Type))
@@ -29,7 +29,7 @@ func (ed *eventDeserializer) Deserialize(event *event.StoredEvent) (commonDomain
 }
 
 func (ed *eventDeserializer) deserializeAccountCreatedEvent(eventJson []byte) (commonDomain.Event, error) {
-	var domainEvent domain.AccountCreated
+	var domainEvent domain.CreatedEvent
 	err := json.Unmarshal(eventJson, &domainEvent)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (ed *eventDeserializer) deserializeAccountCreatedEvent(eventJson []byte) (c
 }
 
 func (ed *eventDeserializer) deserializeAccountTitleChangedEvent(eventJson []byte) (commonDomain.Event, error) {
-	var domainEvent domain.AccountTitleChanged
+	var domainEvent domain.TitleChangedEvent
 	err := json.Unmarshal(eventJson, &domainEvent)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (ed *eventDeserializer) deserializeAccountTitleChangedEvent(eventJson []byt
 }
 
 func (ed *eventDeserializer) deserializeAccountDeletedEvent(eventJson []byte) (commonDomain.Event, error) {
-	var domainEvent domain.AccountDeleted
+	var domainEvent domain.DeletedEvent
 	err := json.Unmarshal(eventJson, &domainEvent)
 	if err != nil {
 		return nil, err
