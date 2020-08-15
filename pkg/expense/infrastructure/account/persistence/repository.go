@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/event"
 	commonDomain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	domain "github.com/klwxsrx/expense-tracker/pkg/expense/domain/account"
@@ -12,6 +13,10 @@ type repository struct {
 	dispatcher   event.Dispatcher
 	store        event.Store
 	deserializer serialization.EventDeserializer
+}
+
+func (r *repository) NextID() domain.ID {
+	return domain.ID{UUID: uuid.New()}
 }
 
 func (r *repository) Update(a *domain.Account) error {

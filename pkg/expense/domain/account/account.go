@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
 	"strings"
 )
 
@@ -29,13 +30,11 @@ const (
 	deletedStatus
 )
 
-type Currency string
-
 type State struct {
 	ID             ID
 	Status         Status
 	Title          string
-	Currency       Currency
+	Currency       domain.Currency
 	InitialBalance int
 }
 
@@ -124,7 +123,7 @@ func validateTitle(title string) error {
 	return nil
 }
 
-func New(id ID, title string, currency Currency, initialBalance int) (*Account, error) {
+func New(id ID, title string, currency domain.Currency, initialBalance int) (*Account, error) {
 	title = strings.TrimSpace(title)
 	if err := validateTitle(title); err != nil {
 		return nil, err

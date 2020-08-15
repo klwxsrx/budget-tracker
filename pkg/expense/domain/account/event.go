@@ -2,6 +2,7 @@ package account
 
 import (
 	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
 )
 
 const (
@@ -11,10 +12,10 @@ const (
 )
 
 type CreatedEvent struct {
-	ID             ID       `json:"id"`
-	Title          string   `json:"title"`
-	Currency       Currency `json:"currency"`
-	InitialBalance int      `json:"initial_balance"`
+	ID             ID              `json:"id"`
+	Title          string          `json:"title"`
+	Currency       domain.Currency `json:"currency"`
+	InitialBalance int             `json:"initial_balance"`
 }
 
 func (e *CreatedEvent) GetAggregateID() event.AggregateID {

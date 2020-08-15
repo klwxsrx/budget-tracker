@@ -13,6 +13,7 @@ func (s *titleSpecification) IsSatisfied(a *Account) bool {
 }
 
 type Repository interface {
+	NextID() ID
 	Update(a *Account) error
 	GetByID(id ID) (*Account, error)
 	Exists(spec Specification) (bool, error)
