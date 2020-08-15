@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	CreatedEventType      = "expense.account_created"
-	TitleChangedEventType = "expense.account_title_changed"
-	DeletedEventType      = "expense.account_deleted"
+	CreatedEventType      = "created"
+	TitleChangedEventType = "changed"
+	DeletedEventType      = "deleted"
 )
 
 type CreatedEvent struct {
