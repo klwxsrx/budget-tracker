@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  expense:
+    build:
+      context: ../../
+      dockerfile: ./deployments/expense/Dockerfile
+    image: klwxsrx/expense-app
+    container_name: expense-app
+    hostname: expense-app
+  expense-db:
+    image: mysql:8.0
+    container_name: expense-db
+    hostname: expense-db
+    volumes:
+      - expense-db-data:/var/lib/mysql/data:rw
+    environment:
+      - MYSQL_DATABASE=expense
+      - MYSQL_USER=expense
+      - MYSQL_PASSWORD=1234
+volumes:
+  expense-db-data:
