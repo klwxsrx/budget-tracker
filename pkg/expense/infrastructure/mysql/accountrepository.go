@@ -90,6 +90,10 @@ func (r *accountRepository) buildAccountsFromEvents(events []*eventApp.StoredEve
 	return result, nil
 }
 
-func NewAccountRepository() domain.AccountRepository {
-	return &accountRepository{}
+func NewAccountRepository(
+	dispatcher eventApp.Dispatcher,
+	store eventApp.Store,
+	deserializer serialization.EventDeserializer,
+) domain.AccountRepository {
+	return &accountRepository{dispatcher, store, deserializer}
 }

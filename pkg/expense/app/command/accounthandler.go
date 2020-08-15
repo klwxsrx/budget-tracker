@@ -75,3 +75,15 @@ func (h *DeleteAccountHandler) Execute(c command.Command) error {
 func (h *DeleteAccountHandler) GetType() command.Type {
 	return deleteAccountType
 }
+
+func NewCreateAccountHandler(transaction Transaction) *CreateAccountHandler {
+	return &CreateAccountHandler{transaction}
+}
+
+func NewRenameAccountHandler(transaction Transaction) *RenameAccountHandler {
+	return &RenameAccountHandler{transaction}
+}
+
+func NewDeleteAccountHandler(transaction Transaction) *DeleteAccountHandler {
+	return &DeleteAccountHandler{transaction}
+}

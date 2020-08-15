@@ -8,9 +8,6 @@ type Handler interface {
 
 type Dispatcher interface {
 	Dispatch(events []event.Event) error
-}
-
-type Subscriber interface {
 	Subscribe(h Handler)
 }
 
@@ -34,12 +31,6 @@ func (d *dispatcher) Subscribe(h Handler) {
 	d.handlers = append(d.handlers, h)
 }
 
-var dispatcherImpl = &dispatcher{make([]Handler, 0)}
-
 func NewDispatcher() Dispatcher {
-	return dispatcherImpl
-}
-
-func NewSubscriber() Subscriber {
-	return dispatcherImpl
+	return &dispatcher{make([]Handler, 0)}
 }

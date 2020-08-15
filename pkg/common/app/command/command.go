@@ -15,13 +15,14 @@ type Bus interface {
 	Publish(c Command) error
 }
 
+type BusRegistry interface {
+	Bus
+	Register(h Handler) error
+}
+
 type Handler interface {
 	Execute(c Command) error
 	GetType() Type
-}
-
-type BusRegistry interface {
-	Register(h Handler) error
 }
 
 type bus struct {
@@ -45,12 +46,6 @@ func (b *bus) Register(h Handler) error {
 	return nil
 }
 
-var busImpl = &bus{make(map[Type]Handler)}
-
-func NewBus() Bus {
-	return busImpl
-}
-
 func NewBusRegistry() BusRegistry {
-	return busImpl
+	return &bus{make(map[Type]Handler)}
 }
