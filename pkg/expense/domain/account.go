@@ -33,8 +33,7 @@ type AccountState struct {
 	ID             AccountID
 	Status         AccountStatus
 	Title          string
-	Currency       Currency
-	InitialBalance int
+	InitialBalance MoneyAmount
 }
 
 func (a *AccountState) Apply(e event.Event) error {
@@ -58,8 +57,7 @@ func (a *AccountState) applyCreatedEvent(e event.Event) error {
 
 	a.ID = ev.ID
 	a.Title = ev.Title
-	a.Currency = ev.Currency
-	a.InitialBalance = ev.InitialBalance
+	a.InitialBalance = MoneyAmount{ev.InitialBalance, ev.Currency}
 	return nil
 }
 
@@ -122,14 +120,14 @@ func validateAccountTitle(title string) error {
 	return nil
 }
 
-func NewAccount(id AccountID, title string, currency Currency, initialBalance int) (*Account, error) {
+func NewAccount(id AccountID, title string, initialBalance MoneyAmount) (*Account, error) {
 	title = strings.TrimSpace(title)
 	if err := validateAccountTitle(title); err != nil {
 		return nil, err
 	}
 
-	state := &AccountState{id, AccountActiveStatus, title, currency, initialBalance}
-	events := []event.Event{&AccountCreatedEvent{id, title, currency, initialBalance}}
+	state := &AccountState{id, AccountActiveStatus, title, initialBalance}
+	events := []event.Event{&AccountCreatedEvent{id, title, initialBalance.Currency, initialBalance.Amount}}
 	return &Account{state, events}, nil
 }
 

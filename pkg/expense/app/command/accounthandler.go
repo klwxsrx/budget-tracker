@@ -20,7 +20,11 @@ func (h *CreateAccountHandler) Execute(c command.Command) error {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
 	return h.tx.Critical(updateAccountLockName, func(r DomainRegistry) error {
-		return r.AccountService().Create(cmd.Title, domain.Currency(cmd.Currency), cmd.InitialBalance)
+		initialBalance, err := domain.NewMoneyAmount(cmd.InitialBalance, domain.Currency(cmd.Currency))
+		if err != nil {
+			return err
+		}
+		return r.AccountService().Create(cmd.Title, initialBalance)
 	})
 }
 

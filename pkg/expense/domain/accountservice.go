@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	AccountTitleIsDuplicated = errors.New("account with this title is already exists")
-	AccountIsNotExists       = errors.New("account is not exists")
+	AccountTitleIsDuplicatedError = errors.New("account with this title is already exists")
+	AccountIsNotExistsError       = errors.New("account is not exists")
 )
 
 type AccountService interface {
-	Create(title string, currency Currency, initialBalance int) error
+	Create(title string, initialBalance MoneyAmount) error
 	Rename(id AccountID, title string) error
 	Delete(id AccountID) error
 }
@@ -20,20 +20,16 @@ type accountService struct {
 	repo AccountRepository
 }
 
-func (s *accountService) Create(title string, currency Currency, initialBalance int) error {
-	if err := validateCurrency(currency); err != nil {
-		return err
-	}
-
+func (s *accountService) Create(title string, initialBalance MoneyAmount) error {
 	exists, err := s.repo.Exists(&accountTitleSpecification{title})
 	if err != nil {
 		return fmt.Errorf("exists checking failed: %v", err)
 	}
 	if exists {
-		return AccountTitleIsDuplicated
+		return AccountTitleIsDuplicatedError
 	}
 
-	acc, err := NewAccount(s.repo.NextID(), title, currency, initialBalance)
+	acc, err := NewAccount(s.repo.NextID(), title, initialBalance)
 	if err != nil {
 		return err
 	}
@@ -51,7 +47,7 @@ func (s *accountService) Rename(id AccountID, title string) error {
 		return fmt.Errorf("exists checking failed: %v", err)
 	}
 	if exists {
-		return AccountTitleIsDuplicated
+		return AccountTitleIsDuplicatedError
 	}
 
 	acc, err := s.repo.GetByID(id)
@@ -59,7 +55,7 @@ func (s *accountService) Rename(id AccountID, title string) error {
 		return fmt.Errorf("failed to get account: %v", err)
 	}
 	if acc == nil {
-		return AccountIsNotExists
+		return AccountIsNotExistsError
 	}
 	err = acc.ChangeTitle(title)
 	if err != nil {
@@ -78,7 +74,7 @@ func (s *accountService) Delete(id AccountID) error {
 		return fmt.Errorf("failed to get account: %v", err)
 	}
 	if acc == nil {
-		return AccountIsNotExists
+		return AccountIsNotExistsError
 	}
 	err = acc.Delete()
 	if err != nil {
