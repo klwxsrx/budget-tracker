@@ -38,12 +38,12 @@ func (d *database) OpenConnection() error {
 	if err != nil {
 		return err
 	}
-	d.db.SetMaxOpenConns(d.maxConn)
 
 	d.db, err = sqlx.Open("mysql", d.config.String()+"?parseTime=true")
 	if err == nil {
 		err = d.db.Ping()
 	}
+	d.db.SetMaxOpenConns(d.maxConn)
 	return err
 }
 
