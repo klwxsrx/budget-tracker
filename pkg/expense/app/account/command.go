@@ -3,34 +3,34 @@ package account
 import "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 
 const (
-	createAccountType = "expense.create_account"
-	renameAccountType = "expense.rename_account"
-	deleteAccountType = "expense.delete_account"
+	createCommandType = "expense.account.create"
+	renameCommandType = "expense.account.rename"
+	deleteCommandType = "expense.account.delete"
 )
 
-type CreateAccount struct {
+type CreateCommand struct {
 	Title          string
 	Currency       string
 	InitialBalance int
 }
 
-func (c *CreateAccount) GetType() command.Type {
-	return createAccountType
+func (c *CreateCommand) GetType() command.Type {
+	return createCommandType
 }
 
-type RenameAccount struct {
+type RenameCommand struct {
 	ID    string
 	Title string
 }
 
-func (c *RenameAccount) GetType() command.Type {
-	return renameAccountType
+func (c *RenameCommand) GetType() command.Type {
+	return renameCommandType
 }
 
-type DeleteAccount struct {
+type DeleteCommand struct {
 	ID string
 }
 
-func (c *DeleteAccount) GetType() command.Type {
-	return deleteAccountType
+func (c *DeleteCommand) GetType() command.Type {
+	return deleteCommandType
 }

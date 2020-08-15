@@ -1,4 +1,4 @@
-package event
+package serialization
 
 import (
 	"encoding/json"

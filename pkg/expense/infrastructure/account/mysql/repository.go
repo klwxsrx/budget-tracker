@@ -1,17 +1,17 @@
-package persistence
+package mysql
 
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/event"
-	commonDomain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	eventApp "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	eventDomain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	domain "github.com/klwxsrx/expense-tracker/pkg/expense/domain/account"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/account/serialization"
 )
 
 type repository struct {
-	dispatcher   event.Dispatcher
-	store        event.Store
+	dispatcher   eventApp.Dispatcher
+	store        eventApp.Store
 	deserializer serialization.EventDeserializer
 }
 
@@ -29,7 +29,7 @@ func (r *repository) Update(a *domain.Account) error {
 
 func (r *repository) GetByID(id domain.ID) (*domain.Account, error) {
 	state := &domain.State{}
-	storedEvents, err := r.store.Get(commonDomain.AggregateID{UUID: id.UUID})
+	storedEvents, err := r.store.Get(eventDomain.AggregateID{UUID: id.UUID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events, %v", err)
 	}
@@ -66,8 +66,8 @@ func (r *repository) Exists(spec domain.Specification) (bool, error) {
 	return false, nil
 }
 
-func (r *repository) buildAccountsFromEvents(events []*event.StoredEvent) ([]*domain.Account, error) {
-	states := make(map[commonDomain.AggregateID]*domain.State)
+func (r *repository) buildAccountsFromEvents(events []*eventApp.StoredEvent) ([]*domain.Account, error) {
+	states := make(map[eventDomain.AggregateID]*domain.State)
 	for _, storedEvent := range events {
 		domainEvent, err := r.deserializer.Deserialize(storedEvent)
 		if err != nil {

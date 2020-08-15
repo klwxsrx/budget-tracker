@@ -6,56 +6,36 @@ import (
 	"github.com/google/uuid"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/app"
-	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
-	"github.com/klwxsrx/expense-tracker/pkg/expense/domain/account"
+	domainCommon "github.com/klwxsrx/expense-tracker/pkg/expense/domain"
+	domain "github.com/klwxsrx/expense-tracker/pkg/expense/domain/account"
 )
 
-type CreateAccountHandler struct {
+var updateAccountLockName = "update_account_lock"
+
+type CreateCommandHandler struct {
 	tx app.Transaction
 }
 
-func (h *CreateAccountHandler) Execute(c command.Command) error {
-	cmd, ok := c.(*CreateAccount)
+func (h *CreateCommandHandler) Execute(c command.Command) error {
+	cmd, ok := c.(*CreateCommand)
 	if !ok {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
 	return h.tx.Critical(updateAccountLockName, func(r app.DomainRegistry) error {
-		return r.AccountService().Create(cmd.Title, domain.Currency(cmd.Currency), cmd.InitialBalance)
+		return r.AccountService().Create(cmd.Title, domainCommon.Currency(cmd.Currency), cmd.InitialBalance)
 	})
 }
 
-func (h *CreateAccountHandler) GetType() command.Type {
-	return createAccountType
+func (h *CreateCommandHandler) GetType() command.Type {
+	return createCommandType
 }
 
-type RenameAccountHandler struct {
+type RenameCommandHandler struct {
 	tx app.Transaction
 }
 
-func (h *RenameAccountHandler) Execute(c command.Command) error {
-	cmd, ok := c.(*RenameAccount)
-	if !ok {
-		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
-	}
-	return h.tx.Critical(updateAccountLockName, func(r app.DomainRegistry) error {
-		id, err := uuid.Parse(cmd.ID)
-		if err != nil {
-			return err
-		}
-		return r.AccountService().Rename(account.ID{UUID: id}, cmd.Title)
-	})
-}
-
-func (h *RenameAccountHandler) GetType() command.Type {
-	return renameAccountType
-}
-
-type DeleteAccountHandler struct {
-	tx app.Transaction
-}
-
-func (h *DeleteAccountHandler) Execute(c command.Command) error {
-	cmd, ok := c.(*DeleteAccount)
+func (h *RenameCommandHandler) Execute(c command.Command) error {
+	cmd, ok := c.(*RenameCommand)
 	if !ok {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
@@ -64,10 +44,32 @@ func (h *DeleteAccountHandler) Execute(c command.Command) error {
 		if err != nil {
 			return err
 		}
-		return r.AccountService().Delete(account.ID{UUID: id})
+		return r.AccountService().Rename(domain.ID{UUID: id}, cmd.Title)
 	})
 }
 
-func (h *DeleteAccountHandler) GetType() command.Type {
-	return deleteAccountType
+func (h *RenameCommandHandler) GetType() command.Type {
+	return renameCommandType
+}
+
+type DeleteCommandHandler struct {
+	tx app.Transaction
+}
+
+func (h *DeleteCommandHandler) Execute(c command.Command) error {
+	cmd, ok := c.(*DeleteCommand)
+	if !ok {
+		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
+	}
+	return h.tx.Critical(updateAccountLockName, func(r app.DomainRegistry) error {
+		id, err := uuid.Parse(cmd.ID)
+		if err != nil {
+			return err
+		}
+		return r.AccountService().Delete(domain.ID{UUID: id})
+	})
+}
+
+func (h *DeleteCommandHandler) GetType() command.Type {
+	return deleteCommandType
 }
