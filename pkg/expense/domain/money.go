@@ -20,7 +20,7 @@ var availableCurrencies = map[Currency]bool{
 }
 
 func validateCurrency(c Currency) error {
-	if _, ok := availableCurrencies[c]; ok {
+	if _, ok := availableCurrencies[c]; !ok {
 		return InvalidCurrencyError
 	}
 	return nil

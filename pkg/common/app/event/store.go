@@ -12,9 +12,9 @@ type StoredEventID struct {
 
 type StoredEvent struct {
 	Id            StoredEventID       `db:"id"`
-	Type          event.Type          `db:"type"`
 	AggregateID   event.AggregateID   `db:"aggregate_id"`
 	AggregateName event.AggregateName `db:"aggregate_name"`
+	Type          event.Type          `db:"event_type"`
 	EventData     []byte              `db:"event_data"`
 	CreatedAt     time.Time           `db:"created_at"`
 }

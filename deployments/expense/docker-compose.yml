@@ -7,15 +7,18 @@ services:
     image: klwxsrx/expense-app
     container_name: expense-app
     hostname: expense-app
+    depends_on:
+      - expense-db
   expense-db:
     image: mysql:8.0
     container_name: expense-db
     hostname: expense-db
     volumes:
-      - expense-db-data:/var/lib/mysql/data:rw
+      - expense-db-data:/var/lib/mysql:rw
     environment:
-      - MYSQL_DATABASE=expense
-      - MYSQL_USER=expense
-      - MYSQL_PASSWORD=1234
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: expense
+      MYSQL_USER: expense
+      MYSQL_PASSWORD: 1234
 volumes:
   expense-db-data:

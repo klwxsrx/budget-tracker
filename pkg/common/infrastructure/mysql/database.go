@@ -3,9 +3,13 @@ package mysql
 import (
 	"errors"
 	"fmt"
+	"github.com/cenkalti/backoff"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
+
+const maxConnectionTime = 30 * time.Second
 
 type Dsn struct {
 	User     string
@@ -40,11 +44,15 @@ func (d *database) OpenConnection() error {
 	}
 
 	d.db, err = sqlx.Open("mysql", d.config.String()+"?parseTime=true")
-	if err == nil {
-		err = d.db.Ping()
-	}
 	d.db.SetMaxOpenConns(d.maxConn)
-	return err
+	err = backoff.Retry(func() error {
+		return d.db.Ping()
+	}, newOpenConnectionBackoff())
+	if err != nil {
+		_ = d.db.Close()
+		return fmt.Errorf("failed to open the connection, %v", err)
+	}
+	return nil
 }
 
 func (d *database) CloseConnection() error {
@@ -59,6 +67,12 @@ func (d *database) GetClient() (TransactionalClient, error) {
 		return nil, errors.New("connection is not opened")
 	}
 	return &client{d.db}, nil
+}
+
+func newOpenConnectionBackoff() *backoff.ExponentialBackOff {
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = maxConnectionTime
+	return b
 }
 
 func NewDatabase(config Dsn, maxConnections int) Database {

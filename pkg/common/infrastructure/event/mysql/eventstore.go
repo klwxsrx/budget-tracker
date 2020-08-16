@@ -45,12 +45,12 @@ func (s *store) Append(e domain.Event) error {
 	}
 	_, err = s.db.Exec(
 		"INSERT INTO event"+
-			"(id, type, aggregate_id, aggregate_name, event_data, created_at)"+
-			"VALUES (UUID_TO_BIN(?), ?, UUID_TO_BIN(?), ?, ?, ?)",
+			"(id, aggregate_id, aggregate_name, event_type, event_data, created_at)"+
+			"VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?)",
 		uuid.New(),
-		e.GetType(),
 		e.GetAggregateID().UUID,
 		e.GetAggregateName(),
+		e.GetType(),
 		eventData,
 		time.Now(),
 	)
@@ -62,9 +62,9 @@ func selectEvents(db mysql.Client, conditions []string, args ...interface{}) ([]
 	err := db.Select(&events,
 		"SELECT "+
 			"BIN_TO_UUID(id) AS id, "+
-			"type, "+
 			"BIN_TO_UUID(aggregate_id) AS aggregate_id, "+
 			"aggregate_name, "+
+			"event_type, "+
 			"event_data, "+
 			"created_at "+
 			"FROM event "+
