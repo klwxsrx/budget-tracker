@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  description: This is an API for the expense microservice
+  version: 1.0.0
+  title: Expense Microservice
+tags:
+  - name: Account
+    description: Manipulates accounts
+paths:
+  /account:
+    post:
+      tags:
+        - Account
+      summary: Create a new account
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                currency:
+                  type: string
+                initialBalance:
+                  type: integer
+              required:
+                - title
+                - currency
+                - initialBalance
+        required: true
+      responses:
+        204:
+          description: ''
+  /account/{accountId}/title:
+    put:
+      tags:
+        - Account
+      summary: Changes a title for an account
+      operationId: renameAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+              required:
+                - title
+        required: true
+      responses:
+        204:
+          description: ''
+  /account/{accountId}:
+    delete:
+      tags:
+        - Account
+      summary: Deletes an account
+      operationId: deleteAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: ''
