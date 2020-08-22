@@ -24,7 +24,7 @@ func (d Dsn) String() string {
 
 type Database interface {
 	OpenConnection() error
-	CloseConnection() error
+	CloseConnection()
 	GetClient() (TransactionalClient, error)
 }
 
@@ -55,11 +55,11 @@ func (d *database) OpenConnection() error {
 	return nil
 }
 
-func (d *database) CloseConnection() error {
+func (d *database) CloseConnection() {
 	if d.db == nil {
-		return errors.New("connection is already closed")
+		return
 	}
-	return d.db.Close()
+	_ = d.db.Close()
 }
 
 func (d *database) GetClient() (TransactionalClient, error) {

@@ -3,6 +3,7 @@ package infrastructure
 import (
 	commandApp "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	eventApp "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event"
 	eventMysql "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event/mysql"
 	eventSerialization "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event/serialization"
@@ -23,6 +24,7 @@ type container struct {
 	dispatcher   eventApp.Dispatcher
 	serializer   eventApp.Serializer
 	deserializer serialization.EventDeserializer
+	logger       logger.Logger
 }
 
 func (c *container) CommandBus() commandApp.Bus {
@@ -57,8 +59,8 @@ func transaction(
 	return mysqlInfrastructure.NewTransaction(client, ed, es, de)
 }
 
-func bus(tx command.Transaction) commandApp.Bus {
-	b := commandApp.NewBusRegistry()
+func bus(tx command.Transaction, logger logger.Logger) commandApp.Bus {
+	b := commandApp.NewBusRegistry(logger)
 	return registerCommandHandlers(b, tx)
 }
 
@@ -74,10 +76,10 @@ func registerCommandHandlers(b commandApp.BusRegistry, tx command.Transaction) c
 	return b
 }
 
-func NewContainer(client mysql.TransactionalClient) Container {
+func NewContainer(client mysql.TransactionalClient, logger logger.Logger) Container {
 	es := eventSerializer()
 	de := eventDeserializer()
 	ed := eventDispatcher(client, es)
 	tx := transaction(client, ed, es, de)
-	return &container{client, tx, bus(tx), ed, es, de}
+	return &container{client, tx, bus(tx, logger), ed, es, de, logger}
 }

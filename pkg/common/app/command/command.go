@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 )
 
 type Type string
@@ -27,6 +28,7 @@ type Handler interface {
 
 type bus struct {
 	registry map[Type]Handler
+	logger   logger.Logger
 }
 
 func (b *bus) Publish(c Command) error {
@@ -46,6 +48,6 @@ func (b *bus) Register(h Handler) error {
 	return nil
 }
 
-func NewBusRegistry() BusRegistry {
-	return &bus{make(map[Type]Handler)}
+func NewBusRegistry(logger logger.Logger) BusRegistry {
+	return &bus{make(map[Type]Handler), logger}
 }

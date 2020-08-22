@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -13,11 +18,18 @@ func main() {
 	if err != nil {
 		logger.Fatalf("failed to parse config: %v", err)
 	}
-	dbClient, err := getReadyDatabaseClient(config)
+
+	db, client, err := getReadyDatabaseClient(config)
 	if err != nil {
 		logger.Fatalf("failed to setup db connection: %v", err)
 	}
-	_ = infrastructure.NewContainer(dbClient).CommandBus()
+	defer db.CloseConnection()
+
+	bus := infrastructure.NewContainer(client, logger).CommandBus()
+	server := startServer(bus, logger)
+
+	listenOSKillSignals()
+	_ = server.Shutdown(context.Background())
 }
 
 func initLogger() *logrus.Logger {
@@ -28,7 +40,7 @@ func initLogger() *logrus.Logger {
 	return l
 }
 
-func getReadyDatabaseClient(config *Config) (mysql.TransactionalClient, error) {
+func getReadyDatabaseClient(config *Config) (mysql.Database, mysql.TransactionalClient, error) {
 	db := mysql.NewDatabase(mysql.Dsn{
 		User:     config.DbUser,
 		Password: config.DbPassword,
@@ -37,19 +49,33 @@ func getReadyDatabaseClient(config *Config) (mysql.TransactionalClient, error) {
 	}, config.DbMaxConnections)
 	err := db.OpenConnection()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	client, err := db.GetClient()
 	if err != nil {
-		return nil, err
+		db.CloseConnection()
+		return nil, nil, err
 	}
 	eventStoreMigration, err := mysql.NewMigration(client, config.EventStoreMigrationsDir)
 	if err != nil {
-		return nil, err
+		db.CloseConnection()
+		return nil, nil, err
 	}
 	err = eventStoreMigration.Migrate()
 	if err != nil {
-		return nil, err
+		db.CloseConnection()
+		return nil, nil, err
 	}
-	return client, nil
+	return db, client, nil
+}
+
+func startServer(bus command.Bus, logger *logrus.Logger) *http.Server {
+	// TODO: start server
+	return nil
+}
+
+func listenOSKillSignals() {
+	ch := make(chan os.Signal)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	<-ch
 }
