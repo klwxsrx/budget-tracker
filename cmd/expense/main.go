@@ -1,44 +1,55 @@
 package main
 
 import (
-	"fmt"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
-	"github.com/klwxsrx/expense-tracker/pkg/expense/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure"
+	"github.com/sirupsen/logrus"
 	"os"
 )
 
 func main() {
-	db := mysql.NewDatabase(mysql.Dsn{
-		User:     "expense",
-		Password: "1234",
-		Address:  "expense-db:3306",
-		Database: "expense",
-	}, 5)
+	logger := initLogger()
+	config, err := ParseConfig()
+	if err != nil {
+		logger.Fatalf("failed to parse config: %v", err)
+	}
+	dbClient, err := getReadyDatabaseClient(config)
+	if err != nil {
+		logger.Fatalf("failed to setup db connection: %v", err)
+	}
+	_ = infrastructure.NewContainer(dbClient).CommandBus()
+}
 
+func initLogger() *logrus.Logger {
+	l := logrus.New()
+	l.SetFormatter(&logrus.JSONFormatter{})
+	l.SetOutput(os.Stdout)
+	l.SetLevel(logrus.InfoLevel)
+	return l
+}
+
+func getReadyDatabaseClient(config *Config) (mysql.TransactionalClient, error) {
+	db := mysql.NewDatabase(mysql.Dsn{
+		User:     config.DbUser,
+		Password: config.DbPassword,
+		Address:  config.DbAddress,
+		Database: config.DbName,
+	}, config.DbMaxConnections)
 	err := db.OpenConnection()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	client, err := db.GetClient()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	migrationDir, ok := os.LookupEnv("EVENT_STORE_MIGRATIONS_DIR")
-	if !ok {
-		panic("cannot find migrations dir")
-	}
-	migration, err := mysql.NewMigration(client, migrationDir)
+	eventStoreMigration, err := mysql.NewMigration(client, config.EventStoreMigrationsDir)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	err = migration.Migrate()
+	err = eventStoreMigration.Migrate()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-
-	bus := infrastructure.NewContainer(client).CommandBus()
-	cmd := command.CreateAccount{Title: "Some", Currency: "USD", InitialBalance: 42}
-	err = bus.Publish(&cmd)
-	fmt.Println(err)
+	return client, nil
 }
