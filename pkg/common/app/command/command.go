@@ -36,7 +36,12 @@ func (b *bus) Publish(c Command) error {
 	if !ok {
 		return errors.New(fmt.Sprintf("cannot find handler for %v", c.GetType()))
 	}
-	_ = handler.Execute(c) // TODO: log
+	err := handler.Execute(c)
+	b.logger.With(logger.Fields{
+		"command":     c.GetType(),
+		"data":        c,
+		"resultError": err,
+	}).Info("command handled")
 	return nil
 }
 
