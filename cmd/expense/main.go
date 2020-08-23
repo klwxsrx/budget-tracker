@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
+	appLogger "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/transport"
@@ -26,7 +27,7 @@ func main() {
 	}
 	defer db.CloseConnection()
 
-	bus := infrastructure.NewContainer(client, logger).CommandBus()
+	bus := infrastructure.NewContainer(client, appLogger.New(logger)).CommandBus()
 	server := startServer(bus, logger)
 
 	listenOSKillSignals()
@@ -73,7 +74,7 @@ func getReadyDatabaseClient(config *Config) (mysql.Database, mysql.Transactional
 func startServer(bus command.Bus, logger *logrus.Logger) *http.Server {
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: transport.NewHttpHandler(bus, logger),
+		Handler: transport.NewHttpHandler(bus, appLogger.New(logger)),
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {

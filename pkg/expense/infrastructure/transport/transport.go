@@ -104,15 +104,6 @@ func getHandlerFunc(bus commandApp.Bus, parser commandParser) http.HandlerFunc {
 	}
 }
 
-func getLoggingMiddleware(logger logger.Logger) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// TODO: log request
-			next.ServeHTTP(w, r)
-		})
-	}
-}
-
 func NewHttpHandler(bus commandApp.Bus, logger logger.Logger) http.Handler {
 	r := mux.NewRouter()
 	for _, route := range routes {
