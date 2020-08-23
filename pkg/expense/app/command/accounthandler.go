@@ -3,7 +3,6 @@ package command
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
 )
@@ -42,11 +41,7 @@ func (h *RenameAccountHandler) Execute(c command.Command) error {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
 	return h.tx.Critical(updateAccountLockName, func(r DomainRegistry) error {
-		id, err := uuid.Parse(cmd.ID)
-		if err != nil {
-			return err
-		}
-		return r.AccountService().Rename(domain.AccountID{UUID: id}, cmd.Title)
+		return r.AccountService().Rename(domain.AccountID{UUID: cmd.ID}, cmd.Title)
 	})
 }
 
@@ -64,11 +59,7 @@ func (h *DeleteAccountHandler) Execute(c command.Command) error {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
 	return h.tx.Critical(updateAccountLockName, func(r DomainRegistry) error {
-		id, err := uuid.Parse(cmd.ID)
-		if err != nil {
-			return err
-		}
-		return r.AccountService().Delete(domain.AccountID{UUID: id})
+		return r.AccountService().Delete(domain.AccountID{UUID: cmd.ID})
 	})
 }
 

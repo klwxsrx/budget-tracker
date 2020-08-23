@@ -5,6 +5,7 @@ import (
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure"
+	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/transport"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -70,12 +71,20 @@ func getReadyDatabaseClient(config *Config) (mysql.Database, mysql.Transactional
 }
 
 func startServer(bus command.Bus, logger *logrus.Logger) *http.Server {
-	// TODO: start server
-	return nil
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: transport.NewHttpHandler(bus, logger),
+	}
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			logger.Fatalf("unable to start the server: %v", err)
+		}
+	}()
+	return srv
 }
 
 func listenOSKillSignals() {
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 	<-ch
 }

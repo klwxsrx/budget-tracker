@@ -1,6 +1,9 @@
 package command
 
-import "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
+import (
+	"github.com/google/uuid"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
+)
 
 const (
 	createAccountType = "expense.account.create"
@@ -19,7 +22,7 @@ func (c *CreateAccount) GetType() command.Type {
 }
 
 type RenameAccount struct {
-	ID    string
+	ID    uuid.UUID
 	Title string
 }
 
@@ -28,7 +31,7 @@ func (c *RenameAccount) GetType() command.Type {
 }
 
 type DeleteAccount struct {
-	ID string
+	ID uuid.UUID
 }
 
 func (c *DeleteAccount) GetType() command.Type {

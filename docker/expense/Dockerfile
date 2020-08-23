@@ -31,6 +31,6 @@ COPY --from=builder /build/bin/expense /app/bin/expense
 COPY ./data/mysql/migrations/eventstore /app/migrations/eventstore
 ENV EVENT_STORE_MIGRATIONS_DIR=/app/migrations/eventstore
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["/app/bin/expense"]
