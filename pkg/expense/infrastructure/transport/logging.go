@@ -30,12 +30,17 @@ func getLoggingMiddleware(l logger.Logger) func(next http.Handler) http.Handler 
 			if err != nil {
 				body = nil
 			}
-			l.With(logger.Fields{
+			loggerWithFields := l.With(logger.Fields{
 				"method":       r.Method,
 				"url":          r.RequestURI,
 				"body":         string(body),
 				"responseCode": lrw.code,
-			}).Info("request handled")
+			})
+			if lrw.code == 500 {
+				loggerWithFields.Error("internal server error")
+			} else {
+				loggerWithFields.Info("request handled")
+			}
 		})
 	}
 }

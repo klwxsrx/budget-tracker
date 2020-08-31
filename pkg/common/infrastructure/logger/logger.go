@@ -7,6 +7,7 @@ import (
 
 type externalLogger interface {
 	WithFields(fields external.Fields) *external.Entry
+	Error(args ...interface{})
 	Info(args ...interface{})
 }
 
@@ -16,6 +17,10 @@ type impl struct {
 
 func (i *impl) With(fields logger.Fields) logger.Logger {
 	return New(i.logger.WithFields(external.Fields(fields)))
+}
+
+func (i *impl) Error(args ...interface{}) {
+	i.logger.Error(args)
 }
 
 func (i *impl) Info(args ...interface{}) {
