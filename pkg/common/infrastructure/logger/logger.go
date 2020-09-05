@@ -8,6 +8,7 @@ import (
 type externalLogger interface {
 	WithFields(fields external.Fields) *external.Entry
 	Error(args ...interface{})
+	Warning(args ...interface{})
 	Info(args ...interface{})
 }
 
@@ -21,6 +22,10 @@ func (i *impl) With(fields logger.Fields) logger.Logger {
 
 func (i *impl) Error(args ...interface{}) {
 	i.logger.Error(args)
+}
+
+func (i *impl) Warning(args ...interface{}) {
+	i.logger.Warning(args)
 }
 
 func (i *impl) Info(args ...interface{}) {

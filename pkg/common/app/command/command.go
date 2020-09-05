@@ -37,11 +37,17 @@ func (b *bus) Publish(c Command) error {
 		return errors.New(fmt.Sprintf("cannot find handler for %v", c.GetType()))
 	}
 	err := handler.Execute(c)
-	b.logger.With(logger.Fields{
+
+	loggerWithFields := b.logger.With(logger.Fields{
 		"command":     c.GetType(),
 		"data":        c,
 		"resultError": err,
-	}).Info("command handled")
+	})
+	if err != nil {
+		loggerWithFields.Warning("command handled with error")
+	} else {
+		loggerWithFields.Info("command handled")
+	}
 	return nil
 }
 
