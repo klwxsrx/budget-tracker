@@ -1,6 +1,8 @@
 <template>
-  <div class="some_style">
-    {{ message }}
+  <div>
+    <b-button size="is-small" icon-pack="fab" icon-left="github">
+      {{message}}
+    </b-button>
   </div>
 </template>
 
@@ -14,9 +16,6 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-  .some_style
-  {
-    background-color: purple;
-  }
+<style scoped>
+
 </style>

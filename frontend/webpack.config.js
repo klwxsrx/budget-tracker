@@ -11,7 +11,10 @@ module.exports = {
         rules: [
             {test: /\.js$/, use: 'babel-loader'},
             {test: /\.vue$/, use: 'vue-loader'},
+            {test: /\.css$/, use: ['vue-style-loader', MiniCssExtractPlugin.loader, 'css-loader']},
             {test: /\.scss$/, use: ['vue-style-loader', MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']},
+            {test: /\.svg$/, use: 'file-loader'},
+            {test: /\.(woff|woff2|eot|ttf|otf)$/, use: 'file-loader'}
         ]
     },
     plugins: [
@@ -19,7 +22,7 @@ module.exports = {
             template: './src/index.html',
         }),
         new MiniCssExtractPlugin({
-            filename: "[name].css"
+            filename: "styles.css"
         }),
         new VueLoaderPlugin(),
     ]
