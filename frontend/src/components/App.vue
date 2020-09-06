@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="some_style">
     {{ message }}
   </div>
 </template>
@@ -14,5 +14,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  .some_style
+  {
+    background-color: purple;
+  }
 </style>
