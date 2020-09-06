@@ -2,7 +2,7 @@
   "name": "expense-tracker",
   "version": "1.0.0",
   "main": "main.js",
-  "license": "GPLv3",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "clean": "rimraf dist",
     "build": "webpack --mode production",
@@ -14,6 +14,9 @@
     "babel-loader": "^8.1.0",
     "html-webpack-plugin": "^4.3.0",
     "rimraf": "^3.0.2",
+    "vue": "^2.6.12",
+    "vue-loader": "^15.9.3",
+    "vue-template-compiler": "^2.6.12",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
