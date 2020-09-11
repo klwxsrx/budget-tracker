@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="page_container">
     <Navigation></Navigation>
     <router-view></router-view>
   </div>
@@ -18,3 +18,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.page_container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+</style>

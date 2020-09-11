@@ -1,7 +1,7 @@
 <template>
-  <div class="columns">
-    <Accounts class="column is-3"></Accounts>
-    <div class="column is-9"></div>
+  <div class="columns is-mobile">
+    <Accounts class="column is-3-desktop is-4-tablet is-12-mobile"></Accounts>
+    <div class="column is-9-desktop is-8-tablet is-12-mobile"></div>
   </div>
 </template>
 
@@ -15,3 +15,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+@media screen and (min-width: $tablet) {
+  .columns {
+    flex: 1;
+  }
+}
+</style>
