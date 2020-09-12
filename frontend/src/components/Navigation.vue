@@ -2,7 +2,7 @@
   <b-navbar centered type="is-primary">
     <template slot="brand">
       <b-navbar-item :to="transactionsPath" tag="router-link">
-        <span class="balance">Total Balance</span><span class="amount">10₽</span> <!-- TODO: money mixin-->
+        <span class="balance">Total Balance</span><span class="amount">{{ moneyBalance }}</span>
       </b-navbar-item>
     </template>
     <template slot="start">
@@ -18,9 +18,15 @@
 
 <script>
 import {routes} from "../router";
+import moneyBalance from "../mixins/moneyBalance";
 
 export default {
   name: "Navigation",
+  props: {
+    balance: Number,
+    currency: String
+  },
+  mixins: [moneyBalance],
   data() {
     return {
       transactionsPath: routes.transactions.path,
