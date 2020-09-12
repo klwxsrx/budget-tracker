@@ -1,6 +1,6 @@
 <template>
   <div class="account_container">
-    <ul>
+    <ul class="account_list">
       <AccountItem v-for="account in accounts"
                    :key="account.id"
                    :balance="account.balance"
@@ -25,6 +25,12 @@ export default {
           title: "Cash",
           balance: 4269,
           currency: "RUB"
+        },
+        {
+          id: "a17aeb44-f459-11ea-adc1-0242ac120002",
+          title: "Debt Card",
+          balance: 6745,
+          currency: "RUB"
         }
       ]
     };
@@ -33,7 +39,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.account_container {
-  background-color: #f5f5f5;
+@import "~bulma/sass/utilities/initial-variables";
+
+@media screen and (min-width: $tablet) {
+  .account_container {
+    margin-top: 10px;
+  }
+}
+
+@media screen and (max-width: $tablet) {
+  .account_container {
+    padding-bottom: 0;
+  }
 }
 </style>

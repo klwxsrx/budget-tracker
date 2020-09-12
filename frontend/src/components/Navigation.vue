@@ -1,5 +1,5 @@
 <template>
-  <b-navbar centered type="is-primary">
+  <b-navbar centered type="is-dark">
     <template slot="brand">
       <b-navbar-item :to="transactionsPath" tag="router-link">
         <span class="balance">Total Balance</span><span class="amount">{{ moneyBalance }}</span>
@@ -37,16 +37,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~bulma/sass/utilities/initial-variables";
-
 .balance,
 .amount {
-  font-size: $size-5;
+  font-size: 18px;
 }
 
 .balance {
-  margin-left: 8px;
-  font-weight: $weight-semibold;
+  margin-left: 18px;
+  font-weight: 600;
 }
 
 .amount {

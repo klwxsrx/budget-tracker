@@ -1,7 +1,8 @@
 <template>
   <div class="columns is-mobile">
-    <Accounts class="column is-3-desktop is-4-tablet is-12-mobile"></Accounts>
-    <div class="column is-9-desktop is-8-tablet is-12-mobile"></div>
+    <Accounts class="accounts column is-3-desktop is-4-tablet is-12-mobile"></Accounts>
+    <div class="transactions column is-6-desktop is-8-tablet is-12-mobile"></div>
+    <div class="edit-transaction column is-3-desktop is-12-mobile"></div>
   </div>
 </template>
 
@@ -19,9 +20,18 @@ export default {
 <style lang="scss">
 @import "~bulma/sass/utilities/initial-variables";
 
+.accounts, .edit-transaction {
+  box-shadow: 0 0 2px 0 lightgrey;
+  z-index: 1;
+}
+
 @media screen and (min-width: $tablet) {
   .columns {
     flex: 1;
+  }
+
+  .transactions {
+    background-color: #f5f5f5;
   }
 }
 </style>
