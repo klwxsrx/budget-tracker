@@ -17,6 +17,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import "~bulma/sass/utilities/initial-variables";
+
 @media screen and (min-width: $tablet) {
   .columns {
     flex: 1;

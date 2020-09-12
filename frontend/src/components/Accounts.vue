@@ -1,7 +1,7 @@
 <template>
   <div class="account_container">
     <ul>
-      <li v-for="account in accounts" v-bind:key="account.id" class="item">
+      <li v-for="account in accounts" :key="account.id" class="item">
         <span class="account_title">{{ account.title }}</span>
         <span class="account_amount">{{ account.currentBalance }}₽</span> <!-- TODO: money mixin -->
       </li>
