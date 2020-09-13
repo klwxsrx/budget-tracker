@@ -55,7 +55,7 @@ import {routes} from '../router'
 import MoneyAmount from './MoneyAmount.vue'
 
 export default {
-  name: 'Navigation',
+  name: 'TheNavigation',
   components: {MoneyAmount},
   data() {
     return {

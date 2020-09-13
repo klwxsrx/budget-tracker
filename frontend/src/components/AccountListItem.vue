@@ -17,7 +17,7 @@
 import MoneyAmount from './MoneyAmount.vue'
 
 export default {
-  name: 'AccountItem',
+  name: 'AccountListItem',
   components: {MoneyAmount},
   props: {
     account: {

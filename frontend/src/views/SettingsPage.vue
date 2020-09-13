@@ -4,6 +4,6 @@
 
 <script>
 export default {
-  name: 'Settings',
+  name: 'SettingsPage',
 }
 </script>

@@ -12,10 +12,10 @@
 </template>
 
 <script>
-import AccountItem from './AccountItem.vue'
+import AccountItem from './AccountListItem.vue'
 
 export default {
-  name: 'Accounts',
+  name: 'AccountList',
   components: {AccountItem},
   data() {
     return {

@@ -7,10 +7,10 @@
 </template>
 
 <script>
-import Accounts from '../components/Accounts.vue'
+import Accounts from '../components/AccountList.vue'
 
 export default {
-  name: 'Transactions',
+  name: 'TransactionsPage',
   components: {
     Accounts,
   },
