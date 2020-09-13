@@ -6,12 +6,12 @@
 </template>
 
 <script>
-import Navigation from './components/TheNavigation.vue'
+import TheNavigation from './components/TheNavigation.vue'
 
 export default {
   name: 'ExpenseApp',
   components: {
-    Navigation: Navigation,
+    Navigation: TheNavigation,
   },
   data() {
     return {}

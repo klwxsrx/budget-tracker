@@ -1,7 +1,7 @@
 <template>
   <div class="account_container">
     <ul class="account_list">
-      <AccountItem
+      <AccountListItem
         v-for="account in accounts"
         :key="account.id"
         :account="account"
@@ -12,11 +12,11 @@
 </template>
 
 <script>
-import AccountItem from './AccountListItem.vue'
+import AccountListItem from './AccountListItem.vue'
 
 export default {
   name: 'AccountList',
-  components: {AccountItem},
+  components: {AccountListItem},
   data() {
     return {
       accounts: [

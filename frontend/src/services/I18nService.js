@@ -16,26 +16,12 @@ function getUserLocale() {
   return supportedLocales.includes(userLocale) ? userLocale : supportedLocales[0]
 }
 
-function getCurrentLocale() {
-  return getVueI18n().locale
-}
-
 export function getVueI18n() {
   return vueI18n
 }
 
 export default {
-  hasCurrencySignBeforeAmount() {
-    const hasAfter = [
-      'ru',
-    ]
-    return !hasAfter.includes(getCurrentLocale())
-  },
-
-  hasCommaAsMoneyDecimalSeparator() {
-    const hasComma = [
-      'ru',
-    ]
-    return hasComma.includes(getCurrentLocale())
+  getCurrentLocale() {
+    return getVueI18n().locale
   },
 }
