@@ -3,9 +3,8 @@
     <ul class="account_list">
       <AccountItem v-for="account in accounts"
                    :key="account.id"
-                   :balance="account.balance"
-                   :currency="account.currency"
-                   :title="account.title"
+                   :account="account"
+                   @selection-changed="changeSelectedAccount"
       ></AccountItem>
     </ul>
   </div>
@@ -17,21 +16,52 @@ import AccountItem from "./AccountItem.vue"
 export default {
   name: "Accounts",
   components: {AccountItem},
+  methods: {
+    changeSelectedAccount(id, isSelected) {
+      this.accounts.forEach(account => {
+        account.isSelected = account.id === id && isSelected;
+      });
+      // TODO: change in model
+    }
+  },
   data() {
     return {
       accounts: [
         {
           id: "b17aeb44-f459-11ea-adc1-0242ac120002",
-          title: "Cash",
+          title: "Наличные",
           balance: 4269,
-          currency: "RUB"
+          currency: "RUB",
+          isSelected: false,
         },
         {
           id: "a17aeb44-f459-11ea-adc1-0242ac120002",
-          title: "Debt Card",
-          balance: 6745,
-          currency: "RUB"
-        }
+          title: "Зарплатная, RUB",
+          balance: 64000000,
+          currency: "RUB",
+          isSelected: false,
+        },
+        {
+          id: "f17aeb44-f459-11ea-adc1-0242ac120002",
+          title: "Дебетовая, RUB",
+          balance: 430000,
+          currency: "RUB",
+          isSelected: false,
+        },
+        {
+          id: "c17aeb44-f459-11ea-adc1-0242ac120002",
+          title: "Дебетовая, EUR",
+          balance: 1400,
+          currency: "EUR",
+          isSelected: false,
+        },
+        {
+          id: "d17aeb44-f459-11ea-adc1-0242ac120002",
+          title: "Дебетовая, USD",
+          balance: 17000,
+          currency: "USD",
+          isSelected: false,
+        },
       ]
     };
   }

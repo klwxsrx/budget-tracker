@@ -1,31 +1,22 @@
 <template>
-  <li :class="{selected: isSelected}" class="item" @click="toggleSelection">
-    <span class="item_title">{{ title }}</span>
-    <span class="item_amount">{{ moneyBalance }}</span>
+  <li :class="{selected: account.isSelected}" class="item" @click="toggleSelected">
+    <span class="item_title">{{ account.title }}</span>
+    <MoneyAmount :amount="account.balance" :currency="account.currency" class="item_amount"></MoneyAmount>
   </li>
 </template>
 
 <script>
-import moneyBalance from "../mixins/moneyBalance";
+import MoneyAmount from "./MoneyAmount.vue";
 
 export default {
   name: "AccountItem",
+  components: {MoneyAmount},
   props: {
-    title: String,
-    balance: Number,
-    currency: String,
+    account: Object,
   },
-  mixins: [
-    moneyBalance
-  ],
   methods: {
-    toggleSelection() {
-      this.isSelected = !this.isSelected;
-    }
-  },
-  data() {
-    return {
-      isSelected: false
+    toggleSelected() {
+      this.$emit('selection-changed', this.account.id, !this.account.isSelected);
     }
   }
 }
@@ -34,9 +25,13 @@ export default {
 <style lang="scss" scoped>
 .item {
   display: flex;
-  padding: 10px;
+  padding: 20px 1px;
   font-size: 18px;
   cursor: pointer;
+
+  &:hover {
+    background-color: #eeeeee;
+  }
 
   &.selected {
     background-color: lightgray;
@@ -53,6 +48,7 @@ export default {
 
   .item_amount {
     flex: 0 0 auto;
+    margin-right: 10px;
   }
 }
 </style>

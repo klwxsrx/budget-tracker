@@ -11,6 +11,7 @@
   "devDependencies": {
     "@babel/core": "^7.11.4",
     "@babel/preset-env": "^7.11.0",
+    "@kazupon/vue-i18n-loader": "^0.5.0",
     "babel-loader": "^8.1.0",
     "css-loader": "^4.2.2",
     "file-loader": "^6.1.0",
@@ -29,6 +30,7 @@
     "buefy": "^0.9.3",
     "bulma": "^0.9.0",
     "vue": "^2.6.12",
+    "vue-i18n": "^8.21.1",
     "vue-router": "^3.4.3",
     "vue-template-compiler": "^2.6.12"
   }

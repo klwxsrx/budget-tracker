@@ -1,16 +1,32 @@
+<i18n path="navigation">
+{
+"en": {
+"total_balance": "Total Balance",
+"transactions": "Transactions",
+"settings": "Settings"
+},
+"ru": {
+"total_balance": "Баланс",
+"transactions": "Операции",
+"settings": "Настройки"
+}
+}
+</i18n>
+
 <template>
   <b-navbar centered type="is-dark">
     <template slot="brand">
       <b-navbar-item :to="transactionsPath" tag="router-link">
-        <span class="balance">Total Balance</span><span class="amount">{{ moneyBalance }}</span>
+        <span class="balance">{{ $t('total_balance') }}</span>
+        <MoneyAmount :amount="balance" :currency="currency" class="amount"></MoneyAmount>
       </b-navbar-item>
     </template>
     <template slot="start">
       <b-navbar-item :active="$route.path === transactionsPath" :to="transactionsPath" tag="router-link">
-        Transactions <!-- TODO: i18n -->
+        {{ $t('transactions') }}
       </b-navbar-item>
       <b-navbar-item :active="$route.path === settingsPath" :to="settingsPath" tag="router-link">
-        Settings
+        {{ $t('settings') }}
       </b-navbar-item>
     </template>
   </b-navbar>
@@ -18,17 +34,15 @@
 
 <script>
 import {routes} from "../router";
-import moneyBalance from "../mixins/moneyBalance";
+import MoneyAmount from "./MoneyAmount.vue";
 
 export default {
   name: "Navigation",
-  props: {
-    balance: Number,
-    currency: String
-  },
-  mixins: [moneyBalance],
+  components: {MoneyAmount},
   data() {
     return {
+      balance: 42000,
+      currency: 'RUB',
       transactionsPath: routes.transactions.path,
       settingsPath: routes.settings.path
     };
