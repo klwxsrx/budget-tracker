@@ -1,24 +1,41 @@
 <template>
-  <li :class="{selected: account.isSelected}" class="item" @click="toggleSelected">
+  <li
+      :class="{selected: account.isSelected}"
+      class="item"
+      @click="toggleSelected"
+  >
     <span class="item_title">{{ account.title }}</span>
-    <MoneyAmount :amount="account.balance" :currency="account.currency" class="item_amount"></MoneyAmount>
+    <MoneyAmount
+        :amount="account.balance"
+        :currency="account.currency"
+        class="item_amount"
+    />
   </li>
 </template>
 
 <script>
-import MoneyAmount from "./MoneyAmount.vue";
+import MoneyAmount from './MoneyAmount.vue'
 
 export default {
-  name: "AccountItem",
+  name: 'AccountItem',
   components: {MoneyAmount},
   props: {
-    account: Object,
+    account: {
+      type: Object,
+      default: () => ({
+        id: '',
+        title: '',
+        balance: 0,
+        currency: 'USD',
+        isSelected: false,
+      }),
+    },
   },
   methods: {
     toggleSelected() {
-      this.$emit('selection-changed', this.account.id, !this.account.isSelected);
-    }
-  }
+      this.$emit('selection-changed', this.account.id, !this.account.isSelected)
+    },
+  },
 }
 </script>
 

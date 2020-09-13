@@ -1,21 +1,21 @@
 <template>
   <div class="page_container">
-    <Navigation></Navigation>
-    <router-view></router-view>
+    <Navigation/>
+    <router-view/>
   </div>
 </template>
 
 <script>
-import Navigation from "./components/Navigation.vue"
+import Navigation from './components/Navigation.vue'
 
 export default {
-  name: "ExpenseApp",
+  name: 'ExpenseApp',
   components: {
-    Navigation: Navigation
+    Navigation: Navigation,
   },
   data() {
-    return {};
-  }
+    return {}
+  },
 }
 </script>
 

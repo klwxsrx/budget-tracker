@@ -14,18 +14,36 @@
 </i18n>
 
 <template>
-  <b-navbar centered type="is-dark">
+  <b-navbar
+      centered
+      type="is-dark"
+  >
     <template slot="brand">
-      <b-navbar-item :to="transactionsPath" tag="router-link">
+      <b-navbar-item
+          :to="transactionsPath"
+          tag="router-link"
+      >
         <span class="balance">{{ $t('total_balance') }}</span>
-        <MoneyAmount :amount="balance" :currency="currency" class="amount"></MoneyAmount>
+        <MoneyAmount
+            :amount="balance"
+            :currency="currency"
+            class="amount"
+        />
       </b-navbar-item>
     </template>
     <template slot="start">
-      <b-navbar-item :active="$route.path === transactionsPath" :to="transactionsPath" tag="router-link">
+      <b-navbar-item
+          :active="$route.path === transactionsPath"
+          :to="transactionsPath"
+          tag="router-link"
+      >
         {{ $t('transactions') }}
       </b-navbar-item>
-      <b-navbar-item :active="$route.path === settingsPath" :to="settingsPath" tag="router-link">
+      <b-navbar-item
+          :active="$route.path === settingsPath"
+          :to="settingsPath"
+          tag="router-link"
+      >
         {{ $t('settings') }}
       </b-navbar-item>
     </template>
@@ -33,20 +51,20 @@
 </template>
 
 <script>
-import {routes} from "../router";
-import MoneyAmount from "./MoneyAmount.vue";
+import {routes} from '../router'
+import MoneyAmount from './MoneyAmount.vue'
 
 export default {
-  name: "Navigation",
+  name: 'Navigation',
   components: {MoneyAmount},
   data() {
     return {
       balance: 42000,
       currency: 'RUB',
       transactionsPath: routes.transactions.path,
-      settingsPath: routes.settings.path
-    };
-  }
+      settingsPath: routes.settings.path,
+    }
+  },
 }
 </script>
 
