@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import I18nService from "../services/I18nService";
+
 const currencyMap = {
   'RUB': '₽',
   'USD': '$',
@@ -17,20 +19,6 @@ function getCurrencySign(code) {
   return currencyMap[code] || code;
 }
 
-function hasCurrencySignBeforeAmount(locale) {
-  const currencyMap = {
-    'ru': false,
-  };
-  return currencyMap[locale] !== undefined ? currencyMap[locale] : true;
-}
-
-function hasCommaAsDecimalSeparator(locale) {
-  const currencyMap = {
-    'ru': true
-  };
-  return currencyMap[locale] !== undefined ? currencyMap[locale] : false;
-}
-
 export default {
   name: "MoneyAmount",
   props: {
@@ -39,17 +27,15 @@ export default {
   },
   computed: {
     moneyAmount() {
-      const locale = this.$i18n.locale;
-
       const amountFloat = this.$props.amount / 100;
       let amount = (parseInt(String(amountFloat)) === amountFloat)
           ? String(amountFloat)
           : amountFloat.toFixed(2);
-      if (hasCommaAsDecimalSeparator(locale)) {
+      if (I18nService.hasCommaAsMoneyDecimalSeparator()) {
         amount = amount.replace('.', ',');
       }
 
-      return (hasCurrencySign(this.$props.currency) && hasCurrencySignBeforeAmount(locale))
+      return (hasCurrencySign(this.$props.currency) && I18nService.hasCurrencySignBeforeAmount())
           ? getCurrencySign(this.$props.currency) + amount
           : amount + getCurrencySign(this.$props.currency);
     }
