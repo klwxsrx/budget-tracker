@@ -19,6 +19,12 @@ module.exports = {
                 resourceQuery: /blockType=i18n/,
                 type: 'javascript/auto',
                 loader: '@kazupon/vue-i18n-loader'
+            },
+            {
+                enforce: 'pre',
+                test: /\.(js|vue)$/,
+                loader: 'eslint-loader',
+                exclude: /node_modules/
             }
         ]
     },
