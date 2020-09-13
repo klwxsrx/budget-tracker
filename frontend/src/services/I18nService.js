@@ -29,7 +29,7 @@ export default {
         const hasAfter = [
             'ru'
         ];
-        return hasAfter.includes(getCurrentLocale());
+        return !hasAfter.includes(getCurrentLocale());
     },
 
     hasCommaAsMoneyDecimalSeparator() {
