@@ -7,14 +7,14 @@ import 'buefy/dist/buefy.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 
 ConfigProgrammatic.setOptions({
-    defaultIconPack: 'fas',
+  defaultIconPack: 'fas',
 })
 
 Vue.use(Buefy)
 
 new Vue({
-    i18n: getVueI18n(),
-    router: router,
-    el: '#app',
-    render: h => h(App),
+  i18n: getVueI18n(),
+  router: router,
+  el: '#app',
+  render: h => h(App),
 })

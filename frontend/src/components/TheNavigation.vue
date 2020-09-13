@@ -15,34 +15,34 @@
 
 <template>
   <b-navbar
-      centered
-      type="is-dark"
+    centered
+    type="is-dark"
   >
     <template slot="brand">
       <b-navbar-item
-          :to="transactionsPath"
-          tag="router-link"
+        :to="transactionsPath"
+        tag="router-link"
       >
         <span class="balance">{{ $t('total_balance') }}</span>
         <MoneyAmount
-            :amount="balance"
-            :currency="currency"
-            class="amount"
+          :amount="balance"
+          :currency="currency"
+          class="amount"
         />
       </b-navbar-item>
     </template>
     <template slot="start">
       <b-navbar-item
-          :active="$route.path === transactionsPath"
-          :to="transactionsPath"
-          tag="router-link"
+        :active="$route.path === transactionsPath"
+        :to="transactionsPath"
+        tag="router-link"
       >
         {{ $t('transactions') }}
       </b-navbar-item>
       <b-navbar-item
-          :active="$route.path === settingsPath"
-          :to="settingsPath"
-          tag="router-link"
+        :active="$route.path === settingsPath"
+        :to="settingsPath"
+        tag="router-link"
       >
         {{ $t('settings') }}
       </b-navbar-item>

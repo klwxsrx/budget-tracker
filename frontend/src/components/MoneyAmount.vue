@@ -35,15 +35,15 @@ export default {
     moneyAmount() {
       const amountFloat = this.$props.amount / 100
       let amount = (parseInt(String(amountFloat)) === amountFloat)
-          ? String(amountFloat)
-          : amountFloat.toFixed(2)
+        ? String(amountFloat)
+        : amountFloat.toFixed(2)
       if (I18nService.hasCommaAsMoneyDecimalSeparator()) {
         amount = amount.replace('.', ',')
       }
 
       return (hasCurrencySign(this.$props.currency) && I18nService.hasCurrencySignBeforeAmount())
-          ? getCurrencySign(this.$props.currency) + amount
-          : amount + getCurrencySign(this.$props.currency)
+        ? getCurrencySign(this.$props.currency) + amount
+        : amount + getCurrencySign(this.$props.currency)
     },
   },
 }

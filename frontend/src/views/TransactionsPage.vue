@@ -1,8 +1,8 @@
 <template>
   <div class="columns is-mobile">
-    <Accounts class="accounts column is-3-desktop is-4-tablet is-12-mobile"/>
-    <div class="transactions column is-6-desktop is-8-tablet is-12-mobile"/>
-    <div class="edit-transaction column is-3-desktop is-12-mobile"/>
+    <Accounts class="accounts column is-3-desktop is-4-tablet is-12-mobile" />
+    <div class="transactions column is-6-desktop is-8-tablet is-12-mobile" />
+    <div class="edit-transaction column is-3-desktop is-12-mobile" />
   </div>
 </template>
 

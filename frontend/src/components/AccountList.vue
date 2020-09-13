@@ -2,10 +2,10 @@
   <div class="account_container">
     <ul class="account_list">
       <AccountItem
-          v-for="account in accounts"
-          :key="account.id"
-          :account="account"
-          @selection-changed="changeSelectedAccount"
+        v-for="account in accounts"
+        :key="account.id"
+        :account="account"
+        @selection-changed="changeSelectedAccount"
       />
     </ul>
   </div>

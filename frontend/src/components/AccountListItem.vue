@@ -1,14 +1,14 @@
 <template>
   <li
-      :class="{selected: account.isSelected}"
-      class="item"
-      @click="toggleSelected"
+    :class="{selected: account.isSelected}"
+    class="item"
+    @click="toggleSelected"
   >
     <span class="item_title">{{ account.title }}</span>
     <MoneyAmount
-        :amount="account.balance"
-        :currency="account.currency"
-        class="item_amount"
+      :amount="account.balance"
+      :currency="account.currency"
+      class="item_amount"
     />
   </li>
 </template>

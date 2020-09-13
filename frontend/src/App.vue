@@ -1,7 +1,7 @@
 <template>
   <div class="page_container">
-    <Navigation/>
-    <router-view/>
+    <Navigation />
+    <router-view />
   </div>
 </template>
 
