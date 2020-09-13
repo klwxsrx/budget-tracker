@@ -75,7 +75,7 @@ export default {
 }
 
 .balance {
-  margin-left: 18px;
+  margin-left: 10px;
   font-weight: 600;
 }
 

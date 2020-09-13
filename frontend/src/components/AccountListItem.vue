@@ -43,7 +43,6 @@ export default {
 .item {
   display: flex;
   padding: 20px 1px;
-  font-size: 18px;
   cursor: pointer;
 
   &:hover {
@@ -60,12 +59,14 @@ export default {
     overflow: hidden;
     white-space: nowrap;
     margin-left: 20px;
+    font-size: 17px;
     font-weight: 600;
   }
 
   .item_amount {
     flex: 0 0 auto;
     margin-right: 10px;
+    font-size: 16px;
   }
 }
 </style>
