@@ -42,7 +42,6 @@ export default {
 <style lang="scss" scoped>
 .item {
   display: flex;
-  padding: 20px 1px;
   cursor: pointer;
 
   &:hover {
@@ -58,14 +57,13 @@ export default {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    margin-left: 20px;
     font-size: 17px;
     font-weight: 600;
   }
 
   .item_amount {
     flex: 0 0 auto;
-    margin-right: 10px;
+    padding-left: 10px;
     font-size: 16px;
   }
 }
