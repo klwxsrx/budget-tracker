@@ -9,7 +9,7 @@
         :key="account.id"
         :account="account"
         class="list_item"
-        @selection-changed="changeSelectedAccount"
+        @selection-changed="onItemSelectionChanged"
       />
     </ul>
     <ul
@@ -44,55 +44,24 @@ import AccountListItem from './AccountListItem.vue'
 export default {
   name: 'AccountList',
   components: {AccountListItem},
+  props: {
+    isLoaded: {
+      type: Boolean,
+      default: false,
+    },
+    accounts: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       skeletonItemsCount: 5,
-      isLoaded: false,
-      accounts: [
-        {
-          id: 'b17aeb44-f459-11ea-adc1-0242ac120002',
-          title: 'Наличные',
-          balance: 4269,
-          currency: 'RUB',
-          isSelected: false,
-        },
-        {
-          id: 'a17aeb44-f459-11ea-adc1-0242ac120002',
-          title: 'Зарплатная, RUB',
-          balance: 64000000,
-          currency: 'RUB',
-          isSelected: false,
-        },
-        {
-          id: 'f17aeb44-f459-11ea-adc1-0242ac120002',
-          title: 'Дебетовая, RUB',
-          balance: 430000,
-          currency: 'RUB',
-          isSelected: false,
-        },
-        {
-          id: 'c17aeb44-f459-11ea-adc1-0242ac120002',
-          title: 'Дебетовая, EUR',
-          balance: 1400,
-          currency: 'EUR',
-          isSelected: false,
-        },
-        {
-          id: 'd17aeb44-f459-11ea-adc1-0242ac120002',
-          title: 'Дебетовая, USD',
-          balance: 17000,
-          currency: 'USD',
-          isSelected: false,
-        },
-      ],
     }
   },
   methods: {
-    changeSelectedAccount(id, isSelected) {
-      this.accounts.forEach(account => {
-        account.isSelected = account.id === id && isSelected
-      })
-      // TODO: change in model
+    onItemSelectionChanged(id, isSelected) {
+      this.$emit('selection-changed', id, isSelected)
     },
   },
 }
@@ -112,7 +81,7 @@ export default {
     }
 
     .skeleton_title {
-      margin-right: 20%;
+      margin-right: 15%;
     }
 
     .skeleton_amount {

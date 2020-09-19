@@ -1,18 +1,49 @@
 <template>
   <div class="columns is-mobile">
-    <Accounts class="accounts column is-3-desktop is-4-tablet is-12-mobile" />
+    <AccountList
+      :accounts="accounts"
+      :is-loaded="isLoaded"
+      class="accounts column is-3-desktop is-4-tablet is-12-mobile"
+      @selection-changed="changeSelectedAccount"
+    />
     <div class="transactions column is-6-desktop is-8-tablet is-12-mobile" />
     <div class="edit-transaction column is-3-desktop is-12-mobile" />
   </div>
 </template>
 
 <script>
-import Accounts from '../components/AccountList.vue'
+import {mapState} from 'vuex'
+import AccountList from '../components/AccountList.vue'
 
 export default {
   name: 'TransactionsPage',
   components: {
-    Accounts,
+    AccountList: AccountList,
+  },
+  computed: {
+    ...mapState({
+      isLoaded: state => state.account.isInitialized,
+    }),
+    accounts() {
+      const selectedItemId = this.$store.state.transaction.filter.accountId
+      return this.$store.getters['account/notDeletedItems'].map(item => {
+        delete item.isDeleted
+        this.$set(item, 'isSelected', (item.id === selectedItemId))
+        return item
+      })
+    },
+  },
+  created() {
+    this.$store.dispatch('account/loadAccounts')
+  },
+  methods: {
+    changeSelectedAccount(id, isSelected) {
+      if (isSelected) {
+        this.$store.commit('transaction/filterAccountId', id)
+      } else {
+        this.$store.commit('transaction/filterAccountId', null)
+      }
+    },
   },
 }
 </script>
