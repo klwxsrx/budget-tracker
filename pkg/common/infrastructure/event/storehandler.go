@@ -13,7 +13,7 @@ type storeEventHandler struct {
 func (eh *storeEventHandler) Handle(e domain.Event) error {
 	err := eh.store.Append(e)
 	if err != nil {
-		return fmt.Errorf("can't append event to store, %v", err)
+		return fmt.Errorf("can't append event to store: %v", err)
 	}
 	return nil
 }

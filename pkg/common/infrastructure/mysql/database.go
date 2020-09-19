@@ -50,7 +50,7 @@ func (d *database) OpenConnection() error {
 	}, newOpenConnectionBackoff())
 	if err != nil {
 		_ = d.db.Close()
-		return fmt.Errorf("failed to open the connection, %v", err)
+		return fmt.Errorf("failed to open the connection: %v", err)
 	}
 	return nil
 }

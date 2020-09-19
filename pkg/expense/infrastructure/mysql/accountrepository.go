@@ -31,7 +31,7 @@ func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error
 	state := &domain.AccountState{}
 	storedEvents, err := r.store.Get(eventDomain.AggregateID{UUID: id.UUID})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get events, %v", err)
+		return nil, fmt.Errorf("failed to get events: %v", err)
 	}
 	if len(storedEvents) == 0 {
 		return nil, nil
@@ -39,11 +39,11 @@ func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error
 	for _, storedEvent := range storedEvents {
 		domainEvent, err := r.deserializer.Deserialize(storedEvent)
 		if err != nil {
-			return nil, fmt.Errorf("failed to deserialize events, %v", err)
+			return nil, fmt.Errorf("failed to deserialize events: %v", err)
 		}
 		err = state.Apply(domainEvent)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create accountState, %v", err)
+			return nil, fmt.Errorf("failed to create accountState: %v", err)
 		}
 	}
 	return domain.CreateAccount(state), nil
@@ -71,7 +71,7 @@ func (r *accountRepository) buildAccountsFromEvents(events []*eventApp.StoredEve
 	for _, storedEvent := range events {
 		domainEvent, err := r.deserializer.Deserialize(storedEvent)
 		if err != nil {
-			return nil, fmt.Errorf("failed to deserialize events, %v", err)
+			return nil, fmt.Errorf("failed to deserialize events: %v", err)
 		}
 		state, exists := states[domainEvent.GetAggregateID()]
 		if !exists {
@@ -80,7 +80,7 @@ func (r *accountRepository) buildAccountsFromEvents(events []*eventApp.StoredEve
 		}
 		err = state.Apply(domainEvent)
 		if err != nil {
-			return nil, fmt.Errorf("failed to apply account state, %v", err)
+			return nil, fmt.Errorf("failed to apply account state: %v", err)
 		}
 	}
 	var result []*domain.Account

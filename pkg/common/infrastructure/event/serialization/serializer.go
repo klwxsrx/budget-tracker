@@ -12,7 +12,7 @@ type serializer struct{}
 func (s *serializer) Serialize(event domain.Event) (string, error) {
 	result, err := json.Marshal(event)
 	if err != nil {
-		return "", fmt.Errorf("can't serialize event - %s, %v", event, err)
+		return "", fmt.Errorf("can't serialize event - %s: %v", event, err)
 	}
 	return string(result), nil
 }

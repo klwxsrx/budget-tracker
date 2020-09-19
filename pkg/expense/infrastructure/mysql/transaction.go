@@ -33,7 +33,7 @@ func (t *transaction) Critical(lock string, f func(r command.DomainRegistry) err
 	dbLock := mysql.NewLock(t.client, lock)
 	err := dbLock.Get()
 	if err != nil {
-		return fmt.Errorf("can't create lock %v", err)
+		return fmt.Errorf("can't create lock: %v", err)
 	}
 	defer dbLock.Release()
 	return t.Execute(f)
