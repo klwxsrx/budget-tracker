@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS `event`
 (
-    surrogate_id   INT AUTO_INCREMENT PRIMARY KEY,
-    id             BINARY(16),
+    id             INT AUTO_INCREMENT PRIMARY KEY,
     aggregate_id   BINARY(16),
     aggregate_name VARCHAR(255),
     event_type     VARCHAR(255),

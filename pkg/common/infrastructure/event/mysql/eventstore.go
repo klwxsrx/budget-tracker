@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"github.com/google/uuid"
 	app "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
 	domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
@@ -21,15 +20,10 @@ func (s *store) Get(id domain.AggregateID) ([]*app.StoredEvent, error) {
 }
 
 func (s *store) GetFromID(id domain.AggregateID, fromID app.StoredEventID) ([]*app.StoredEvent, error) {
-	var surrogateId int
-	err := s.db.Get(&surrogateId, "SELECT surrogate_id FROM event WHERE id = UUID_TO_BIN(?)", fromID.String())
-	if err != nil {
-		return nil, err
-	}
 	return selectEvents(s.db, []string{
 		"aggregate_id = UUID_TO_BIN(?)",
-		"surrogate_id > ?",
-	}, id.String(), surrogateId)
+		"id > ?",
+	}, id.String(), fromID)
 }
 
 func (s *store) GetByName(name domain.AggregateName) ([]*app.StoredEvent, error) {
@@ -45,9 +39,8 @@ func (s *store) Append(e domain.Event) error {
 	}
 	_, err = s.db.Exec(
 		"INSERT INTO event"+
-			"(id, aggregate_id, aggregate_name, event_type, event_data, created_at)"+
-			"VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?)",
-		uuid.New(),
+			"(aggregate_id, aggregate_name, event_type, event_data, created_at)"+
+			"VALUES (UUID_TO_BIN(?), ?, ?, ?, ?)",
 		e.GetAggregateID().UUID,
 		e.GetAggregateName(),
 		e.GetType(),
@@ -61,7 +54,7 @@ func selectEvents(db mysql.Client, conditions []string, args ...interface{}) ([]
 	var events []*app.StoredEvent
 	err := db.Select(&events,
 		"SELECT "+
-			"BIN_TO_UUID(id) AS id, "+
+			"id, "+
 			"BIN_TO_UUID(aggregate_id) AS aggregate_id, "+
 			"aggregate_name, "+
 			"event_type, "+

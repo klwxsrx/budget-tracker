@@ -2,6 +2,7 @@ package transport
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	commandApp "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
@@ -9,6 +10,8 @@ import (
 	"github.com/klwxsrx/expense-tracker/pkg/expense/app/command"
 	"net/http"
 )
+
+var InvalidParameterError = errors.New("invalid parameter")
 
 type commandParser func(r *http.Request) (commandApp.Command, error)
 
@@ -52,23 +55,24 @@ type renameAccountBody struct {
 
 func createAccountParser(r *http.Request) (commandApp.Command, error) {
 	var body createAccountBody
-	err := parseJsonFromBody(r, body)
-	if err != nil {
+	if err := parseJsonFromBody(r, &body); err != nil {
 		return nil, err
+	}
+	if body.Title == "" || body.Currency == "" {
+		return nil, InvalidParameterError
 	}
 	return &command.CreateAccount{Title: body.Title, Currency: body.Currency, InitialBalance: body.InitialBalance}, nil
 }
 
 func renameAccountParser(r *http.Request) (commandApp.Command, error) {
 	var body renameAccountBody
-	err := parseJsonFromBody(r, body)
-	if err != nil {
+	if err := parseJsonFromBody(r, &body); err != nil {
 		return nil, err
 	}
 
 	accountId, err := parseUuid(mux.Vars(r)["accountId"])
-	if err != nil {
-		return nil, err
+	if body.Title == "" || err != nil {
+		return nil, InvalidParameterError
 	}
 	return &command.RenameAccount{ID: accountId, Title: body.Title}, nil
 }
@@ -86,7 +90,7 @@ func parseUuid(str string) (uuid.UUID, error) {
 }
 
 func parseJsonFromBody(r *http.Request, v interface{}) error {
-	return json.NewDecoder(r.Body).Decode(&v)
+	return json.NewDecoder(r.Body).Decode(v)
 }
 
 func getHandlerFunc(bus commandApp.Bus, parser commandParser) http.HandlerFunc {

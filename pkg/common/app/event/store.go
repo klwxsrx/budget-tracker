@@ -1,14 +1,11 @@
 package event
 
 import (
-	"github.com/google/uuid"
 	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	"time"
 )
 
-type StoredEventID struct {
-	uuid.UUID
-}
+type StoredEventID int
 
 type StoredEvent struct {
 	Id            StoredEventID       `db:"id"`
