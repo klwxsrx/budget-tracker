@@ -10,7 +10,7 @@ import (
 var updateAccountLockName = "update_account_lock"
 
 type CreateAccountHandler struct {
-	tx Transaction
+	uw UnitOfWork
 }
 
 func (h *CreateAccountHandler) Execute(c command.Command) error {
@@ -18,7 +18,7 @@ func (h *CreateAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
-	return h.tx.Critical(updateAccountLockName, func(r DomainRegistry) error {
+	return h.uw.Critical(updateAccountLockName, func(r DomainRegistry) error {
 		initialBalance, err := domain.NewMoneyAmount(cmd.InitialBalance, domain.Currency(cmd.Currency))
 		if err != nil {
 			return err
@@ -32,7 +32,7 @@ func (h *CreateAccountHandler) GetType() command.Type {
 }
 
 type RenameAccountHandler struct {
-	tx Transaction
+	uw UnitOfWork
 }
 
 func (h *RenameAccountHandler) Execute(c command.Command) error {
@@ -40,7 +40,7 @@ func (h *RenameAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
-	return h.tx.Critical(updateAccountLockName, func(r DomainRegistry) error {
+	return h.uw.Critical(updateAccountLockName, func(r DomainRegistry) error {
 		return r.AccountService().Rename(domain.AccountID{UUID: cmd.ID}, cmd.Title)
 	})
 }
@@ -50,7 +50,7 @@ func (h *RenameAccountHandler) GetType() command.Type {
 }
 
 type DeleteAccountHandler struct {
-	tx Transaction
+	uw UnitOfWork
 }
 
 func (h *DeleteAccountHandler) Execute(c command.Command) error {
@@ -58,7 +58,7 @@ func (h *DeleteAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
 	}
-	return h.tx.Critical(updateAccountLockName, func(r DomainRegistry) error {
+	return h.uw.Critical(updateAccountLockName, func(r DomainRegistry) error {
 		return r.AccountService().Delete(domain.AccountID{UUID: cmd.ID})
 	})
 }
@@ -67,14 +67,14 @@ func (h *DeleteAccountHandler) GetType() command.Type {
 	return deleteAccountType
 }
 
-func NewCreateAccountHandler(transaction Transaction) *CreateAccountHandler {
-	return &CreateAccountHandler{transaction}
+func NewCreateAccountHandler(uw UnitOfWork) *CreateAccountHandler {
+	return &CreateAccountHandler{uw}
 }
 
-func NewRenameAccountHandler(transaction Transaction) *RenameAccountHandler {
-	return &RenameAccountHandler{transaction}
+func NewRenameAccountHandler(uw UnitOfWork) *RenameAccountHandler {
+	return &RenameAccountHandler{uw}
 }
 
-func NewDeleteAccountHandler(transaction Transaction) *DeleteAccountHandler {
-	return &DeleteAccountHandler{transaction}
+func NewDeleteAccountHandler(uw UnitOfWork) *DeleteAccountHandler {
+	return &DeleteAccountHandler{uw}
 }

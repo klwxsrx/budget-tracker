@@ -8,19 +8,19 @@ import (
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/serialization"
 )
 
-type transaction struct {
+type unitOfWork struct {
 	client       mysql.TransactionalClient
 	dispatcher   eventApp.Dispatcher
 	serializer   eventApp.Serializer
 	deserializer serialization.EventDeserializer
 }
 
-func (t *transaction) Execute(f func(r command.DomainRegistry) error) error {
-	tx, err := t.client.Begin()
+func (uw *unitOfWork) Execute(f func(r command.DomainRegistry) error) error {
+	tx, err := uw.client.Begin()
 	if err != nil {
 		return fmt.Errorf("can't begin new transaction: %v", err)
 	}
-	registry := newDomainRegistry(tx, t.dispatcher, t.serializer, t.deserializer)
+	registry := newDomainRegistry(tx, uw.dispatcher, uw.serializer, uw.deserializer)
 	err = f(registry)
 	if err != nil {
 		_ = tx.Rollback()
@@ -29,21 +29,21 @@ func (t *transaction) Execute(f func(r command.DomainRegistry) error) error {
 	return tx.Commit()
 }
 
-func (t *transaction) Critical(lock string, f func(r command.DomainRegistry) error) error {
-	dbLock := mysql.NewLock(t.client, lock)
+func (uw *unitOfWork) Critical(lock string, f func(r command.DomainRegistry) error) error {
+	dbLock := mysql.NewLock(uw.client, lock)
 	err := dbLock.Get()
 	if err != nil {
 		return fmt.Errorf("can't create lock: %v", err)
 	}
 	defer dbLock.Release()
-	return t.Execute(f)
+	return uw.Execute(f)
 }
 
-func NewTransaction(
+func NewUnitOfWork(
 	client mysql.TransactionalClient,
 	dispatcher eventApp.Dispatcher,
 	serializer eventApp.Serializer,
 	deserializer serialization.EventDeserializer,
-) command.Transaction {
-	return &transaction{client, dispatcher, serializer, deserializer}
+) command.UnitOfWork {
+	return &unitOfWork{client, dispatcher, serializer, deserializer}
 }

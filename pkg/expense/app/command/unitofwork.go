@@ -8,7 +8,7 @@ type DomainRegistry interface {
 	AccountService() domain.AccountService
 }
 
-type Transaction interface {
+type UnitOfWork interface {
 	Execute(f func(r DomainRegistry) error) error
 	Critical(lock string, f func(r DomainRegistry) error) error
 }

@@ -19,7 +19,7 @@ type Container interface {
 
 type container struct {
 	client       mysql.TransactionalClient
-	transaction  command.Transaction
+	unitOfWork   command.UnitOfWork
 	bus          commandApp.Bus
 	dispatcher   eventApp.Dispatcher
 	serializer   eventApp.Serializer
@@ -31,15 +31,15 @@ func (c *container) CommandBus() commandApp.Bus {
 	return c.bus
 }
 
-func eventStoreEventHandler(client mysql.Client, es eventApp.Serializer) eventApp.Handler {
-	eventStore := eventMysql.NewStore(client, es)
+func eventStoreEventHandler(client mysql.Client, serializer eventApp.Serializer) eventApp.Handler {
+	eventStore := eventMysql.NewStore(client, serializer)
 	return event.NewStoreEventHandler(eventStore)
 }
 
-func eventDispatcher(client mysql.Client, es eventApp.Serializer) eventApp.Dispatcher {
-	d := eventApp.NewDispatcher()
-	d.Subscribe(eventStoreEventHandler(client, es))
-	return registerEventHandlers(d)
+func eventDispatcher(client mysql.Client, serializer eventApp.Serializer) eventApp.Dispatcher {
+	dispatcher := eventApp.NewDispatcher()
+	dispatcher.Subscribe(eventStoreEventHandler(client, serializer)) // TODO: subscribe within DomainRegistry
+	return registerEventHandlers(dispatcher)
 }
 
 func eventSerializer() eventApp.Serializer {
@@ -50,36 +50,36 @@ func eventDeserializer() serialization.EventDeserializer {
 	return serialization.NewEventDeserializer()
 }
 
-func transaction(
+func unitOfWork(
 	client mysql.TransactionalClient,
-	ed eventApp.Dispatcher,
-	es eventApp.Serializer,
-	de serialization.EventDeserializer,
-) command.Transaction {
-	return mysqlInfrastructure.NewTransaction(client, ed, es, de)
+	dispatcher eventApp.Dispatcher,
+	serializer eventApp.Serializer,
+	deserializer serialization.EventDeserializer,
+) command.UnitOfWork {
+	return mysqlInfrastructure.NewUnitOfWork(client, dispatcher, serializer, deserializer)
 }
 
-func bus(tx command.Transaction, logger logger.Logger) commandApp.Bus {
-	b := commandApp.NewBusRegistry(logger)
-	return registerCommandHandlers(b, tx)
+func bus(unitOfWork command.UnitOfWork, logger logger.Logger) commandApp.Bus {
+	bus := commandApp.NewBusRegistry(logger)
+	return registerCommandHandlers(bus, unitOfWork)
 }
 
-func registerEventHandlers(d eventApp.Dispatcher) eventApp.Dispatcher {
+func registerEventHandlers(dispatcher eventApp.Dispatcher) eventApp.Dispatcher {
 	// TODO: add event handlers
-	return d
+	return dispatcher
 }
 
-func registerCommandHandlers(b commandApp.BusRegistry, tx command.Transaction) commandApp.Bus {
-	_ = b.Register(command.NewCreateAccountHandler(tx))
-	_ = b.Register(command.NewRenameAccountHandler(tx))
-	_ = b.Register(command.NewDeleteAccountHandler(tx))
-	return b
+func registerCommandHandlers(bus commandApp.BusRegistry, unitOfWork command.UnitOfWork) commandApp.Bus {
+	_ = bus.Register(command.NewCreateAccountHandler(unitOfWork))
+	_ = bus.Register(command.NewRenameAccountHandler(unitOfWork))
+	_ = bus.Register(command.NewDeleteAccountHandler(unitOfWork))
+	return bus
 }
 
 func NewContainer(client mysql.TransactionalClient, logger logger.Logger) Container {
-	es := eventSerializer()
-	de := eventDeserializer()
-	ed := eventDispatcher(client, es)
-	tx := transaction(client, ed, es, de)
-	return &container{client, tx, bus(tx, logger), ed, es, de, logger}
+	serializer := eventSerializer()
+	deserializer := eventDeserializer()
+	dispatcher := eventDispatcher(client, serializer)
+	unitOfWork := unitOfWork(client, dispatcher, serializer, deserializer)
+	return &container{client, unitOfWork, bus(unitOfWork, logger), dispatcher, serializer, deserializer, logger}
 }
