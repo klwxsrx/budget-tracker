@@ -1,24 +1,25 @@
 <template>
-  <div class="columns is-mobile">
+  <div class="columns is-gapless is-mobile">
     <AccountList
       :accounts="accounts"
       :is-loaded="isLoaded"
       class="accounts column is-3-desktop is-4-tablet is-12-mobile"
       @selection-changed="changeSelectedAccount"
     />
-    <div class="transactions column is-6-desktop is-8-tablet is-12-mobile" />
-    <div class="edit-transaction column is-3-desktop is-12-mobile" />
+    <TransactionList class="transactions column is-9-desktop is-8-tablet is-12-mobile" />
   </div>
 </template>
 
 <script>
 import {mapState} from 'vuex'
 import AccountList from '../components/AccountList.vue'
+import TransactionList from '../components/TransactionList.vue'
 
 export default {
   name: 'TransactionsPage',
   components: {
-    AccountList: AccountList,
+    TransactionList,
+    AccountList,
   },
   computed: {
     ...mapState({
@@ -51,7 +52,7 @@ export default {
 <style lang="scss">
 @import "~bulma/sass/utilities/initial-variables";
 
-.accounts, .edit-transaction {
+.columns .accounts {
   box-shadow: 0 0 2px 0 lightgrey;
   z-index: 1;
 }

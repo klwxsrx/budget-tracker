@@ -71,7 +71,7 @@ export default {
 @import "~bulma/sass/utilities/initial-variables";
 
 .account_container .list_item {
-  padding: 20px 10px 20px 20px;
+  padding: 20px;
 
   &.skeleton {
     display: flex;
@@ -91,14 +91,8 @@ export default {
 }
 
 @media screen and (min-width: $tablet) {
-  .account_container {
-    margin-top: 10px;
-  }
-}
-
-@media screen and (max-width: $tablet) {
-  .account_container {
-    padding-bottom: 0;
+  .account_container .list_item {
+    margin: 10px;
   }
 }
 </style>
