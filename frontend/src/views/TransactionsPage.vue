@@ -49,8 +49,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
-@import "~bulma/sass/utilities/initial-variables";
+<style lang="scss" scoped>
+@import "../buefy.scss";
 
 .columns .accounts {
   box-shadow: 0 0 2px 0 lightgrey;

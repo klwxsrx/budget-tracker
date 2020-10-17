@@ -68,7 +68,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~bulma/sass/utilities/initial-variables";
+@import "../buefy.scss";
 
 .account_container .list_item {
   padding: 20px;

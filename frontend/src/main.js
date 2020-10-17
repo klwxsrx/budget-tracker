@@ -4,7 +4,7 @@ import App from './App.vue'
 import store from './store'
 import router from './router'
 import Buefy, {ConfigProgrammatic} from 'buefy'
-import 'buefy/dist/buefy.css'
+import './buefy.scss'
 import '@fortawesome/fontawesome-free/css/all.css'
 
 ConfigProgrammatic.setOptions({
