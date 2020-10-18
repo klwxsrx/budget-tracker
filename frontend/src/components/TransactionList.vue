@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="shadow-block"></div>
+    <div class="shadow-block" />
   </div>
 </template>
 
