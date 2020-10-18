@@ -1,33 +1,33 @@
 <template>
-  <div class="account_container">
+  <div class="account-container">
     <ul
       v-if="isLoaded"
-      class="account_list"
+      class="account-list"
     >
       <AccountListItem
         v-for="account in accounts"
         :key="account.id"
         :account="account"
-        class="list_item"
+        class="list-item"
         @selection-changed="onItemSelectionChanged"
       />
     </ul>
     <ul
       v-if="!isLoaded"
-      class="account_list"
+      class="account-list"
     >
       <li
         v-for="index in skeletonItemsCount"
         :key="index"
-        class="list_item skeleton"
+        class="list-item skeleton"
       >
         <div
           :style="[{'flex-grow': Math.random() * skeletonItemsCount + 1}]"
-          class="skeleton_title"
+          class="skeleton-title"
         >
           <b-skeleton size="is-medium" />
         </div>
-        <div class="skeleton_amount">
+        <div class="skeleton-amount">
           <b-skeleton
             position="is-right"
             size="is-medium"
@@ -70,28 +70,28 @@ export default {
 <style lang="scss" scoped>
 @import "src/scss/variables";
 
-.account_container .list_item {
+.account-container .list-item {
   padding: 16px;
 
   &.skeleton {
     display: flex;
 
-    .skeleton_title, .skeleton_amount {
+    .skeleton-title, .skeleton-amount {
       flex-shrink: 1;
     }
 
-    .skeleton_title {
+    .skeleton-title {
       margin-right: 15%;
     }
 
-    .skeleton_amount {
+    .skeleton-amount {
       flex-grow: 1;
     }
   }
 }
 
 @media screen and (min-width: $tablet) {
-  .account_container .list_item {
+  .account-container .list-item {
     margin: 10px;
   }
 }

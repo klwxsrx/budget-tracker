@@ -1,5 +1,5 @@
 <template>
-  <div class="columns is-gapless is-mobile">
+  <div class="columns is-gapless is-tablet">
     <AccountList
       :accounts="accounts"
       :is-loaded="isLoaded"
@@ -62,7 +62,7 @@ export default {
     flex: 1;
 
     .transactions {
-      background-color: $light;
+      background-color: $background;
     }
   }
 }

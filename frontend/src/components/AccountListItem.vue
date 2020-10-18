@@ -4,11 +4,11 @@
     class="item"
     @click="toggleSelected"
   >
-    <span class="item_title">{{ account.title }}</span>
+    <span class="item-title">{{ account.title }}</span>
     <MoneyAmount
       :amount="account.balance"
       :currency="account.currency"
-      class="item_amount"
+      class="item-amount"
     />
   </li>
 </template>
@@ -48,8 +48,8 @@ export default {
 
   &:hover,
   &:hover.selected {
-    .item_title,
-    .item_amount {
+    .item-title,
+    .item-amount {
       color: $link;
     }
   }
@@ -57,13 +57,13 @@ export default {
   &.selected {
     background-color: $scheme-main-ter;
 
-    .item_title,
-    .item_amount {
+    .item-title,
+    .item-amount {
       color: $text-strong;
     }
   }
 
-  .item_title {
+  .item-title {
     flex: 1 1 auto;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -73,7 +73,7 @@ export default {
     color: $text;
   }
 
-  .item_amount {
+  .item-amount {
     flex: 0 0 auto;
     padding-left: 10px;
     font-size: $size-normal;

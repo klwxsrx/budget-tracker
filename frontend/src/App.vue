@@ -1,5 +1,5 @@
 <template>
-  <div class="page_container">
+  <div class="page-container">
     <TheNavigation />
     <router-view />
   </div>
@@ -20,7 +20,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.page_container {
+.page-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
