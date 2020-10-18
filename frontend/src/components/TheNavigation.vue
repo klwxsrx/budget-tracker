@@ -16,6 +16,7 @@
 <template>
   <b-navbar
     centered
+    type="is-dark"
   >
     <template slot="brand">
       <b-navbar-item

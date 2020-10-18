@@ -55,7 +55,7 @@ export default {
   }
 
   &.selected {
-    background-color: $scheme-main-ter;
+    background-color: $primary-light;
 
     .item-title,
     .item-amount {

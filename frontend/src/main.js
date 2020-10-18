@@ -6,6 +6,7 @@ import router from './router'
 import Buefy, {ConfigProgrammatic} from 'buefy'
 import './scss/variables.scss'
 import './scss/buefy.scss'
+import '@fortawesome/fontawesome-free/css/all.css'
 
 ConfigProgrammatic.setOptions({
   defaultIconPack: 'fas',
