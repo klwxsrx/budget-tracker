@@ -89,7 +89,7 @@ export default {
   name: 'TransactionList',
   computed: {
     dateControlsSize() {
-      return this.$mq === 'tablet' ? 'is-medium' : 'is-small'
+      return this.$mq === 'tablet' ? 'is-default' : 'is-small'
     },
     filterControlsSize() {
       return this.$mq === 'tablet' ? 'is-medium' : 'is-small'
@@ -123,9 +123,9 @@ export default {
     }
 
     .transaction-list-container {
+      box-shadow: 0 0 2px 0 $grey-lighter;
       background-color: $scheme-main;
-      border-top-left-radius: $radius;
-      border-top-right-radius: $radius;
+      width: 100%;
 
       .transaction-list {
         border-top-left-radius: $radius;
@@ -169,8 +169,8 @@ export default {
     }
 
     .transaction-list-container {
-      box-shadow: 0 0 2px 0 $grey-lighter;
-      width: 100%;
+      border-top-left-radius: $radius;
+      border-top-right-radius: $radius;
       flex-grow: 1;
       margin-top: 10px;
     }
@@ -190,8 +190,11 @@ export default {
 
       .transaction-filter-controls {
         margin-top: 30px;
-        margin-bottom: 30px;
       }
+    }
+
+    .transaction-list-container {
+      margin-top: 30px;
     }
   }
 }
