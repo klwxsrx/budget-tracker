@@ -68,10 +68,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../scss/variables";
+@import "src/scss/variables";
 
 .account_container .list_item {
-  padding: 20px;
+  padding: 16px;
 
   &.skeleton {
     display: flex;

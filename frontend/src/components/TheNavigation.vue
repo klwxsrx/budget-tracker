@@ -68,17 +68,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "src/scss/variables";
+
 .balance,
 .amount {
-  font-size: 18px;
+  font-size: $size-normal;
 }
 
 .balance {
-  margin-left: 10px;
-  font-weight: 600;
+  margin-left: 14px;
+  font-weight: $weight-semibold;
 }
 
 .amount {
   margin-left: 5px;
+}
+
+@media screen and (max-width: $tablet) {
+  .balance {
+    margin-left: 4px;
+  }
 }
 </style>

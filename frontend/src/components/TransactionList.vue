@@ -1,5 +1,7 @@
 <template>
-  <div />
+  <div>
+    <div class="shadow-block"></div>
+  </div>
 </template>
 
 <script>
@@ -8,6 +10,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import "src/scss/variables";
 
+  .shadow-block {
+    box-shadow: 0 0 1px 0 $grey-lighter;
+    width: 100%;
+    height: 1px;
+  }
 </style>

@@ -50,20 +50,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../scss/variables";
+@import "src/scss/variables";
 
 .columns .accounts {
-  box-shadow: 0 0 2px 0 lightgrey;
+  box-shadow: 0 0 2px 0 $grey-lighter;
   z-index: 1;
 }
 
 @media screen and (min-width: $tablet) {
   .columns {
     flex: 1;
-  }
 
-  .transactions {
-    background-color: #f5f5f5;
+    .transactions {
+      background-color: $light;
+    }
   }
 }
 </style>

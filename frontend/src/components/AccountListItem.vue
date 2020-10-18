@@ -40,16 +40,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "src/scss/variables";
+
 .item {
   display: flex;
   cursor: pointer;
 
-  &:hover {
-    background-color: #eeeeee;
+  &:hover,
+  &:hover.selected {
+    .item_title,
+    .item_amount {
+      color: $link;
+    }
   }
 
   &.selected {
-    background-color: lightgray;
+    background-color: $scheme-main-ter;
+
+    .item_title,
+    .item_amount {
+      color: $text-strong;
+    }
   }
 
   .item_title {
@@ -57,14 +68,16 @@ export default {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    font-size: 17px;
-    font-weight: 600;
+    font-size: $size-normal;
+    font-weight: $weight-semibold;
+    color: $text;
   }
 
   .item_amount {
     flex: 0 0 auto;
     padding-left: 10px;
-    font-size: 16px;
+    font-size: $size-normal;
+    color: $text;
   }
 }
 </style>

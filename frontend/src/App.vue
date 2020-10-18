@@ -1,6 +1,6 @@
 <template>
   <div class="page_container">
-    <Navigation />
+    <TheNavigation />
     <router-view />
   </div>
 </template>
@@ -11,7 +11,7 @@ import TheNavigation from './components/TheNavigation.vue'
 export default {
   name: 'ExpenseApp',
   components: {
-    Navigation: TheNavigation,
+    TheNavigation: TheNavigation,
   },
   data() {
     return {}
