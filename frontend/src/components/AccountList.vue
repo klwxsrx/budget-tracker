@@ -70,22 +70,26 @@ export default {
 <style lang="scss" scoped>
 @import "src/scss/variables";
 
-.account-container .list-item {
-  padding: 16px;
+.account-container {
+  background-color: $scheme-main;
 
-  &.skeleton {
-    display: flex;
+  .list-item {
+    padding: 16px;
 
-    .skeleton-title, .skeleton-amount {
-      flex-shrink: 1;
-    }
+    &.skeleton {
+      display: flex;
 
-    .skeleton-title {
-      margin-right: 15%;
-    }
+      .skeleton-title, .skeleton-amount {
+        flex-shrink: 1;
+      }
 
-    .skeleton-amount {
-      flex-grow: 1;
+      .skeleton-title {
+        margin-right: 15%;
+      }
+
+      .skeleton-amount {
+        flex-grow: 1;
+      }
     }
   }
 }

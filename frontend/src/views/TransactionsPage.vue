@@ -57,10 +57,6 @@ export default {
     box-shadow: 0 0 2px 0 $grey-lighter;
     z-index: 1;
   }
-
-  .transactions {
-    background-color: $background;
-  }
 }
 
 @media screen and (min-width: $tablet) {
