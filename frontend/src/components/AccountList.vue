@@ -68,7 +68,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../buefy.scss";
+@import "../scss/variables";
 
 .account_container .list_item {
   padding: 20px;

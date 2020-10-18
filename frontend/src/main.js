@@ -4,8 +4,8 @@ import App from './App.vue'
 import store from './store'
 import router from './router'
 import Buefy, {ConfigProgrammatic} from 'buefy'
-import './buefy.scss'
-import '@fortawesome/fontawesome-free/css/all.css'
+import './scss/variables.scss'
+import './scss/buefy.scss'
 
 ConfigProgrammatic.setOptions({
   defaultIconPack: 'fas',
