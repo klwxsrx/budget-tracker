@@ -77,7 +77,7 @@
         </div>
         <div class="transaction-list-container columns is-gapless">
           <div class="transaction-list column is-8-desktop is-12-tablet is-12-mobile" />
-          <div class="transaction-totals column is-4-desktop is-0-tablet is-0-mobile" />
+          <div v-if="this.$mq !== 'tablet'" class="transaction-totals column is-4-desktop is-0-tablet is-0-mobile" />
         </div>
       </div>
     </div>
