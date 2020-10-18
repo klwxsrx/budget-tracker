@@ -53,15 +53,23 @@ export default {
 @import "src/scss/variables";
 
 .columns {
+  display: flex;
+  flex-grow: 1;
+
   .accounts {
     box-shadow: 0 0 2px 0 $grey-lighter;
     z-index: 1;
   }
 }
 
-@media screen and (min-width: $tablet) {
+@media screen and (max-width: $tablet) {
   .columns {
-    flex: 1;
+    flex-direction: column;
+
+    .transactions {
+      display: flex;
+      flex-grow: 1;
+    }
   }
 }
 </style>

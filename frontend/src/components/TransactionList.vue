@@ -105,12 +105,12 @@ export default {
 @import "src/scss/variables";
 
 .transaction-container {
-  width: 100%;
   display: flex;
   align-items: flex-end;
   justify-content: center;
 
   .transaction-content {
+    height: calc(100% - 30px);
     display: flex;
     flex-direction: column;
 
@@ -146,11 +146,11 @@ export default {
   }
 
   .transaction-container {
+    width: 100%;
     height: 100%;
 
     .transaction-content {
       width: calc(100% - 50px);
-      height: calc(100% - 30px);
     }
 
     .transaction-list-controls {
@@ -178,23 +178,28 @@ export default {
 }
 
 @media screen and (max-width: $tablet) {
-  .transaction-container .transaction-content {
-    margin-top: 30px;
-    width: 100%;
-    align-items: center;
+  .transaction-container {
+    flex-grow: 1;
 
-    .transaction-list-controls {
-      flex-direction: column;
+    .transaction-content {
+      margin-top: 30px;
+      width: 100%;
       align-items: center;
-      width: calc(100% - 32px);
 
-      .transaction-filter-controls {
+      .transaction-list-controls {
+        flex-direction: column;
+        align-items: center;
+        width: calc(100% - 32px);
+
+        .transaction-filter-controls {
+          margin-top: 30px;
+        }
+      }
+
+      .transaction-list-container {
+        flex-grow: 1;
         margin-top: 30px;
       }
-    }
-
-    .transaction-list-container {
-      margin-top: 30px;
     }
   }
 }
