@@ -11,4 +11,6 @@ $link: $primary;
 $link-invert: findColorInvert($primary);
 $link-focus-border: $primary;
 
+$tablet: 769px;
+
 @import "~bulma/sass/utilities/_all.sass";

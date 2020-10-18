@@ -4,25 +4,41 @@
     <div class="transaction-container">
       <div class="transaction-content">
         <div class="transaction-list-controls">
-          <div class="transaction-date-controls">
-            <b-button
-              icon-left="chevron-left"
-              icon-pack="fas"
-              size="is-small is-dark"
-            />
-            <b-button size="is-small is-dark">
-              02 сент. - 02 нояб.
-            </b-button>
-            <b-button
-              icon-left="chevron-right"
-              icon-pack="fas"
-              size="is-small is-dark"
-            />
-          </div>
+          <b-field
+            class="transaction-date-controls"
+            grouped
+            position="is-centered"
+          >
+            <div class="control">
+              <b-button
+                :size="dateControlsSize"
+                icon-left="chevron-left"
+                icon-pack="fas"
+                type="is-dark"
+              />
+            </div>
+            <div class="control">
+              <b-button
+                :size="dateControlsSize"
+                type="is-dark"
+              >
+                02 сент. - 02 нояб.
+              </b-button>
+            </div>
+            <div class="control">
+              <b-button
+                :size="dateControlsSize"
+                icon-left="chevron-right"
+                icon-pack="fas"
+                type="is-dark"
+              />
+            </div>
+          </b-field>
           <b-field
             class="transaction-filter-controls"
             group-multiline
             grouped
+            :position="filterControlsPosition"
           >
             <div class="control">
               <b-tag
@@ -30,6 +46,7 @@
                 closable
                 close-type="is-primary"
                 type="is-primary"
+                :size="filterControlsSize"
               >
                 Наличные
               </b-tag>
@@ -40,6 +57,7 @@
                 closable
                 close-type="is-purple"
                 type="is-purple"
+                :size="filterControlsSize"
               >
                 #питание
               </b-tag>
@@ -50,6 +68,7 @@
                 closable
                 close-type="is-purple"
                 type="is-purple"
+                :size="filterControlsSize"
               >
                 #фастфуд
               </b-tag>
@@ -57,7 +76,7 @@
           </b-field>
         </div>
         <div class="transaction-list-container columns is-gapless">
-          <div class="transaction-list column is-8-desktop" />
+          <div class="transaction-list column is-8-desktop is-12-tablet is-12-mobile" />
           <div class="transaction-totals column is-4-desktop is-0-tablet is-0-mobile" />
         </div>
       </div>
@@ -68,6 +87,17 @@
 <script>
 export default {
   name: 'TransactionList',
+  computed: {
+    dateControlsSize() {
+      return this.$mq === 'tablet' ? 'is-medium' : 'is-small'
+    },
+    filterControlsSize() {
+      return this.$mq === 'tablet' ? 'is-medium' : 'is-small'
+    },
+    filterControlsPosition() {
+      return this.$mq === 'tablet' ? 'is-centered' : 'is-left'
+    },
+  },
 }
 </script>
 
@@ -86,10 +116,23 @@ export default {
 
     .transaction-list-controls {
       display: flex;
-      width: 100%;
 
       .transaction-date-controls {
-        flex-shrink: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    .transaction-list-container {
+      background-color: $scheme-main;
+      border-top-left-radius: $radius;
+      border-top-right-radius: $radius;
+
+      .transaction-list {
+        border-top-left-radius: $radius;
+      }
+
+      .transaction-totals {
+        border-top-right-radius: $radius;
       }
     }
   }
@@ -108,37 +151,46 @@ export default {
     .transaction-content {
       width: calc(100% - 50px);
       height: calc(100% - 30px);
+    }
 
-      .transaction-list-controls {
-        margin: 0 30px 10px 30px;
-        align-items: baseline;
+    .transaction-list-controls {
+      padding-left: 20px;
+      align-items: baseline;
+      width: 100%;
 
-        .transaction-filter-controls
-        {
-          margin-left: 30px;
-          margin-bottom: 10px;
-        }
+      .transaction-date-controls {
+        flex-shrink: 0;
       }
 
-      .transaction-list-container {
-        border-top-left-radius: $radius;
-        border-top-right-radius: $radius;
-        box-shadow: 0 0 2px 0 $grey-lighter;
-        width: 100%;
-        height: 100%;
+      .transaction-filter-controls
+      {
+        margin-left: 30px;
+      }
+    }
 
-        .transaction-list {
-          border-top-left-radius: $radius;
-          z-index: 1;
-          background-color: $scheme-main;
-          height: 100%;
-        }
+    .transaction-list-container {
+      box-shadow: 0 0 2px 0 $grey-lighter;
+      width: 100%;
+      flex-grow: 1;
+      margin-top: 10px;
+    }
+  }
+}
 
-        .transaction-totals {
-          border-top-right-radius: $radius;
-          background-color: $scheme-main;
-          height: 100%;
-        }
+@media screen and (max-width: $tablet) {
+  .transaction-container .transaction-content {
+    margin-top: 30px;
+    width: 100%;
+    align-items: center;
+
+    .transaction-list-controls {
+      flex-direction: column;
+      align-items: center;
+      width: calc(100% - 32px);
+
+      .transaction-filter-controls {
+        margin-top: 30px;
+        margin-bottom: 30px;
       }
     }
   }
@@ -150,17 +202,9 @@ export default {
   }
 }
 
-@media screen and (max-width: $tablet) {
-  .transaction-container {
-    .transaction-list-controls {
-      flex-direction: column;
-      align-items: center;
-      margin-top: 30px;
-    }
-
-    .transaction-filter-controls {
-      margin: 30px 0;
-    }
+@media screen and (max-width: $desktop) {
+  .transaction-container .transaction-content .transaction-list {
+    border-top-right-radius: $radius;
   }
 }
 </style>

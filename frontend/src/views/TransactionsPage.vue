@@ -52,18 +52,20 @@ export default {
 <style lang="scss" scoped>
 @import "src/scss/variables";
 
-.columns .accounts {
-  box-shadow: 0 0 2px 0 $grey-lighter;
-  z-index: 1;
+.columns {
+  .accounts {
+    box-shadow: 0 0 2px 0 $grey-lighter;
+    z-index: 1;
+  }
+
+  .transactions {
+    background-color: $background;
+  }
 }
 
 @media screen and (min-width: $tablet) {
   .columns {
     flex: 1;
-
-    .transactions {
-      background-color: $background;
-    }
   }
 }
 </style>

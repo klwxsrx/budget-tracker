@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import {getVueI18n} from './services/I18nService'
+import VueMq from 'vue-mq'
 import App from './App.vue'
 import store from './store'
 import router from './router'
@@ -12,6 +13,12 @@ ConfigProgrammatic.setOptions({
   defaultIconPack: 'fas',
 })
 Vue.use(Buefy)
+Vue.use(VueMq, {
+  breakpoints: {
+    tablet: 769, // coupling with scss/variables.scss: $tablet
+    desktop: Infinity,
+  },
+})
 
 new Vue({
   i18n: getVueI18n(),
