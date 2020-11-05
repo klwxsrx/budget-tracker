@@ -1,24 +1,24 @@
 <template>
   <b-field
-    v-if="transactions.length > 0"
+    v-if="filterItems.length > 0"
     :position="controlsPosition"
     group-multiline
     grouped
   >
     <div
-      v-for="transaction in transactions"
-      :key="transaction.id"
+      v-for="item in filterItems"
+      :key="item.id"
       class="control"
     >
       <b-tag
-        :close-type="transaction.viewType"
+        :close-type="item.viewType"
         :size="controlsSize"
-        :type="transaction.viewType"
+        :type="item.viewType"
         attached
         closable
-        @close="removeItem(transaction.id, transaction.type)"
+        @close="removeItem(item.id, item.type)"
       >
-        {{ transaction.name }}
+        {{ item.name }}
       </b-tag>
     </div>
   </b-field>
@@ -44,7 +44,7 @@ function getViewType(type) {
 export default {
   name: 'TransactionFilter',
   computed: {
-    transactions() {
+    filterItems() {
       let items = []
 
       const accountId = this.$store.state.transaction.filter.accountId
@@ -69,7 +69,11 @@ export default {
       case accountType:
         this.$store.commit('transaction/filterAccountId', null)
         break
-      default:
+      case categoryType:
+        this.$store.commit('transaction/filterCategoryId', null)
+        break
+      case tagType:
+        this.$store.commit('transaction/removeTagIdFromFilter', id)
         break
       }
     },
