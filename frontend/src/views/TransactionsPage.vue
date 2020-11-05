@@ -1,11 +1,6 @@
 <template>
   <div class="columns is-gapless is-tablet">
-    <AccountList
-      :accounts="accounts"
-      :is-loaded="isLoaded"
-      class="accounts-block column is-3-desktop is-4-tablet is-12-mobile"
-      @selection-changed="changeSelectedAccount"
-    />
+    <TransactionPageAccountList class="accounts-block column is-3-desktop is-4-tablet is-12-mobile" />
     <div class="transactions-block column is-9-desktop is-8-tablet is-12-mobile">
       <div class="shadow-block" />
       <div class="transaction-container">
@@ -28,38 +23,16 @@
 </template>
 
 <script>
-import {mapState} from 'vuex'
-import AccountList from '../components/AccountList.vue'
 import TransactionFilter from '../components/TransactionFilter.vue'
 import TransactionDateSelector from '../components/TransactionDateSelector.vue'
+import TransactionPageAccountList from '../components/TransactionPageAccountList.vue'
 
 export default {
   name: 'TransactionsPage',
   components: {
-    AccountList,
+    TransactionPageAccountList,
     TransactionDateSelector,
     TransactionFilter,
-  },
-  computed: {
-    ...mapState({
-      isLoaded: state => state.account.isInitialized,
-    }),
-    accounts() {
-      const selectedItemId = this.$store.state.transaction.filter.accountId
-      return this.$store.getters['account/notDeletedItems'].map(item => {
-        delete item.isDeleted
-        this.$set(item, 'isSelected', (item.id === selectedItemId))
-        return item
-      })
-    },
-  },
-  created() {
-    this.$store.dispatch('account/loadAccounts')
-  },
-  methods: {
-    changeSelectedAccount(id, isSelected) {
-      this.$store.commit('transaction/filterAccountId', isSelected ? id : null)
-    },
   },
 }
 </script>
