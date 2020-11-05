@@ -1,12 +1,10 @@
 <i18n path="navigation">
 {
 "en": {
-"total_balance": "Total Balance",
 "transactions": "Transactions",
 "settings": "Settings"
 },
 "ru": {
-"total_balance": "Баланс",
 "transactions": "Операции",
 "settings": "Настройки"
 }
@@ -23,12 +21,7 @@
         :to="transactionsPath"
         tag="router-link"
       >
-        <span class="balance">{{ $t('total_balance') }}</span>
-        <MoneyAmount
-          :amount="balance"
-          :currency="currency"
-          class="amount"
-        />
+      <TotalBalanceItem />
       </b-navbar-item>
     </template>
     <template slot="start">
@@ -52,15 +45,13 @@
 
 <script>
 import {routes} from '../router'
-import MoneyAmount from './MoneyAmount.vue'
+import TotalBalanceItem from './TotalBalanceItem.vue'
 
 export default {
   name: 'TheNavigation',
-  components: {MoneyAmount},
+  components: {TotalBalanceItem},
   data() {
     return {
-      balance: 42000,
-      currency: 'RUB',
       transactionsPath: routes.transactions.path,
       settingsPath: routes.settings.path,
     }
