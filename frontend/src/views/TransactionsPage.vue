@@ -6,19 +6,19 @@
       class="accounts column is-3-desktop is-4-tablet is-12-mobile"
       @selection-changed="changeSelectedAccount"
     />
-    <TransactionList class="transactions column is-9-desktop is-8-tablet is-12-mobile" />
+    <TransactionsSection class="transactions column is-9-desktop is-8-tablet is-12-mobile" />
   </div>
 </template>
 
 <script>
 import {mapState} from 'vuex'
 import AccountList from '../components/AccountList.vue'
-import TransactionList from '../components/TransactionList.vue'
+import TransactionsSection from '../components/TransactionsSection.vue'
 
 export default {
   name: 'TransactionsPage',
   components: {
-    TransactionList,
+    TransactionsSection,
     AccountList,
   },
   computed: {
@@ -39,11 +39,7 @@ export default {
   },
   methods: {
     changeSelectedAccount(id, isSelected) {
-      if (isSelected) {
-        this.$store.commit('transaction/filterAccountId', id)
-      } else {
-        this.$store.commit('transaction/filterAccountId', null)
-      }
+      this.$store.commit('transaction/filterAccountId', isSelected ? id : null)
     },
   },
 }

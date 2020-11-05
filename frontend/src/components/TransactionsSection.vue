@@ -4,80 +4,15 @@
     <div class="transaction-container">
       <div class="transaction-content">
         <div class="transaction-list-controls">
-          <b-field
-            class="transaction-date-controls"
-            grouped
-            position="is-centered"
-          >
-            <div class="control">
-              <b-button
-                :size="dateControlsSize"
-                icon-left="chevron-left"
-                icon-pack="fas"
-                type="is-dark"
-              />
-            </div>
-            <div class="control">
-              <b-button
-                :size="dateControlsSize"
-                type="is-dark"
-              >
-                02 сент. - 02 нояб.
-              </b-button>
-            </div>
-            <div class="control">
-              <b-button
-                :size="dateControlsSize"
-                icon-left="chevron-right"
-                icon-pack="fas"
-                type="is-dark"
-              />
-            </div>
-          </b-field>
-          <b-field
-            class="transaction-filter-controls"
-            group-multiline
-            grouped
-            :position="filterControlsPosition"
-          >
-            <div class="control">
-              <b-tag
-                attached
-                closable
-                close-type="is-primary"
-                type="is-primary"
-                :size="filterControlsSize"
-              >
-                Наличные
-              </b-tag>
-            </div>
-            <div class="control">
-              <b-tag
-                attached
-                closable
-                close-type="is-purple"
-                type="is-purple"
-                :size="filterControlsSize"
-              >
-                #питание
-              </b-tag>
-            </div>
-            <div class="control">
-              <b-tag
-                attached
-                closable
-                close-type="is-purple"
-                type="is-purple"
-                :size="filterControlsSize"
-              >
-                #фастфуд
-              </b-tag>
-            </div>
-          </b-field>
+          <TransactionDateSelector class="transaction-date-controls" />
+          <TransactionFilter class="transaction-filter-controls" />
         </div>
         <div class="transaction-list-container columns is-gapless">
           <div class="transaction-list column is-8-desktop is-12-tablet is-12-mobile" />
-          <div v-if="this.$mq !== 'tablet'" class="transaction-totals column is-4-desktop is-0-tablet is-0-mobile" />
+          <div
+            v-if="this.$mq !== 'tablet'"
+            class="transaction-totals column is-4-desktop is-0-tablet is-0-mobile"
+          />
         </div>
       </div>
     </div>
@@ -85,18 +20,14 @@
 </template>
 
 <script>
-export default {
-  name: 'TransactionList',
-  computed: {
-    dateControlsSize() {
-      return this.$mq === 'tablet' ? 'is-default' : 'is-small'
-    },
-    filterControlsSize() {
-      return this.$mq === 'tablet' ? 'is-medium' : 'is-small'
-    },
-    filterControlsPosition() {
-      return this.$mq === 'tablet' ? 'is-centered' : 'is-left'
-    },
+import TransactionFilter from './TransactionFilter.vue'
+import TransactionDateSelector from './TransactionDateSelector.vue'
+
+export default { // TODO: delete this component
+  name: 'TransactionSection',
+  components: {
+    TransactionDateSelector,
+    TransactionFilter,
   },
 }
 </script>

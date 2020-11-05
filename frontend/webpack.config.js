@@ -7,6 +7,7 @@ module.exports = {
   output: {
     filename: 'bundle.js',
   },
+  devtool: 'source-map',
   module: {
     rules: [
       {test: /\.js$/, use: 'babel-loader'},
