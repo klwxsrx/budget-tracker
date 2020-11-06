@@ -16,6 +16,10 @@ export default {
   data() {
     return {}
   },
+  created() {
+    this.$store.dispatch('settings/load')
+    this.$store.dispatch('account/load')
+  },
 }
 </script>
 

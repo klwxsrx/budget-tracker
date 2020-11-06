@@ -8,6 +8,10 @@ import I18nService from '../services/I18nService'
 export default {
   name: 'MoneyAmount',
   props: {
+    prefix: {
+      type: String,
+      default: '',
+    },
     amount: {
       type: Number,
       default: 0,
@@ -20,7 +24,7 @@ export default {
   computed: {
     moneyAmount() {
       const amountFloat = this.$props.amount / 100
-      return amountFloat.toLocaleString(I18nService.getCurrentLocale(), {
+      return this.$props.prefix + amountFloat.toLocaleString(I18nService.getCurrentLocale(), {
         style: 'currency',
         currency: this.$props.currency,
       })

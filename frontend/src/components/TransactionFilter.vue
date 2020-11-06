@@ -27,7 +27,6 @@
 <script>
 const accountType = 0
 const categoryType = 1
-const tagType = 2
 
 function getViewType(type) {
   switch (type) {
@@ -35,7 +34,6 @@ function getViewType(type) {
     return 'is-primary'
   case categoryType:
     return 'is-turquoise'
-  case tagType:
   default:
     return 'is-purple'
   }
@@ -71,9 +69,6 @@ export default {
         break
       case categoryType:
         this.$store.commit('transaction/filterCategoryId', null)
-        break
-      case tagType:
-        this.$store.commit('transaction/removeTagIdFromFilter', id)
         break
       }
     },

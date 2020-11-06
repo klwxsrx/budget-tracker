@@ -26,9 +26,6 @@ export default {
       })
     },
   },
-  created() {
-    this.$store.dispatch('account/loadAccounts')
-  },
   methods: {
     changeSelectedAccount(id, isSelected) {
       this.$store.commit('transaction/filterAccountId', isSelected ? id : null)

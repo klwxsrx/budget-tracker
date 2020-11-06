@@ -4,7 +4,7 @@ const state = {
 }
 
 const actions = {
-  ['loadAccounts']({commit}) {
+  ['load']({commit}) {
     return new Promise((resolve) => { // TODO: api request
       setTimeout(() => {
         commit('addItems', [
@@ -12,7 +12,7 @@ const actions = {
             id: 'a17aeb44-f459-11ea-adc1-0242ac120002',
             title: 'Наличные',
             balance: 4269,
-            currency: 'RUB',
+            currency: 'USD',
             isDeleted: false,
           },
           {
