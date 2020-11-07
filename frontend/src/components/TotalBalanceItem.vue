@@ -10,7 +10,7 @@
 </i18n>
 
 <template>
-  <div>
+  <div class="total-balance">
     <span class="balance">{{ $t('total_balance') }} </span>
     <MoneyAmount
       v-if="isLoaded"
@@ -79,22 +79,26 @@ export default {
 <style lang="scss" scoped>
 @import "src/scss/variables";
 
-.balance,
-.amount {
-  font-size: $size-normal;
-}
+.total-balance {
+  min-width: 200px;
 
-.balance {
-  margin-left: 14px;
-  font-weight: $weight-semibold;
-}
+  .balance,
+  .amount {
+    font-size: $size-normal;
+  }
 
-.amount {
-  margin-left: 5px;
+  .balance {
+    margin-left: 14px;
+    font-weight: $weight-semibold;
+  }
+
+  .amount {
+    margin-left: 5px;
+  }
 }
 
 @media screen and (max-width: $tablet) {
-  .balance {
+  .total-balance .balance {
     margin-left: 4px;
   }
 }
