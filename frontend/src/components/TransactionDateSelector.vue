@@ -1,43 +1,13 @@
 <template>
-  <b-field
-    grouped
-    position="is-centered"
-  >
-    <div class="control">
-      <b-button
-        :size="controlsSize"
-        icon-left="chevron-left"
-        icon-pack="fas"
-        type="is-dark"
-      />
-    </div>
-    <div class="control">
-      <b-button
-        :size="controlsSize"
-        type="is-dark"
-      >
-        02 сент. - 02 нояб.
-      </b-button>
-    </div>
-    <div class="control">
-      <b-button
-        :size="controlsSize"
-        icon-left="chevron-right"
-        icon-pack="fas"
-        type="is-dark"
-      />
-    </div>
-  </b-field>
+  <date-range-picker />
 </template>
 
 <script>
-export default { // TODO: real data
+import DateRangePicker from './DateRangePicker.vue'
+
+export default {
   name: 'TransactionDateSelector',
-  computed: {
-    controlsSize() {
-      return this.$mq === 'tablet' ? 'is-default' : 'is-small'
-    },
-  },
+  components: {DateRangePicker},
 }
 </script>
 

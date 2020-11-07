@@ -21,7 +21,7 @@
         :to="transactionsPath"
         tag="router-link"
       >
-        <TotalBalanceItem />
+        <total-balance-item />
       </b-navbar-item>
     </template>
     <template slot="start">

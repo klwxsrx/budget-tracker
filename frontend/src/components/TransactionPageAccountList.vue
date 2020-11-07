@@ -1,5 +1,5 @@
 <template>
-  <AccountList
+  <account-list
     :accounts="accounts"
     :is-loaded="isLoaded"
     @selection-changed="changeSelectedAccount"

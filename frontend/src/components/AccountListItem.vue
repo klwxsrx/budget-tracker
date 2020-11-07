@@ -5,7 +5,7 @@
     @click="toggleSelected"
   >
     <span class="item-title">{{ account.title }}</span>
-    <MoneyAmount
+    <money-amount
       :amount="account.balance"
       :currency="account.currency"
       class="item-amount"

@@ -19,7 +19,7 @@ const actions = { // TODO: api request
               EUR: 90.34,
             },
           },
-          firstDayOfPeriod: 2
+          firstDayOfPeriod: 2,
         })
         resolve()
       }, 1000)

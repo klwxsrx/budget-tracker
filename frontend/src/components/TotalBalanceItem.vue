@@ -12,7 +12,7 @@
 <template>
   <div class="total-balance">
     <span class="balance">{{ $t('total_balance') }} </span>
-    <MoneyAmount
+    <money-amount
       v-if="isLoaded"
       :amount="totalBalance.balance"
       :currency="totalBalance.currency"

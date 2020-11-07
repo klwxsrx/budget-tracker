@@ -4,7 +4,7 @@
       v-if="isLoaded"
       class="account-list"
     >
-      <AccountListItem
+      <account-list-item
         v-for="account in accounts"
         :key="account.id"
         :account="account"

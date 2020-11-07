@@ -1,13 +1,13 @@
 <template>
   <div class="columns is-gapless is-tablet">
-    <TransactionPageAccountList class="accounts-block column is-3-desktop is-4-tablet is-12-mobile" />
+    <transaction-page-account-list class="accounts-block column is-3-desktop is-4-tablet is-12-mobile" />
     <div class="transactions-block column is-9-desktop is-8-tablet is-12-mobile">
       <div class="shadow-block" />
       <div class="transaction-container">
         <div class="transaction-content">
           <div class="transaction-list-controls">
-            <TransactionDateSelector class="transaction-date-controls" />
-            <TransactionFilter class="transaction-filter-controls" />
+            <transaction-date-selector class="transaction-date-controls" />
+            <transaction-filter class="transaction-filter-controls" />
           </div>
           <div class="transaction-list-container columns is-gapless">
             <div class="transaction-list column is-8-desktop is-12-tablet is-12-mobile" />
