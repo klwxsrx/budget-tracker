@@ -1,5 +1,5 @@
 const state = {
-  filter: {
+  filter: { // TODO: delete from model
     accountId: null,
     categoryId: null,
   },

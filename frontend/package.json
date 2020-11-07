@@ -32,6 +32,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.14.0",
     "buefy": "^0.9.3",
+    "moment": "^2.29.1",
     "vue": "^2.6.12",
     "vue-i18n": "^8.21.1",
     "vue-mq": "^1.0.1",

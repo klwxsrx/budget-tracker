@@ -6,7 +6,11 @@
       <div class="transaction-container">
         <div class="transaction-content">
           <div class="transaction-list-controls">
-            <transaction-date-selector class="transaction-date-controls" />
+            <transaction-date-range-selector
+              :end-date="new Date(2020, 10, 1)"
+              :start-date="new Date(2020, 9, 2)"
+              class="transaction-date-controls"
+            />
             <transaction-filter class="transaction-filter-controls" />
           </div>
           <div class="transaction-list-container columns is-gapless">
@@ -24,14 +28,14 @@
 
 <script>
 import TransactionFilter from '../components/TransactionFilter.vue'
-import TransactionDateSelector from '../components/TransactionDateSelector.vue'
 import TransactionPageAccountList from '../components/TransactionPageAccountList.vue'
+import TransactionDateRangeSelector from '../components/TransactionDateRangeSelector.vue'
 
 export default {
   name: 'TransactionsPage',
   components: {
+    TransactionDateRangeSelector,
     TransactionPageAccountList,
-    TransactionDateSelector,
     TransactionFilter,
   },
 }
