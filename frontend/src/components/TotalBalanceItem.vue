@@ -37,7 +37,7 @@ export default {
   components: {MoneyAmount},
   computed: {
     ...mapState({
-      isLoaded: state => state.account.isInitialized,
+      isLoaded: state => state.account.isInitialized && state.settings.isInitialized,
     }),
     hasOtherCurrencies() {
       const baseCurrency = this.$store.state.settings.currency.base

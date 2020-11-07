@@ -4,18 +4,22 @@ const state = {
     base: null,
     rates: {},
   },
+  firstDayOfPeriod: null,
 }
 
 const actions = { // TODO: api request
   ['load']({commit}) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        commit('updateCurrency', {
-          base: 'RUB',
-          rates: {
-            USD: 80.78,
-            EUR: 90.34,
+        commit('update', {
+          currency: {
+            base: 'RUB',
+            rates: {
+              USD: 80.78,
+              EUR: 90.34,
+            },
           },
+          firstDayOfPeriod: 2
         })
         resolve()
       }, 1000)
@@ -24,9 +28,12 @@ const actions = { // TODO: api request
 }
 
 const mutations = {
-  updateCurrency(state, settings) {
-    state.currency.base = settings.base
-    state.currency.rates = settings.rates
+  update(state, settings) {
+    state.currency.base = settings.currency.base
+    state.currency.rates = settings.currency.rates
+    state.firstDayOfPeriod = settings.firstDayOfPeriod
+
+    state.isInitialized = true
   },
 }
 
