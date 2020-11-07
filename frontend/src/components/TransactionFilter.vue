@@ -41,11 +41,21 @@ function getViewType(type) {
 
 export default {
   name: 'TransactionFilter',
+  props: {
+    accountIdFilter: {
+      type: String,
+      default: null,
+    },
+    categoryIdFilter: {
+      type: String,
+      default: null,
+    },
+  },
   computed: {
     filterItems() {
       let items = []
 
-      const accountId = this.$store.state.transaction.filter.accountId
+      const accountId = this.accountIdFilter
       if (accountId !== null) {
         const accountItem = this.getItemByAccountId(accountId)
         if (accountItem !== null) {
@@ -65,10 +75,10 @@ export default {
     removeItem(id, type) {
       switch (type) {
       case accountType:
-        this.$store.commit('transaction/filterAccountId', null)
+        this.$emit('account-filter-removed')
         break
       case categoryType:
-        this.$store.commit('transaction/filterCategoryId', null)
+        this.$emit('category-filter-removed')
         break
       }
     },

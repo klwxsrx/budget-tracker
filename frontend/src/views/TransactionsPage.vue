@@ -1,6 +1,10 @@
 <template>
   <div class="columns is-gapless is-tablet">
-    <transaction-page-account-list class="accounts-block column is-3-desktop is-4-tablet is-12-mobile" />
+    <transaction-page-account-list
+      :selected-account-id="transactionFilter.accountId"
+      class="accounts-block column is-3-desktop is-4-tablet is-12-mobile"
+      @account-changed="updateAccountIdFilter"
+    />
     <div class="transactions-block column is-9-desktop is-8-tablet is-12-mobile">
       <div class="shadow-block" />
       <div class="transaction-container">
@@ -11,7 +15,13 @@
               :start-date="new Date(2020, 9, 2)"
               class="transaction-date-controls"
             />
-            <transaction-filter class="transaction-filter-controls" />
+            <transaction-filter
+              :account-id-filter="transactionFilter.accountId"
+              :category-id-filter="transactionFilter.categoryId"
+              class="transaction-filter-controls"
+              @account-filter-removed="updateAccountIdFilter(null)"
+              @category-filter-removed="updateCategoryIdFilter(null)"
+            />
           </div>
           <div class="transaction-list-container columns is-gapless">
             <div class="transaction-list column is-8-desktop is-12-tablet is-12-mobile" />
@@ -37,6 +47,22 @@ export default {
     TransactionDateRangeSelector,
     TransactionPageAccountList,
     TransactionFilter,
+  },
+  data() {
+    return {
+      transactionFilter: {
+        accountId: null,
+        categoryId: null,
+      },
+    }
+  },
+  methods: {
+    updateAccountIdFilter(id, isSelected) {
+      this.transactionFilter.accountId = isSelected ? id : null
+    },
+    updateCategoryIdFilter(id, isSelected) {
+      this.transactionFilter.categoryId = isSelected ? id : null
+    },
   },
 }
 </script>

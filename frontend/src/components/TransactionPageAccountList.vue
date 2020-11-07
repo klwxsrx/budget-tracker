@@ -13,12 +13,18 @@ import AccountList from '../components/AccountList.vue'
 export default {
   name: 'TransactionPageAccountList',
   components: {AccountList},
+  props: {
+    selectedAccountId: {
+      type: String,
+      default: null,
+    },
+  },
   computed: {
     ...mapState({
       isLoaded: state => state.account.isInitialized,
     }),
     accounts() {
-      const selectedItemId = this.$store.state.transaction.filter.accountId
+      const selectedItemId = this.$props.selectedAccountId
       return this.$store.getters['account/notDeletedItems'].map(item => {
         delete item.isDeleted
         this.$set(item, 'isSelected', (item.id === selectedItemId))
@@ -28,7 +34,7 @@ export default {
   },
   methods: {
     changeSelectedAccount(id, isSelected) {
-      this.$store.commit('transaction/filterAccountId', isSelected ? id : null)
+      this.$emit('account-changed', id, isSelected)
     },
   },
 }
