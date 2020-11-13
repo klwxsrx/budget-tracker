@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  expense:
+  expense-app:
     build:
       context: ../
       dockerfile: ./docker/expense/Dockerfile
@@ -28,5 +28,15 @@ services:
       MYSQL_DATABASE: expense
       MYSQL_USER: expense
       MYSQL_PASSWORD: 1234
+  expense-amqp:
+    image: rabbitmq:3.8-management
+    container_name: expense-amqp
+    hostname: expense-amqp
+    volumes:
+      - expense-amqp-data:/var/lib/rabbitmq:rw
+    environment:
+      RABBITMQ_DEFAULT_USER: expense
+      RABBITMQ_DEFAULT_PASS: 1234
 volumes:
   expense-db-data:
+  expense-amqp-data:

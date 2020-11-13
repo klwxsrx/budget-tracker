@@ -13,6 +13,12 @@ type store struct {
 	serializer app.Serializer
 }
 
+func (s *store) LastID() (app.StoredEventID, error) {
+	var id app.StoredEventID
+	err := s.db.Get(&id, "SELECT IFNULL(MAX(id), 0) FROM event")
+	return id, err
+}
+
 func (s *store) Get(id domain.AggregateID) ([]*app.StoredEvent, error) {
 	return selectEvents(s.db, []string{
 		"aggregate_id = UUID_TO_BIN(?)",

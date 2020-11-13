@@ -162,7 +162,7 @@ func createMigrationRecord(client Client, migrationId int) error {
 	return err
 }
 
-func NewMigration(client TransactionalClient, migrationDirectoryPath string) (*Migration, error) {
+func NewMigration(client TransactionalClient, migrationDirectoryPath string) (*Migration, error) { // TODO: add logging
 	if migrationFileRegexError != nil {
 		return nil, migrationFileRegexError
 	}
