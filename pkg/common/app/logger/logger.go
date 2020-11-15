@@ -7,4 +7,5 @@ type Logger interface {
 	Error(args ...interface{})
 	Warning(args ...interface{})
 	Info(args ...interface{})
+	Fatal(args ...interface{})
 }

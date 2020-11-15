@@ -15,6 +15,9 @@ services:
       DATABASE_USER: expense
       DATABASE_PASSWORD: 1234
       DATABASE_MAX_CONNECTIONS: 10
+      AMQP_USER: expense
+      AMQP_PASSWORD: 1234
+      AMQP_ADDRESS: "expense-amqp:5672"
     depends_on:
       - expense-db
   expense-db:

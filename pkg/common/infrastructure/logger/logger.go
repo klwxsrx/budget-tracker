@@ -10,6 +10,7 @@ type externalLogger interface {
 	Error(args ...interface{})
 	Warning(args ...interface{})
 	Info(args ...interface{})
+	Fatal(args ...interface{})
 }
 
 type impl struct {
@@ -30,6 +31,10 @@ func (i *impl) Warning(args ...interface{}) {
 
 func (i *impl) Info(args ...interface{}) {
 	i.logger.Info(args)
+}
+
+func (i *impl) Fatal(args ...interface{}) {
+	i.logger.Fatal(args)
 }
 
 func New(l externalLogger) logger.Logger {

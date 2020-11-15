@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
-	appLogger "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/logger"
+	appLogger "github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/amqp"
+	infrastructureLogger "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/transport"
@@ -15,31 +17,60 @@ import (
 )
 
 func main() {
-	logger := initLogger()
+	logger := infrastructureLogger.New(initLogrus())
 	config, err := ParseConfig()
 	if err != nil {
-		logger.Fatalf("failed to parse config: %v", err)
+		logger.With(appLogger.Fields{
+			"error": err,
+		}).Fatal("failed to parse config")
 	}
 
 	db, client, err := getReadyDatabaseClient(config)
 	if err != nil {
-		logger.Fatalf("failed to setup db connection: %v", err)
+		logger.With(appLogger.Fields{
+			"error": err,
+		}).Fatal("failed to setup db connection")
+		os.Exit(1)
 	}
 	defer db.CloseConnection()
 
-	bus := infrastructure.NewContainer(client, appLogger.New(logger)).CommandBus()
-	server := startServer(bus, logger)
+	container := infrastructure.NewContainer(client, logger)
 
+	amqpConn, err := getReadyAmqpConnection(config, container, logger)
+	if err != nil {
+		logger.With(appLogger.Fields{
+			"error": err,
+		}).Fatal("failed to setup amqp connection")
+		os.Exit(1)
+	}
+	defer amqpConn.Close()
+
+	server := startServer(container.CommandBus(), logger)
 	listenOSKillSignals()
 	_ = server.Shutdown(context.Background())
 }
 
-func initLogger() *logrus.Logger {
+func initLogrus() *logrus.Logger {
 	l := logrus.New()
 	l.SetFormatter(&logrus.JSONFormatter{})
 	l.SetOutput(os.Stdout)
 	l.SetLevel(logrus.InfoLevel)
 	return l
+}
+
+func getReadyAmqpConnection(config *Config, container infrastructure.Container, logger appLogger.Logger) (amqp.Connection, error) {
+	amqpConfig := amqp.Config{
+		User:     config.AMQPUser,
+		Password: config.AMQPPassword,
+		Address:  config.AMQPAddress,
+	}
+	conn := amqp.NewConnection(amqpConfig, logger)
+	conn.AddChannel(container.EventNotifierChannel())
+	err := conn.Open()
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 func getReadyDatabaseClient(config *Config) (mysql.Database, mysql.TransactionalClient, error) {
@@ -71,14 +102,16 @@ func getReadyDatabaseClient(config *Config) (mysql.Database, mysql.Transactional
 	return db, client, nil
 }
 
-func startServer(bus command.Bus, logger *logrus.Logger) *http.Server {
+func startServer(bus command.Bus, logger appLogger.Logger) *http.Server {
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: transport.NewHttpHandler(bus, appLogger.New(logger)),
+		Handler: transport.NewHttpHandler(bus, logger),
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			logger.Fatalf("unable to start the server: %v", err)
+			logger.With(appLogger.Fields{
+				"error": err,
+			}).Fatal("unable to start the server")
 		}
 	}()
 	return srv

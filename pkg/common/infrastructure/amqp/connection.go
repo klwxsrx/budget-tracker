@@ -23,7 +23,7 @@ type Channel interface {
 type Connection interface {
 	AddChannel(ch Channel)
 	Open() error
-	Close() error
+	Close()
 }
 
 func (c Config) String() string {
@@ -43,7 +43,7 @@ func (c *connection) AddChannel(ch Channel) {
 
 func (c *connection) Open() error {
 	if c.con != nil {
-		_ = c.Close()
+		c.Close()
 	}
 
 	err := backoff.Retry(func() error {
@@ -61,7 +61,7 @@ func (c *connection) Open() error {
 	for _, ch := range c.channels {
 		err := ch.Connect(c.con)
 		if err != nil {
-			_ = c.Close()
+			c.Close()
 			return err
 		}
 	}
@@ -71,10 +71,9 @@ func (c *connection) Open() error {
 	return nil
 }
 
-func (c *connection) Close() error {
-	err := c.con.Close()
+func (c *connection) Close() {
+	_ = c.con.Close()
 	c.con = nil
-	return err
 }
 
 func (c *connection) processCloseEvent(closeCh chan *amqp.Error) {

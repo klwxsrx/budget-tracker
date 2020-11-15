@@ -1,8 +1,8 @@
 package event
 
 import (
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/event/messaging"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
-	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event/messaging"
 	"sync/atomic"
 	"time"
 )
@@ -47,8 +47,9 @@ func (d *notificationDispatcher) start() {
 			case <-ticker.C:
 				needDispatch := atomic.SwapInt32(&d.needDispatch, 0)
 				if needDispatch == 1 {
-					err := d.notifier.NotifyOfCreatedEvents()
+					err := d.notifier.NotifyOfCreatedEvents() // TODO: wait for amqp connection
 					if err != nil {
+						atomic.StoreInt32(&d.needDispatch, 1)
 						errorsChan <- err
 					}
 				}

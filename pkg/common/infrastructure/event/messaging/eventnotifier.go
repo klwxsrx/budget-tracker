@@ -1,6 +1,7 @@
 package messaging
 
 import (
+	"errors"
 	"fmt"
 	app "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
@@ -14,17 +15,17 @@ const (
 	messageContentType = "text/plain"
 )
 
-type StoredEventNotifier interface {
-	NotifyOfCreatedEvents() error
-}
-
-type storedEventNotifier struct {
+type StoredEventNotifier struct {
 	store   app.Store
 	client  mysql.Client
 	channel *amqp.Channel
 }
 
-func (en *storedEventNotifier) NotifyOfCreatedEvents() error {
+func (en *StoredEventNotifier) NotifyOfCreatedEvents() error {
+	if en.channel == nil {
+		return errors.New("channel is not connected")
+	}
+
 	lock := mysql.NewLock(en.client, "stored_event_notification")
 	err := lock.Get()
 	if err != nil {
@@ -49,31 +50,32 @@ func (en *storedEventNotifier) NotifyOfCreatedEvents() error {
 	return en.updateLastSentEventID(lastSentID)
 }
 
-func (en *storedEventNotifier) Connect(connection *amqp.Connection) error {
-	ch, err := connection.Channel()
+func (en *StoredEventNotifier) Connect(connection *amqp.Connection) error {
+	var err error
+	en.channel, err = connection.Channel()
 	if err != nil {
 		return err
 	}
 
-	err = ch.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, nil)
+	err = en.channel.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, nil) // TODO: test
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (en *storedEventNotifier) getLastSentEventID() (app.StoredEventID, error) {
+func (en *StoredEventNotifier) getLastSentEventID() (app.StoredEventID, error) {
 	var id app.StoredEventID
-	err := en.client.Get(&id, "SELECT id FROM last_notified_event LIMIT 1")
+	err := en.client.Get(&id, "SELECT IFNULL(MAX(id), 0) FROM last_notified_event") // TODO: edit sql
 	return id, err
 }
 
-func (en *storedEventNotifier) updateLastSentEventID(id app.StoredEventID) error {
+func (en *StoredEventNotifier) updateLastSentEventID(id app.StoredEventID) error {
 	_, err := en.client.Exec("UPDATE last_notified_event SET id = ?", id)
 	return err
 }
 
-func (en *storedEventNotifier) sendNotification(id app.StoredEventID) error {
+func (en *StoredEventNotifier) sendNotification(id app.StoredEventID) error {
 	msg := amqp.Publishing{
 		DeliveryMode: amqp.Persistent,
 		ContentType:  messageContentType,
@@ -82,6 +84,6 @@ func (en *storedEventNotifier) sendNotification(id app.StoredEventID) error {
 	return en.channel.Publish(exchangeName, routingKey, false, false, msg)
 }
 
-func NewStoredEventNotifier(store app.Store, client mysql.Client, channel *amqp.Channel) StoredEventNotifier {
-	return &storedEventNotifier{store, client, channel}
+func NewStoredEventNotifier(store app.Store, client mysql.Client) *StoredEventNotifier {
+	return &StoredEventNotifier{store, client, nil}
 }
