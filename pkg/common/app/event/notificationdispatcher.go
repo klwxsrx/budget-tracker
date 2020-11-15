@@ -11,6 +11,7 @@ const dispatchPeriod = time.Millisecond * 500
 
 type StoredEventNotificationDispatcher interface {
 	Dispatch()
+	Start()
 	Stop()
 }
 
@@ -25,11 +26,7 @@ func (d *notificationDispatcher) Dispatch() {
 	atomic.StoreInt32(&d.needDispatch, 1)
 }
 
-func (d *notificationDispatcher) Stop() {
-	d.stopChan <- struct{}{}
-}
-
-func (d *notificationDispatcher) start() {
+func (d *notificationDispatcher) Start() {
 	errorsChan := make(chan error)
 	go func() {
 		for {
@@ -47,7 +44,7 @@ func (d *notificationDispatcher) start() {
 			case <-ticker.C:
 				needDispatch := atomic.SwapInt32(&d.needDispatch, 0)
 				if needDispatch == 1 {
-					err := d.notifier.NotifyOfCreatedEvents() // TODO: wait for amqp connection
+					err := d.notifier.NotifyOfCreatedEvents()
 					if err != nil {
 						atomic.StoreInt32(&d.needDispatch, 1)
 						errorsChan <- err
@@ -60,8 +57,10 @@ func (d *notificationDispatcher) start() {
 	}()
 }
 
+func (d *notificationDispatcher) Stop() {
+	d.stopChan <- struct{}{}
+}
+
 func NewStoredEventNotificationDispatcher(notifier messaging.StoredEventNotifier, logger logger.Logger) StoredEventNotificationDispatcher {
-	dispatcher := &notificationDispatcher{notifier, logger, 1, make(chan struct{})}
-	dispatcher.start()
-	return dispatcher
+	return &notificationDispatcher{notifier, logger, 1, make(chan struct{})}
 }

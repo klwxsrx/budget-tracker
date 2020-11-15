@@ -17,11 +17,13 @@ import (
 type Container interface {
 	CommandBus() commandCommon.Bus
 	EventNotifierChannel() amqp.Channel
+	StoredEventNotificationDispatcher() event.StoredEventNotificationDispatcher
 }
 
 type container struct {
-	bus           commandCommon.Bus
-	eventNotifier amqp.Channel
+	bus                    commandCommon.Bus
+	eventNotifier          amqp.Channel
+	notificationDispatcher event.StoredEventNotificationDispatcher
 }
 
 func (c *container) CommandBus() commandCommon.Bus {
@@ -30,6 +32,10 @@ func (c *container) CommandBus() commandCommon.Bus {
 
 func (c *container) EventNotifierChannel() amqp.Channel {
 	return c.eventNotifier
+}
+
+func (c *container) StoredEventNotificationDispatcher() event.StoredEventNotificationDispatcher {
+	return c.notificationDispatcher
 }
 
 func registerCommandHandlers(bus commandCommon.BusRegistry, unitOfWork command.UnitOfWork) commandCommon.Bus {
@@ -51,5 +57,5 @@ func NewContainer(client commonMysql.TransactionalClient, logger logger.Logger) 
 
 	bus := registerCommandHandlers(commandCommon.NewBusRegistry(logger), notifyingUnitOfWork)
 
-	return &container{bus, storedEventNotifier}
+	return &container{bus, storedEventNotifier, notificationDispatcher}
 }

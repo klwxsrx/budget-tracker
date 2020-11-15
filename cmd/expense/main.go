@@ -45,6 +45,7 @@ func main() {
 	}
 	defer amqpConn.Close()
 
+	container.StoredEventNotificationDispatcher().Start()
 	server := startServer(container.CommandBus(), logger)
 	listenOSKillSignals()
 	_ = server.Shutdown(context.Background())

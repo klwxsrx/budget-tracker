@@ -66,12 +66,12 @@ func (en *StoredEventNotifier) Connect(connection *amqp.Connection) error {
 
 func (en *StoredEventNotifier) getLastSentEventID() (app.StoredEventID, error) {
 	var id app.StoredEventID
-	err := en.client.Get(&id, "SELECT IFNULL(MAX(id), 0) FROM last_notified_event") // TODO: edit sql
+	err := en.client.Get(&id, "SELECT IFNULL(MAX(id), 0) FROM last_notified_event")
 	return id, err
 }
 
 func (en *StoredEventNotifier) updateLastSentEventID(id app.StoredEventID) error {
-	_, err := en.client.Exec("UPDATE last_notified_event SET id = ?", id)
+	_, err := en.client.Exec("INSERT INTO last_notified_event (id) VALUES (?) ON DUPLICATE KEY IGNORE", id)
 	return err
 }
 
