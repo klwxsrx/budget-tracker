@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const dispatchPeriod = time.Millisecond * 500
+const dispatchPeriod = time.Second
 
 type StoredEventNotificationDispatcher interface {
 	Dispatch()

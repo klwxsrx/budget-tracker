@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const maxConnectionTime = 30 * time.Second
+const maxConnectionTime = time.Minute
 
 type Dsn struct {
 	User     string

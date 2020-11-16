@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const maxConnectionTime = 30 * time.Second
+const maxConnectionTime = time.Minute
 
 type Config struct {
 	User     string
@@ -27,7 +27,7 @@ type Connection interface {
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("amqp://%v:%v@%v/", c.User, c.Password, c.Address)
+	return fmt.Sprintf("amqp://%s:%s@%s/", c.User, c.Password, c.Address)
 }
 
 type connection struct {

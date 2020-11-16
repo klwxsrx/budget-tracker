@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"errors"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
@@ -20,6 +21,7 @@ const (
 
 type Migration struct {
 	client                 TransactionalClient
+	logger                 logger.Logger
 	migrationDirectoryPath string
 }
 
@@ -63,8 +65,12 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 
 	for _, migrationId := range fileMigrationIds {
 		if !performedMigrationIds[migrationId] {
+			m.logger.Info("execute migration #%s", migrationId)
 			migrationSql, err := getMigrationSql(migrationDirectoryPath, migrationId)
 			if err != nil {
+				m.logger.With(logger.Fields{
+					"error": err,
+				}).Error("failed to obtain migration #%s sql", migrationId)
 				return err
 			}
 			tx, err := m.client.Begin()
@@ -74,6 +80,9 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 			err = performMigration(tx, migrationSql, migrationId)
 			if err != nil {
 				_ = tx.Rollback()
+				m.logger.With(logger.Fields{
+					"error": err,
+				}).Error("migration #%s failed", migrationId)
 				return err
 			}
 			err = tx.Commit()
@@ -162,9 +171,9 @@ func createMigrationRecord(client Client, migrationId int) error {
 	return err
 }
 
-func NewMigration(client TransactionalClient, migrationDirectoryPath string) (*Migration, error) { // TODO: add logging
+func NewMigration(client TransactionalClient, logger logger.Logger, migrationDirectoryPath string) (*Migration, error) {
 	if migrationFileRegexError != nil {
 		return nil, migrationFileRegexError
 	}
-	return &Migration{client, migrationDirectoryPath}, nil
+	return &Migration{client, logger, migrationDirectoryPath}, nil
 }

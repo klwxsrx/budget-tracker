@@ -25,7 +25,7 @@ func main() {
 		}).Fatal("failed to parse config")
 	}
 
-	db, client, err := getReadyDatabaseClient(config)
+	db, client, err := getReadyDatabaseClient(config, logger)
 	if err != nil {
 		logger.With(appLogger.Fields{
 			"error": err,
@@ -35,8 +35,7 @@ func main() {
 	defer db.CloseConnection()
 
 	container := infrastructure.NewContainer(client, logger)
-
-	amqpConn, err := getReadyAmqpConnection(config, container, logger)
+	amqpConn, err := getSetUpAmqpConnection(config, logger, container.EventNotifierChannel())
 	if err != nil {
 		logger.With(appLogger.Fields{
 			"error": err,
@@ -47,6 +46,8 @@ func main() {
 
 	container.StoredEventNotificationDispatcher().Start()
 	server := startServer(container.CommandBus(), logger)
+	logger.Info("app is ready")
+
 	listenOSKillSignals()
 	_ = server.Shutdown(context.Background())
 }
@@ -59,14 +60,14 @@ func initLogrus() *logrus.Logger {
 	return l
 }
 
-func getReadyAmqpConnection(config *Config, container infrastructure.Container, logger appLogger.Logger) (amqp.Connection, error) {
+func getSetUpAmqpConnection(config *Config, logger appLogger.Logger, eventNotificationChannel amqp.Channel) (amqp.Connection, error) {
 	amqpConfig := amqp.Config{
 		User:     config.AMQPUser,
 		Password: config.AMQPPassword,
 		Address:  config.AMQPAddress,
 	}
 	conn := amqp.NewConnection(amqpConfig, logger)
-	conn.AddChannel(container.EventNotifierChannel())
+	conn.AddChannel(eventNotificationChannel)
 	err := conn.Open()
 	if err != nil {
 		return nil, err
@@ -74,7 +75,7 @@ func getReadyAmqpConnection(config *Config, container infrastructure.Container, 
 	return conn, nil
 }
 
-func getReadyDatabaseClient(config *Config) (mysql.Database, mysql.TransactionalClient, error) {
+func getReadyDatabaseClient(config *Config, logger appLogger.Logger) (mysql.Database, mysql.TransactionalClient, error) {
 	db := mysql.NewDatabase(mysql.Dsn{
 		User:     config.DbUser,
 		Password: config.DbPassword,
@@ -90,7 +91,7 @@ func getReadyDatabaseClient(config *Config) (mysql.Database, mysql.Transactional
 		db.CloseConnection()
 		return nil, nil, err
 	}
-	eventStoreMigration, err := mysql.NewMigration(client, config.EventStoreMigrationsDir)
+	eventStoreMigration, err := mysql.NewMigration(client, logger, config.EventStoreMigrationsDir)
 	if err != nil {
 		db.CloseConnection()
 		return nil, nil, err
