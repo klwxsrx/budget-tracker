@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"errors"
+	"fmt"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	"io/ioutil"
 	"path/filepath"
@@ -65,12 +66,12 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 
 	for _, migrationId := range fileMigrationIds {
 		if !performedMigrationIds[migrationId] {
-			m.logger.Info("execute migration #%s", migrationId)
+			m.logger.Info("execute migration #", migrationId)
 			migrationSql, err := getMigrationSql(migrationDirectoryPath, migrationId)
 			if err != nil {
 				m.logger.With(logger.Fields{
 					"error": err,
-				}).Error("failed to obtain migration #%s sql", migrationId)
+				}).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationId))
 				return err
 			}
 			tx, err := m.client.Begin()
@@ -82,7 +83,7 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 				_ = tx.Rollback()
 				m.logger.With(logger.Fields{
 					"error": err,
-				}).Error("migration #%s failed", migrationId)
+				}).Error(fmt.Sprintf("migration #%d failed", migrationId))
 				return err
 			}
 			err = tx.Commit()
