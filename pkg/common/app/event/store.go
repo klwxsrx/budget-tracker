@@ -18,8 +18,8 @@ type StoredEvent struct {
 
 type Store interface {
 	LastID() (StoredEventID, error)
-	Get(id event.AggregateID) ([]*StoredEvent, error)
-	GetFromID(id event.AggregateID, fromID StoredEventID) ([]*StoredEvent, error)
-	GetByName(name event.AggregateName) ([]*StoredEvent, error)
+	Get(fromID StoredEventID) ([]*StoredEvent, error)
+	GetByAggregateID(id event.AggregateID, fromID StoredEventID) ([]*StoredEvent, error)
+	GetByAggregateName(name event.AggregateName) ([]*StoredEvent, error)
 	Append(e event.Event) error
 }

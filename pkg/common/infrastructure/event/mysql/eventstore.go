@@ -19,20 +19,20 @@ func (s *store) LastID() (app.StoredEventID, error) {
 	return id, err
 }
 
-func (s *store) Get(id domain.AggregateID) ([]*app.StoredEvent, error) {
+func (s *store) Get(fromID app.StoredEventID) ([]*app.StoredEvent, error) {
 	return selectEvents(s.db, []string{
-		"aggregate_id = UUID_TO_BIN(?)",
-	}, id.String())
+		"id > ?",
+	}, fromID)
 }
 
-func (s *store) GetFromID(id domain.AggregateID, fromID app.StoredEventID) ([]*app.StoredEvent, error) {
+func (s *store) GetByAggregateID(id domain.AggregateID, fromID app.StoredEventID) ([]*app.StoredEvent, error) {
 	return selectEvents(s.db, []string{
 		"aggregate_id = UUID_TO_BIN(?)",
 		"id > ?",
 	}, id.String(), fromID)
 }
 
-func (s *store) GetByName(name domain.AggregateName) ([]*app.StoredEvent, error) {
+func (s *store) GetByAggregateName(name domain.AggregateName) ([]*app.StoredEvent, error) {
 	return selectEvents(s.db, []string{
 		"aggregate_name = ?",
 	}, string(name))

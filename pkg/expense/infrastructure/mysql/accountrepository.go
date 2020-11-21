@@ -29,7 +29,7 @@ func (r *accountRepository) Update(a *domain.Account) error {
 
 func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error) {
 	state := &domain.AccountState{}
-	storedEvents, err := r.store.Get(eventDomain.AggregateID{UUID: id.UUID})
+	storedEvents, err := r.store.GetByAggregateID(eventDomain.AggregateID{UUID: id.UUID}, 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events: %v", err)
 	}
@@ -50,7 +50,7 @@ func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error
 }
 
 func (r *accountRepository) Exists(spec domain.AccountSpecification) (bool, error) {
-	storedEvents, err := r.store.GetByName(domain.AccountAggregateName)
+	storedEvents, err := r.store.GetByAggregateName(domain.AccountAggregateName)
 	if err != nil {
 		return false, fmt.Errorf("failed to get events of agregates %s: %v", domain.AccountAggregateName, err)
 	}
