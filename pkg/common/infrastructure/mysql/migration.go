@@ -54,36 +54,36 @@ func (m *Migration) createMigrationTableIfNotExists() error {
 }
 
 func (m *Migration) performMigrations(migrationDirectoryPath string) error {
-	performedMigrationIds, err := getPerformedMigrationIDs(m.client)
+	performedMigrationIDs, err := getPerformedMigrationIDs(m.client)
 	if err != nil {
 		return err
 	}
 
-	fileMigrationIds, err := getFileMigrationIds(migrationDirectoryPath)
+	fileMigrationIDs, err := getFileMigrationIDs(migrationDirectoryPath)
 	if err != nil {
 		return err
 	}
 
-	for _, migrationId := range fileMigrationIds {
-		if !performedMigrationIds[migrationId] {
-			m.logger.Info("execute migration #", migrationId)
-			migrationSql, err := getMigrationSql(migrationDirectoryPath, migrationId)
+	for _, migrationID := range fileMigrationIDs {
+		if !performedMigrationIDs[migrationID] {
+			m.logger.Info("execute migration #", migrationID)
+			migrationSql, err := getMigrationSql(migrationDirectoryPath, migrationID)
 			if err != nil {
 				m.logger.With(logger.Fields{
 					"error": err,
-				}).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationId))
+				}).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationID))
 				return err
 			}
 			tx, err := m.client.Begin()
 			if err != nil {
 				return err
 			}
-			err = performMigration(tx, migrationSql, migrationId)
+			err = performMigration(tx, migrationSql, migrationID)
 			if err != nil {
 				_ = tx.Rollback()
 				m.logger.With(logger.Fields{
 					"error": err,
-				}).Error(fmt.Sprintf("migration #%d failed", migrationId))
+				}).Error(fmt.Sprintf("migration #%d failed", migrationID))
 				return err
 			}
 			err = tx.Commit()
@@ -108,7 +108,7 @@ func getPerformedMigrationIDs(client Client) (map[int]bool, error) {
 	return result, nil
 }
 
-func getFileMigrationIds(migrationDirectoryPath string) ([]int, error) {
+func getFileMigrationIDs(migrationDirectoryPath string) ([]int, error) {
 	files, err := ioutil.ReadDir(migrationDirectoryPath)
 	if err != nil {
 		return nil, err
@@ -139,8 +139,8 @@ func getMigrationIDFromFileName(fileName string) (int, error) {
 	return migrationID, nil
 }
 
-func getMigrationSql(migrationDirectoryPath string, migrationId int) (string, error) {
-	migrationFilePath := filepath.Join(migrationDirectoryPath, getMigrationFileNameFromMigrationID(migrationId))
+func getMigrationSql(migrationDirectoryPath string, migrationID int) (string, error) {
+	migrationFilePath := filepath.Join(migrationDirectoryPath, getMigrationFileNameFromMigrationID(migrationID))
 	content, err := ioutil.ReadFile(migrationFilePath)
 	if err != nil {
 		return "", err
@@ -152,11 +152,11 @@ func getMigrationFileNameFromMigrationID(migrationID int) string {
 	return strings.Replace(migrationFileNamePattern, migrationIDVariable, strconv.Itoa(migrationID), 1)
 }
 
-func performMigration(client Client, sql string, migrationId int) error {
+func performMigration(client Client, sql string, migrationID int) error {
 	if sql == "" {
 		return errors.New("empty migration")
 	}
-	err := createMigrationRecord(client, migrationId)
+	err := createMigrationRecord(client, migrationID)
 	if err != nil {
 		return err
 	}
@@ -167,8 +167,8 @@ func performMigration(client Client, sql string, migrationId int) error {
 	return nil
 }
 
-func createMigrationRecord(client Client, migrationId int) error {
-	_, err := client.Exec("INSERT INTO `"+migrationTableName+"` VALUES (?)", migrationId)
+func createMigrationRecord(client Client, migrationID int) error {
+	_, err := client.Exec("INSERT INTO `"+migrationTableName+"` VALUES (?)", migrationID)
 	return err
 }
 

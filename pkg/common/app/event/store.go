@@ -8,7 +8,7 @@ import (
 type StoredEventID int
 
 type StoredEvent struct {
-	Id            StoredEventID       `db:"id"`
+	ID            StoredEventID       `db:"id"`
 	AggregateID   event.AggregateID   `db:"aggregate_id"`
 	AggregateName event.AggregateName `db:"aggregate_name"`
 	Type          event.Type          `db:"event_type"`

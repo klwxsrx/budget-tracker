@@ -70,19 +70,19 @@ func renameAccountParser(r *http.Request) (commandApp.Command, error) {
 		return nil, err
 	}
 
-	accountId, err := parseUuid(mux.Vars(r)["accountId"])
+	accountID, err := parseUuid(mux.Vars(r)["accountId"])
 	if body.Title == "" || err != nil {
 		return nil, InvalidParameterError
 	}
-	return &command.RenameAccount{ID: accountId, Title: body.Title}, nil
+	return &command.RenameAccount{ID: accountID, Title: body.Title}, nil
 }
 
 func deleteAccountParser(r *http.Request) (commandApp.Command, error) {
-	accountId, err := parseUuid(mux.Vars(r)["accountId"])
+	accountID, err := parseUuid(mux.Vars(r)["accountId"])
 	if err != nil {
 		return nil, err
 	}
-	return &command.DeleteAccount{ID: accountId}, nil
+	return &command.DeleteAccount{ID: accountID}, nil
 }
 
 func parseUuid(str string) (uuid.UUID, error) {
