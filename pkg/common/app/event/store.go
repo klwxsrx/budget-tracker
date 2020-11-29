@@ -20,6 +20,6 @@ type Store interface {
 	LastID() (StoredEventID, error)
 	Get(fromID StoredEventID) ([]*StoredEvent, error)
 	GetByAggregateID(id event.AggregateID, fromID StoredEventID) ([]*StoredEvent, error)
-	GetByAggregateName(name event.AggregateName) ([]*StoredEvent, error)
+	GetByAggregateName(name event.AggregateName, fromID StoredEventID) ([]*StoredEvent, error)
 	Append(e event.Event) error
 }

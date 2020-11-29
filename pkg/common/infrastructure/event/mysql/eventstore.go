@@ -32,10 +32,11 @@ func (s *store) GetByAggregateID(id domain.AggregateID, fromID app.StoredEventID
 	}, id.String(), fromID)
 }
 
-func (s *store) GetByAggregateName(name domain.AggregateName) ([]*app.StoredEvent, error) {
+func (s *store) GetByAggregateName(name domain.AggregateName, fromID app.StoredEventID) ([]*app.StoredEvent, error) {
 	return selectEvents(s.db, []string{
 		"aggregate_name = ?",
-	}, string(name))
+		"id > ?",
+	}, string(name), fromID)
 }
 
 func (s *store) Append(e domain.Event) error {

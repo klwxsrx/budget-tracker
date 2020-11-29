@@ -50,7 +50,7 @@ func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error
 }
 
 func (r *accountRepository) Exists(spec domain.AccountSpecification) (bool, error) {
-	storedEvents, err := r.store.GetByAggregateName(domain.AccountAggregateName)
+	storedEvents, err := r.store.GetByAggregateName(domain.AccountAggregateName, 0)
 	if err != nil {
 		return false, fmt.Errorf("failed to get events of agregates %s: %v", domain.AccountAggregateName, err)
 	}
