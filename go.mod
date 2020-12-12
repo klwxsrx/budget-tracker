@@ -10,5 +10,4 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/sirupsen/logrus v1.6.0
-	github.com/streadway/amqp v1.0.0
 )

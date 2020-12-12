@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"fmt"
-	eventApp "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	appEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/serialization"
@@ -10,7 +10,7 @@ import (
 
 type unitOfWork struct {
 	client       mysql.TransactionalClient
-	serializer   eventApp.Serializer
+	serializer   appEvent.Serializer
 	deserializer serialization.EventDeserializer
 }
 
@@ -40,7 +40,7 @@ func (uw *unitOfWork) Critical(lock string, f func(r command.DomainRegistry) err
 
 func NewUnitOfWork(
 	client mysql.TransactionalClient,
-	serializer eventApp.Serializer,
+	serializer appEvent.Serializer,
 	deserializer serialization.EventDeserializer,
 ) command.UnitOfWork {
 	return &unitOfWork{client, serializer, deserializer}

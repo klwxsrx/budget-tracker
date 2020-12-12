@@ -1,7 +1,7 @@
 package event
 
-import "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+import domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 
 type Serializer interface {
-	Serialize(event event.Event) (string, error)
+	Serialize(event domain.Event) (string, error)
 }

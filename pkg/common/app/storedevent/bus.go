@@ -1,4 +1,4 @@
-package event
+package storedevent
 
 type Bus interface {
 	Dispatch(event StoredEvent)
@@ -6,14 +6,14 @@ type Bus interface {
 
 type UnsentEventProvider interface {
 	GetBatch() ([]StoredEvent, error)
-	SetOffset(id StoredEventID) error
+	SetOffset(id ID) error
 }
 
-type BusHandler struct {
+type UnsentEventBusHandler struct {
 	eventProvider UnsentEventProvider
 	bus           Bus
 }
 
-func (bh *BusHandler) ProcessUnsentEvents() error { // TODO: add critical section interface and use it
+func (handler *UnsentEventBusHandler) ProcessUnsentEvents() error { // TODO: add critical section interface and use it
 	return nil // TODO:
 }

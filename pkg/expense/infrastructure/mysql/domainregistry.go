@@ -2,8 +2,7 @@ package mysql
 
 import (
 	eventApp "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
-	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event"
-	eventMysql "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event/mysql"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
@@ -18,8 +17,8 @@ func (dr *domainRegistry) AccountService() domain.AccountService {
 	return dr.accountService
 }
 
-func registerEventHandlers(dispatcher eventApp.Dispatcher, registry command.DomainRegistry, store eventApp.Store) eventApp.Dispatcher {
-	dispatcher.Subscribe(event.NewStoreEventHandler(store))
+func registerEventHandlers(dispatcher eventApp.Dispatcher, registry command.DomainRegistry, store storedevent.Store) eventApp.Dispatcher {
+	dispatcher.Subscribe(storedevent.NewStoreEventHandler(store))
 	// TODO: add event handlers
 	return dispatcher
 }
@@ -30,7 +29,7 @@ func newDomainRegistry(
 	deserializer serialization.EventDeserializer,
 ) command.DomainRegistry {
 	dispatcher := eventApp.NewDispatcher()
-	store := eventMysql.NewStore(client, serializer)
+	store := mysql.NewStore(client, serializer)
 	accountRepo := NewAccountRepository(dispatcher, store, deserializer)
 	registry := &domainRegistry{domain.NewAccountService(accountRepo)}
 	registerEventHandlers(dispatcher, registry, store)

@@ -1,38 +1,38 @@
 package mysql
 
 import (
-	app "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	appEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
 	domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
-	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"strings"
 	"time"
 )
 
 type store struct {
-	db         mysql.Client
-	serializer app.Serializer
+	db         Client
+	serializer appEvent.Serializer
 }
 
-func (s *store) LastID() (app.StoredEventID, error) {
-	var id app.StoredEventID
+func (s *store) LastID() (storedevent.ID, error) {
+	var id storedevent.ID
 	err := s.db.Get(&id, "SELECT IFNULL(MAX(id), 0) FROM event")
 	return id, err
 }
 
-func (s *store) Get(fromID app.StoredEventID) ([]*app.StoredEvent, error) {
+func (s *store) Get(fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
 	return selectEvents(s.db, []string{
 		"id > ?",
 	}, fromID)
 }
 
-func (s *store) GetByAggregateID(id domain.AggregateID, fromID app.StoredEventID) ([]*app.StoredEvent, error) {
+func (s *store) GetByAggregateID(id domain.AggregateID, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
 	return selectEvents(s.db, []string{
 		"aggregate_id = UUID_TO_BIN(?)",
 		"id > ?",
 	}, id.String(), fromID)
 }
 
-func (s *store) GetByAggregateName(name domain.AggregateName, fromID app.StoredEventID) ([]*app.StoredEvent, error) {
+func (s *store) GetByAggregateName(name domain.AggregateName, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
 	return selectEvents(s.db, []string{
 		"aggregate_name = ?",
 		"id > ?",
@@ -57,8 +57,8 @@ func (s *store) Append(e domain.Event) error {
 	return err
 }
 
-func selectEvents(db mysql.Client, conditions []string, args ...interface{}) ([]*app.StoredEvent, error) {
-	var events []*app.StoredEvent
+func selectEvents(db Client, conditions []string, args ...interface{}) ([]*storedevent.StoredEvent, error) {
+	var events []*storedevent.StoredEvent
 	err := db.Select(&events,
 		"SELECT "+
 			"id, "+
@@ -72,6 +72,6 @@ func selectEvents(db mysql.Client, conditions []string, args ...interface{}) ([]
 	return events, err
 }
 
-func NewStore(client mysql.Client, serializer app.Serializer) app.Store {
+func NewStore(client Client, serializer appEvent.Serializer) storedevent.Store {
 	return &store{client, serializer}
 }

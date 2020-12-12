@@ -1,4 +1,4 @@
-package event
+package storedevent
 
 import (
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
@@ -8,27 +8,27 @@ import (
 
 const dispatchPeriod = time.Second
 
-type StoredEventHandler interface {
-	HandleStoredEvents()
+type Handler interface {
+	HandleUnsentStoredEvents()
 	Stop()
 }
 
-type storedEventHandler struct {
-	busHandler   *BusHandler
+type handler struct {
+	busHandler   *UnsentEventBusHandler
 	logger       logger.Logger
 	needDispatch int32
 	stopChan     chan struct{}
 }
 
-func (d *storedEventHandler) HandleStoredEvents() {
+func (d *handler) HandleUnsentStoredEvents() {
 	atomic.StoreInt32(&d.needDispatch, 1)
 }
 
-func (d *storedEventHandler) Stop() {
+func (d *handler) Stop() {
 	d.stopChan <- struct{}{}
 }
 
-func (d *storedEventHandler) start() {
+func (d *handler) start() {
 	errorsChan := make(chan error)
 	go func() {
 		for {
@@ -59,9 +59,9 @@ func (d *storedEventHandler) start() {
 	}()
 }
 
-func NewStoredEventHandler(unsentEventProvider UnsentEventProvider, eventBus Bus, logger logger.Logger) StoredEventHandler {
-	busHandler := &BusHandler{unsentEventProvider, eventBus}
-	dispatcher := &storedEventHandler{busHandler, logger, 1, make(chan struct{})}
+func NewHandler(unsentEventProvider UnsentEventProvider, eventBus Bus, logger logger.Logger) Handler {
+	busHandler := &UnsentEventBusHandler{unsentEventProvider, eventBus}
+	dispatcher := &handler{busHandler, logger, 1, make(chan struct{})}
 	go dispatcher.start()
 	return dispatcher
 }

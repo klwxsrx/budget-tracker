@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	commandApp "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
+	appCommand "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/app/command"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 
 var InvalidParameterError = errors.New("invalid parameter")
 
-type commandParser func(r *http.Request) (commandApp.Command, error)
+type commandParser func(r *http.Request) (appCommand.Command, error)
 
 type route struct {
 	Name    string
@@ -53,7 +53,7 @@ type renameAccountBody struct {
 	Title string `json:"title"`
 }
 
-func createAccountParser(r *http.Request) (commandApp.Command, error) {
+func createAccountParser(r *http.Request) (appCommand.Command, error) {
 	var body createAccountBody
 	if err := parseJsonFromBody(r, &body); err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func createAccountParser(r *http.Request) (commandApp.Command, error) {
 	return &command.CreateAccount{Title: body.Title, Currency: body.Currency, InitialBalance: body.InitialBalance}, nil
 }
 
-func renameAccountParser(r *http.Request) (commandApp.Command, error) {
+func renameAccountParser(r *http.Request) (appCommand.Command, error) {
 	var body renameAccountBody
 	if err := parseJsonFromBody(r, &body); err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func renameAccountParser(r *http.Request) (commandApp.Command, error) {
 	return &command.RenameAccount{ID: accountID, Title: body.Title}, nil
 }
 
-func deleteAccountParser(r *http.Request) (commandApp.Command, error) {
+func deleteAccountParser(r *http.Request) (appCommand.Command, error) {
 	accountID, err := parseUuid(mux.Vars(r)["accountId"])
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func parseJsonFromBody(r *http.Request, v interface{}) error {
 	return json.NewDecoder(r.Body).Decode(v)
 }
 
-func getHandlerFunc(bus commandApp.Bus, parser commandParser) http.HandlerFunc {
+func getHandlerFunc(bus appCommand.Bus, parser commandParser) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cmd, err := parser(r)
 		if err != nil {
@@ -108,7 +108,7 @@ func getHandlerFunc(bus commandApp.Bus, parser commandParser) http.HandlerFunc {
 	}
 }
 
-func NewHttpHandler(bus commandApp.Bus, logger logger.Logger) http.Handler {
+func NewHttpHandler(bus appCommand.Bus, logger logger.Logger) http.Handler {
 	r := mux.NewRouter()
 	for _, route := range routes {
 		r.

@@ -3,15 +3,16 @@ package mysql
 import (
 	"fmt"
 	"github.com/google/uuid"
-	eventApp "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
-	eventDomain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	appEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
+	domainEvent "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/domain"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/serialization"
 )
 
 type accountRepository struct {
-	dispatcher   eventApp.Dispatcher
-	store        eventApp.Store
+	dispatcher   appEvent.Dispatcher
+	store        storedevent.Store
 	deserializer serialization.EventDeserializer
 }
 
@@ -29,7 +30,7 @@ func (r *accountRepository) Update(a *domain.Account) error {
 
 func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error) {
 	state := &domain.AccountState{}
-	storedEvents, err := r.store.GetByAggregateID(eventDomain.AggregateID{UUID: id.UUID}, 0)
+	storedEvents, err := r.store.GetByAggregateID(domainEvent.AggregateID{UUID: id.UUID}, 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events: %v", err)
 	}
@@ -37,11 +38,11 @@ func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error
 		return nil, nil
 	}
 	for _, storedEvent := range storedEvents {
-		domainEvent, err := r.deserializer.Deserialize(storedEvent)
+		event, err := r.deserializer.Deserialize(storedEvent)
 		if err != nil {
 			return nil, fmt.Errorf("failed to deserialize events: %v", err)
 		}
-		err = state.Apply(domainEvent)
+		err = state.Apply(event)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create accountState: %v", err)
 		}
@@ -66,19 +67,19 @@ func (r *accountRepository) Exists(spec domain.AccountSpecification) (bool, erro
 	return false, nil
 }
 
-func (r *accountRepository) buildAccountsFromEvents(events []*eventApp.StoredEvent) ([]*domain.Account, error) {
-	states := make(map[eventDomain.AggregateID]*domain.AccountState)
+func (r *accountRepository) buildAccountsFromEvents(events []*storedevent.StoredEvent) ([]*domain.Account, error) {
+	states := make(map[domainEvent.AggregateID]*domain.AccountState)
 	for _, storedEvent := range events {
-		domainEvent, err := r.deserializer.Deserialize(storedEvent)
+		event, err := r.deserializer.Deserialize(storedEvent)
 		if err != nil {
 			return nil, fmt.Errorf("failed to deserialize events: %v", err)
 		}
-		state, exists := states[domainEvent.GetAggregateID()]
+		state, exists := states[event.GetAggregateID()]
 		if !exists {
 			state = &domain.AccountState{}
-			states[domainEvent.GetAggregateID()] = state
+			states[event.GetAggregateID()] = state
 		}
-		err = state.Apply(domainEvent)
+		err = state.Apply(event)
 		if err != nil {
 			return nil, fmt.Errorf("failed to apply account state: %v", err)
 		}
@@ -91,8 +92,8 @@ func (r *accountRepository) buildAccountsFromEvents(events []*eventApp.StoredEve
 }
 
 func NewAccountRepository(
-	dispatcher eventApp.Dispatcher,
-	store eventApp.Store,
+	dispatcher appEvent.Dispatcher,
+	store storedevent.Store,
 	deserializer serialization.EventDeserializer,
 ) domain.AccountRepository {
 	return &accountRepository{dispatcher, store, deserializer}

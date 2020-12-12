@@ -1,14 +1,14 @@
-package event
+package storedevent
 
 import (
 	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	"time"
 )
 
-type StoredEventID int
+type ID int
 
-type StoredEvent struct { // TODO: extract to storedevent package
-	ID            StoredEventID       `db:"id"`
+type StoredEvent struct {
+	ID            ID                  `db:"id"`
 	AggregateID   event.AggregateID   `db:"aggregate_id"`
 	AggregateName event.AggregateName `db:"aggregate_name"`
 	Type          event.Type          `db:"event_type"`
@@ -17,9 +17,9 @@ type StoredEvent struct { // TODO: extract to storedevent package
 }
 
 type Store interface {
-	LastID() (StoredEventID, error)
-	Get(fromID StoredEventID) ([]*StoredEvent, error)
-	GetByAggregateID(id event.AggregateID, fromID StoredEventID) ([]*StoredEvent, error)
-	GetByAggregateName(name event.AggregateName, fromID StoredEventID) ([]*StoredEvent, error)
+	LastID() (ID, error)
+	Get(fromID ID) ([]*StoredEvent, error)
+	GetByAggregateID(id event.AggregateID, fromID ID) ([]*StoredEvent, error)
+	GetByAggregateName(name event.AggregateName, fromID ID) ([]*StoredEvent, error)
 	Append(e event.Event) error
 }

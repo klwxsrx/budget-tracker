@@ -1,13 +1,13 @@
 package event
 
-import "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+import domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 
 type Handler interface {
-	Handle(e event.Event) error
+	Handle(e domain.Event) error
 }
 
 type Dispatcher interface {
-	Dispatch(events []event.Event) error
+	Dispatch(events []domain.Event) error
 	Subscribe(h Handler)
 }
 
@@ -15,7 +15,7 @@ type dispatcher struct {
 	handlers []Handler
 }
 
-func (d *dispatcher) Dispatch(events []event.Event) error {
+func (d *dispatcher) Dispatch(events []domain.Event) error {
 	for _, e := range events {
 		for _, h := range d.handlers {
 			err := h.Handle(e)
