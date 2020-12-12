@@ -23,7 +23,7 @@ func (d Dsn) String() string {
 }
 
 type Database interface {
-	OpenConnection() error
+	OpenConnection() error // TODO: rewrite to open while creating
 	CloseConnection()
 	GetClient() (TransactionalClient, error)
 }

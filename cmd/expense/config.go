@@ -14,9 +14,7 @@ type Config struct {
 	DbPassword              string
 	DbMaxConnections        int
 	EventStoreMigrationsDir string
-	AMQPUser                string
-	AMQPPassword            string
-	AMQPAddress             string
+	MessageBrokerAddress    string
 }
 
 func parseEnvString(key string, err error) (string, error) {
@@ -51,9 +49,7 @@ func ParseConfig() (*Config, error) {
 	dbMaxConnections, err := parseEnvInt("DATABASE_MAX_CONNECTIONS", err)
 	eventStoreMigrationsDir, err := parseEnvString("EVENT_STORE_MIGRATIONS_DIR", err)
 
-	amqpUser, err := parseEnvString("AMQP_USER", err)
-	amqpPassword, err := parseEnvString("AMQP_PASSWORD", err)
-	amqpAddress, err := parseEnvString("AMQP_ADDRESS", err)
+	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
 
 	if err != nil {
 		return nil, err
@@ -66,8 +62,6 @@ func ParseConfig() (*Config, error) {
 		dbPassword,
 		dbMaxConnections,
 		eventStoreMigrationsDir,
-		amqpUser,
-		amqpPassword,
-		amqpAddress,
+		messageBrokerAddress,
 	}, nil
 }

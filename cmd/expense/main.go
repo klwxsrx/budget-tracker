@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	appLogger "github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
-	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/amqp"
 	infrastructureLogger "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
+	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/pulsar"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/transport"
 	"github.com/sirupsen/logrus"
@@ -16,35 +16,31 @@ import (
 	"syscall"
 )
 
+// TODO: use error package with stacktrace
+
 func main() {
 	logger := infrastructureLogger.New(initLogrus())
 	config, err := ParseConfig()
 	if err != nil {
-		logger.With(appLogger.Fields{
-			"error": err,
-		}).Fatal("failed to parse config")
+		logger.WithError(err).Fatal("failed to parse config")
 	}
 
 	db, client, err := getReadyDatabaseClient(config, logger)
 	if err != nil {
-		logger.With(appLogger.Fields{
-			"error": err,
-		}).Fatal("failed to setup db connection")
-		os.Exit(1)
+		logger.WithError(err).Fatal("failed to setup db connection")
 	}
 	defer db.CloseConnection()
 
-	container := infrastructure.NewContainer(client, logger)
-	amqpConn, err := getSetUpAmqpConnection(config, logger, container.EventNotifierChannel())
+	broker, err := getPulsarClient(config, logger)
 	if err != nil {
-		logger.With(appLogger.Fields{
-			"error": err,
-		}).Fatal("failed to setup amqp connection")
-		os.Exit(1)
+		logger.WithError(err).Fatal("failed to setup broker connection")
 	}
-	defer amqpConn.Close()
+	defer broker.Close()
 
-	container.StoredEventNotificationDispatcher().Start()
+	container, err := infrastructure.NewContainer(client, broker, logger)
+	if err != nil {
+		logger.WithError(err).Fatal(err.Error())
+	}
 	server := startServer(container.CommandBus(), logger)
 	logger.Info("app is ready")
 
@@ -60,19 +56,8 @@ func initLogrus() *logrus.Logger {
 	return l
 }
 
-func getSetUpAmqpConnection(config *Config, logger appLogger.Logger, eventNotificationChannel amqp.Channel) (amqp.Connection, error) {
-	amqpConfig := amqp.Config{
-		User:     config.AMQPUser,
-		Password: config.AMQPPassword,
-		Address:  config.AMQPAddress,
-	}
-	conn := amqp.NewConnection(amqpConfig, logger)
-	conn.AddChannel(eventNotificationChannel)
-	err := conn.Open()
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
+func getPulsarClient(config *Config, logger appLogger.Logger) (pulsar.Connection, error) {
+	return pulsar.NewConnection(pulsar.Config{URL: config.MessageBrokerAddress}, logger)
 }
 
 func getReadyDatabaseClient(config *Config, logger appLogger.Logger) (mysql.Database, mysql.TransactionalClient, error) {
@@ -111,9 +96,7 @@ func startServer(bus command.Bus, logger appLogger.Logger) *http.Server {
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			logger.With(appLogger.Fields{
-				"error": err,
-			}).Fatal("unable to start the server")
+			logger.WithError(err).Fatal("unable to start the server")
 		}
 	}()
 	return srv

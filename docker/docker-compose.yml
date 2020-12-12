@@ -15,11 +15,10 @@ services:
       DATABASE_USER: expense
       DATABASE_PASSWORD: 1234
       DATABASE_MAX_CONNECTIONS: 10
-      AMQP_USER: expense
-      AMQP_PASSWORD: 1234
-      AMQP_ADDRESS: "expense-amqp:5672"
+      MESSAGE_BROKER_ADDRESS: "pulsar://expense-pulsar:6650"
     depends_on:
       - expense-db
+      - expense-pulsar
   expense-db:
     image: mysql:8.0
     container_name: expense-db
@@ -31,15 +30,12 @@ services:
       MYSQL_DATABASE: expense
       MYSQL_USER: expense
       MYSQL_PASSWORD: 1234
-  expense-amqp:
-    image: rabbitmq:3.8-management
-    container_name: expense-amqp
-    hostname: expense-amqp
-    volumes:
-      - expense-amqp-data:/var/lib/rabbitmq:rw
-    environment:
-      RABBITMQ_DEFAULT_USER: expense
-      RABBITMQ_DEFAULT_PASS: 1234
+  expense-pulsar:
+    image: apachepulsar/pulsar:2.7.0
+    container_name: expense-pulsar
+    hostname: expense-pulsar
+    ports:
+      - 6650:6650
+    entrypoint: ["bin/pulsar", "standalone"]
 volumes:
   expense-db-data:
-  expense-amqp-data:

@@ -7,7 +7,7 @@ import (
 
 type StoredEventID int
 
-type StoredEvent struct {
+type StoredEvent struct { // TODO: extract to storedevent package
 	ID            StoredEventID       `db:"id"`
 	AggregateID   event.AggregateID   `db:"aggregate_id"`
 	AggregateName event.AggregateName `db:"aggregate_name"`

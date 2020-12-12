@@ -69,9 +69,7 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 			m.logger.Info("execute migration #", migrationID)
 			migrationSql, err := getMigrationSql(migrationDirectoryPath, migrationID)
 			if err != nil {
-				m.logger.With(logger.Fields{
-					"error": err,
-				}).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationID))
+				m.logger.WithError(err).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationID))
 				return err
 			}
 			tx, err := m.client.Begin()
@@ -81,9 +79,7 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 			err = performMigration(tx, migrationSql, migrationID)
 			if err != nil {
 				_ = tx.Rollback()
-				m.logger.With(logger.Fields{
-					"error": err,
-				}).Error(fmt.Sprintf("migration #%d failed", migrationID))
+				m.logger.WithError(err).Error(fmt.Sprintf("migration #%d failed", migrationID))
 				return err
 			}
 			err = tx.Commit()

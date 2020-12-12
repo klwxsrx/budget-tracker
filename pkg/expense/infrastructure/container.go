@@ -2,40 +2,28 @@ package infrastructure
 
 import (
 	commandCommon "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/event"
+	commonEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
-	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/amqp"
-	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event/messaging"
 	eventMysql "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event/mysql"
 	commonSerialization "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/event/serialization"
 	commonMysql "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
+	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/pulsar"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/app/command"
+	"github.com/klwxsrx/expense-tracker/pkg/expense/app/event"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/serialization"
 )
 
 type Container interface {
 	CommandBus() commandCommon.Bus
-	EventNotifierChannel() amqp.Channel
-	StoredEventNotificationDispatcher() event.StoredEventNotificationDispatcher
 }
 
 type container struct {
-	bus                    commandCommon.Bus
-	eventNotifier          amqp.Channel
-	notificationDispatcher event.StoredEventNotificationDispatcher
+	bus commandCommon.Bus
 }
 
 func (c *container) CommandBus() commandCommon.Bus {
 	return c.bus
-}
-
-func (c *container) EventNotifierChannel() amqp.Channel {
-	return c.eventNotifier
-}
-
-func (c *container) StoredEventNotificationDispatcher() event.StoredEventNotificationDispatcher {
-	return c.notificationDispatcher
 }
 
 func registerCommandHandlers(bus commandCommon.BusRegistry, unitOfWork command.UnitOfWork) commandCommon.Bus {
@@ -45,17 +33,18 @@ func registerCommandHandlers(bus commandCommon.BusRegistry, unitOfWork command.U
 	return bus
 }
 
-func NewContainer(client commonMysql.TransactionalClient, logger logger.Logger) Container {
+func NewContainer(client commonMysql.TransactionalClient, broker pulsar.Connection, logger logger.Logger) (Container, error) {
 	serializer := commonSerialization.NewSerializer()
 	deserializer := serialization.NewEventDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
-	eventStore := eventMysql.NewStore(client, serializer)
-	storedEventNotifier := messaging.NewStoredEventNotifier(eventStore, client)
-	notificationDispatcher := event.NewStoredEventNotificationDispatcher(storedEventNotifier, logger)
-	notifyingUnitOfWork := mysql.NewNotifyingUnitOfWork(unitOfWork, notificationDispatcher)
+	_ = eventMysql.NewStore(client, serializer)             // TODO:
+	var unsentEventProvider commonEvent.UnsentEventProvider // TODO:
+	var eventBus commonEvent.Bus                            // TODO:
+	storedEventHandler := commonEvent.NewStoredEventHandler(unsentEventProvider, eventBus, logger)
+	notifyingUnitOfWork := event.NewStoredEventHandlingUnitOfWork(unitOfWork, storedEventHandler)
 
 	bus := registerCommandHandlers(commandCommon.NewBusRegistry(logger), notifyingUnitOfWork)
 
-	return &container{bus, storedEventNotifier, notificationDispatcher}
+	return &container{bus}, nil
 }
