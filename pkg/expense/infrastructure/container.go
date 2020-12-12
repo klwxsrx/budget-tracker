@@ -3,12 +3,12 @@ package infrastructure
 import (
 	commonCommand "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
+	commandStoreEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
 	commonMysql "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/pulsar"
 	commonSerialization "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/serialization"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/app/command"
-	"github.com/klwxsrx/expense-tracker/pkg/expense/app/event"
+	"github.com/klwxsrx/expense-tracker/pkg/expense/app/storedevent"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/mysql"
 	"github.com/klwxsrx/expense-tracker/pkg/expense/infrastructure/serialization"
 )
@@ -37,11 +37,11 @@ func NewContainer(client commonMysql.TransactionalClient, broker pulsar.Connecti
 	deserializer := serialization.NewEventDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
-	_ = commonMysql.NewStore(client, serializer)            // TODO:
-	var unsentEventProvider storedevent.UnsentEventProvider // TODO:
-	var eventBus storedevent.Bus                            // TODO:
-	storedEventHandler := storedevent.NewHandler(unsentEventProvider, eventBus, logger)
-	notifyingUnitOfWork := event.NewStoredEventHandlingUnitOfWork(unitOfWork, storedEventHandler)
+	_ = commonMysql.NewStore(client, serializer)                  // TODO:
+	var unsentEventProvider commandStoreEvent.UnsentEventProvider // TODO:
+	var eventBus commandStoreEvent.Bus                            // TODO:
+	storedEventHandler := commandStoreEvent.NewHandler(unsentEventProvider, eventBus, logger)
+	notifyingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
 
 	bus := registerCommandHandlers(commonCommand.NewBusRegistry(logger), notifyingUnitOfWork)
 
