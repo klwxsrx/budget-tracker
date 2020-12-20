@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const batchSize = 1 // TODO: change to 1000
+const batchSize = 1000
 
 type store struct {
 	db         Client

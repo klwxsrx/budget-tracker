@@ -23,9 +23,8 @@ func (d Dsn) String() string {
 }
 
 type Database interface {
-	OpenConnection() error // TODO: rewrite to open while creating
-	CloseConnection()
 	GetClient() (TransactionalClient, error)
+	Close()
 }
 
 type database struct {
@@ -34,15 +33,19 @@ type database struct {
 	db      *sqlx.DB
 }
 
-func (d *database) OpenConnection() error {
-	var err error
-	if d.db != nil {
-		err = d.db.Close()
+func (d *database) GetClient() (TransactionalClient, error) {
+	if d.db == nil {
+		return nil, errors.New("connection is not opened")
 	}
-	if err != nil {
-		return err
-	}
+	return &client{d.db}, nil
+}
 
+func (d *database) Close() {
+	_ = d.db.Close()
+}
+
+func (d *database) openConnection() error {
+	var err error
 	d.db, err = sqlx.Open("mysql", d.config.String()+"?parseTime=true")
 	d.db.SetMaxOpenConns(d.maxConn)
 	err = backoff.Retry(func() error {
@@ -55,26 +58,14 @@ func (d *database) OpenConnection() error {
 	return nil
 }
 
-func (d *database) CloseConnection() {
-	if d.db == nil {
-		return
-	}
-	_ = d.db.Close()
-}
-
-func (d *database) GetClient() (TransactionalClient, error) {
-	if d.db == nil {
-		return nil, errors.New("connection is not opened")
-	}
-	return &client{d.db}, nil
-}
-
 func newOpenConnectionBackoff() *backoff.ExponentialBackOff {
 	b := backoff.NewExponentialBackOff()
 	b.MaxElapsedTime = maxConnectionTime
 	return b
 }
 
-func NewDatabase(config Dsn, maxConnections int) Database {
-	return &database{config: config, maxConn: maxConnections}
+func NewDatabase(config Dsn, maxConnections int) (Database, error) {
+	db := &database{config: config, maxConn: maxConnections}
+	err := db.openConnection()
+	return db, err
 }

@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		logger.WithError(err).Fatal("failed to setup db connection")
 	}
-	defer db.CloseConnection()
+	defer db.Close()
 
 	broker, err := getPulsarClient(config, logger)
 	if err != nil {
@@ -61,29 +61,28 @@ func getPulsarClient(config *Config, logger appLogger.Logger) (pulsar.Connection
 }
 
 func getReadyDatabaseClient(config *Config, logger appLogger.Logger) (mysql.Database, mysql.TransactionalClient, error) {
-	db := mysql.NewDatabase(mysql.Dsn{
+	db, err := mysql.NewDatabase(mysql.Dsn{
 		User:     config.DbUser,
 		Password: config.DbPassword,
 		Address:  config.DbAddress,
 		Database: config.DbName,
 	}, config.DbMaxConnections)
-	err := db.OpenConnection()
 	if err != nil {
 		return nil, nil, err
 	}
 	client, err := db.GetClient()
 	if err != nil {
-		db.CloseConnection()
+		db.Close()
 		return nil, nil, err
 	}
 	migration, err := mysql.NewMigration(client, logger, config.MigrationsDir)
 	if err != nil {
-		db.CloseConnection()
+		db.Close()
 		return nil, nil, err
 	}
 	err = migration.Migrate()
 	if err != nil {
-		db.CloseConnection()
+		db.Close()
 		return nil, nil, err
 	}
 	return db, client, nil
