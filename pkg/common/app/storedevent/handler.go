@@ -2,6 +2,7 @@ package storedevent
 
 import (
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/persistence"
 	"sync/atomic"
 	"time"
 )
@@ -34,7 +35,7 @@ func (d *handler) start() {
 		for {
 			select {
 			case err := <-errorsChan:
-				d.logger.WithError(err).Error("failed to handle event events")
+				d.logger.WithError(err).Error("failed to handle unsent events") // TODO another stopchan
 			}
 		}
 	}()
@@ -59,8 +60,8 @@ func (d *handler) start() {
 	}()
 }
 
-func NewHandler(unsentEventProvider UnsentEventProvider, eventBus Bus, logger logger.Logger) Handler {
-	busHandler := &UnsentEventBusHandler{unsentEventProvider, eventBus}
+func NewHandler(unsentEventProvider UnsentEventProvider, eventBus Bus, sync persistence.Synchronization, logger logger.Logger) Handler {
+	busHandler := &UnsentEventBusHandler{unsentEventProvider, eventBus, sync}
 	dispatcher := &handler{busHandler, logger, 1, make(chan struct{})}
 	go dispatcher.start()
 	return dispatcher

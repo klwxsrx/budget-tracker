@@ -12,7 +12,7 @@ type handingUnitOfWork struct {
 
 func (uw *handingUnitOfWork) Execute(f func(r command.DomainRegistry) error) error {
 	err := uw.unitOfWork.Execute(f)
-	if err != nil {
+	if err == nil {
 		uw.handler.HandleUnsentStoredEvents()
 	}
 	return err
@@ -20,7 +20,7 @@ func (uw *handingUnitOfWork) Execute(f func(r command.DomainRegistry) error) err
 
 func (uw *handingUnitOfWork) Critical(lock string, f func(r command.DomainRegistry) error) error {
 	err := uw.unitOfWork.Critical(lock, f)
-	if err != nil {
+	if err == nil {
 		uw.handler.HandleUnsentStoredEvents()
 	}
 	return err

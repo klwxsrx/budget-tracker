@@ -66,7 +66,7 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 
 	for _, migrationID := range fileMigrationIDs {
 		if !performedMigrationIDs[migrationID] {
-			m.logger.Info("execute migration #", migrationID)
+			m.logger.Info(fmt.Sprintf("execute migration #%v", migrationID))
 			migrationSql, err := getMigrationSql(migrationDirectoryPath, migrationID)
 			if err != nil {
 				m.logger.WithError(err).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationID))

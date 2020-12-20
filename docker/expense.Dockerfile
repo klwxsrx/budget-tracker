@@ -28,8 +28,8 @@ USER appuser
 
 COPY --from=builder /build/bin/expense /app/bin/expense
 
-COPY ./data/mysql/migrations/eventstore /app/migrations/eventstore
-ENV EVENT_STORE_MIGRATIONS_DIR=/app/migrations/eventstore
+COPY ./data/mysql/migrations/expense /app/migrations
+ENV MIGRATIONS_DIR=/app/migrations
 
 EXPOSE 8080
 

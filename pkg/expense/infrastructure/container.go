@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"context"
 	commonCommand "github.com/klwxsrx/expense-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	commandStoreEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
@@ -32,18 +33,22 @@ func registerCommandHandlers(bus commonCommand.BusRegistry, unitOfWork command.U
 	return bus
 }
 
-func NewContainer(client commonMysql.TransactionalClient, broker pulsar.Connection, logger logger.Logger) (Container, error) {
+func NewContainer(client commonMysql.TransactionalClient, broker pulsar.Connection, logger logger.Logger, ctx context.Context) (Container, error) {
 	serializer := commonSerialization.NewSerializer()
 	deserializer := serialization.NewEventDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
-	_ = commonMysql.NewStore(client, serializer)                  // TODO:
-	var unsentEventProvider commandStoreEvent.UnsentEventProvider // TODO:
-	var eventBus commandStoreEvent.Bus                            // TODO:
-	storedEventHandler := commandStoreEvent.NewHandler(unsentEventProvider, eventBus, logger)
-	notifyingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
+	eventStore := commonMysql.NewStore(client, serializer)
+	unsentEventProvider := commonMysql.NewUnsentEventProvider(eventStore, client)
+	eventBus, err := pulsar.NewEventBus(broker, ctx)
+	if err != nil {
+		return nil, err
+	}
+	sync := commonMysql.NewSynchronization(client)
+	storedEventHandler := commandStoreEvent.NewHandler(unsentEventProvider, eventBus, sync, logger)
+	storedEventHandlingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
 
-	bus := registerCommandHandlers(commonCommand.NewBusRegistry(logger), notifyingUnitOfWork)
+	bus := registerCommandHandlers(commonCommand.NewBusRegistry(logger), storedEventHandlingUnitOfWork)
 
 	return &container{bus}, nil
 }

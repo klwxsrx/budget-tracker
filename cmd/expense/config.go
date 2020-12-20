@@ -8,13 +8,13 @@ import (
 )
 
 type Config struct {
-	DbName                  string
-	DbAddress               string
-	DbUser                  string
-	DbPassword              string
-	DbMaxConnections        int
-	EventStoreMigrationsDir string
-	MessageBrokerAddress    string
+	DbName               string
+	DbAddress            string
+	DbUser               string
+	DbPassword           string
+	DbMaxConnections     int
+	MigrationsDir        string
+	MessageBrokerAddress string
 }
 
 func parseEnvString(key string, err error) (string, error) {
@@ -47,8 +47,7 @@ func ParseConfig() (*Config, error) {
 	dbUser, err := parseEnvString("DATABASE_USER", err)
 	dbPassword, err := parseEnvString("DATABASE_PASSWORD", err)
 	dbMaxConnections, err := parseEnvInt("DATABASE_MAX_CONNECTIONS", err)
-	eventStoreMigrationsDir, err := parseEnvString("EVENT_STORE_MIGRATIONS_DIR", err)
-
+	migrationsDir, err := parseEnvString("MIGRATIONS_DIR", err)
 	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
 
 	if err != nil {
@@ -61,7 +60,7 @@ func ParseConfig() (*Config, error) {
 		dbUser,
 		dbPassword,
 		dbMaxConnections,
-		eventStoreMigrationsDir,
+		migrationsDir,
 		messageBrokerAddress,
 	}, nil
 }

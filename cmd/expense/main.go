@@ -37,7 +37,7 @@ func main() {
 	}
 	defer broker.Close()
 
-	container, err := infrastructure.NewContainer(client, broker, logger)
+	container, err := infrastructure.NewContainer(client, broker, logger, context.Background())
 	if err != nil {
 		logger.WithError(err).Fatal(err.Error())
 	}
@@ -76,12 +76,12 @@ func getReadyDatabaseClient(config *Config, logger appLogger.Logger) (mysql.Data
 		db.CloseConnection()
 		return nil, nil, err
 	}
-	eventStoreMigration, err := mysql.NewMigration(client, logger, config.EventStoreMigrationsDir)
+	migration, err := mysql.NewMigration(client, logger, config.MigrationsDir)
 	if err != nil {
 		db.CloseConnection()
 		return nil, nil, err
 	}
-	err = eventStoreMigration.Migrate()
+	err = migration.Migrate()
 	if err != nil {
 		db.CloseConnection()
 		return nil, nil, err

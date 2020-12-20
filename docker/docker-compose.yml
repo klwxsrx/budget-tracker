@@ -3,7 +3,7 @@ services:
   expense-app:
     build:
       context: ../
-      dockerfile: ./docker/expense/Dockerfile
+      dockerfile: ./docker/expense.Dockerfile
     image: klwxsrx/expense-app
     container_name: expense-app
     hostname: expense-app
@@ -34,8 +34,6 @@ services:
     image: apachepulsar/pulsar:2.7.0
     container_name: expense-pulsar
     hostname: expense-pulsar
-    ports:
-      - 6650:6650
     entrypoint: ["bin/pulsar", "standalone"]
 volumes:
   expense-db-data:

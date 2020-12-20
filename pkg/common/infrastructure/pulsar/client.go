@@ -13,10 +13,40 @@ type Config struct {
 	URL string
 }
 
+type ProducerConfig struct {
+	Topic string
+}
+
+type ConsumerConfig struct {
+	Topic            string
+	SubscriptionName string
+}
+
 type Connection interface {
-	CreateProducer(pulsar.ProducerOptions) (pulsar.Producer, error)
-	Subscribe(pulsar.ConsumerOptions) (pulsar.Consumer, error)
+	CreateProducer(config *ProducerConfig) (pulsar.Producer, error)
+	Subscribe(config *ConsumerConfig) (pulsar.Consumer, error)
 	Close()
+}
+
+type connection struct {
+	client pulsar.Client
+}
+
+func (c *connection) CreateProducer(config *ProducerConfig) (pulsar.Producer, error) {
+	return c.client.CreateProducer(pulsar.ProducerOptions{
+		Topic: config.Topic,
+	})
+}
+
+func (c *connection) Subscribe(config *ConsumerConfig) (pulsar.Consumer, error) {
+	return c.client.Subscribe(pulsar.ConsumerOptions{
+		Topic:            config.Topic,
+		SubscriptionName: config.SubscriptionName,
+	})
+}
+
+func (c *connection) Close() {
+	c.client.Close()
 }
 
 func NewConnection(config Config, logger logger.Logger) (Connection, error) {
@@ -29,5 +59,5 @@ func NewConnection(config Config, logger logger.Logger) (Connection, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c, nil
+	return &connection{c}, nil
 }
