@@ -28,7 +28,7 @@ func (h *CreateAccountHandler) Execute(c command.Command) error {
 }
 
 func (h *CreateAccountHandler) GetType() command.Type {
-	return createAccountType
+	return typeCreateAccount
 }
 
 type RenameAccountHandler struct {
@@ -46,7 +46,7 @@ func (h *RenameAccountHandler) Execute(c command.Command) error {
 }
 
 func (h *RenameAccountHandler) GetType() command.Type {
-	return renameAccountType
+	return typeRenameAccount
 }
 
 type DeleteAccountHandler struct {
@@ -64,7 +64,7 @@ func (h *DeleteAccountHandler) Execute(c command.Command) error {
 }
 
 func (h *DeleteAccountHandler) GetType() command.Type {
-	return deleteAccountType
+	return typeDeleteAccount
 }
 
 func NewCreateAccountHandler(uw UnitOfWork) *CreateAccountHandler {

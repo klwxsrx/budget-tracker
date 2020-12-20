@@ -3,7 +3,7 @@ package domain
 import "errors"
 
 var (
-	InvalidCurrencyError = errors.New("currency is invalid")
+	ErrorInvalidCurrency = errors.New("currency is invalid")
 )
 
 type Currency string
@@ -21,7 +21,7 @@ var availableCurrencies = map[Currency]bool{
 
 func validateCurrency(c Currency) error {
 	if _, ok := availableCurrencies[c]; !ok {
-		return InvalidCurrencyError
+		return ErrorInvalidCurrency
 	}
 	return nil
 }

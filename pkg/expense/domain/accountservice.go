@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	AccountTitleIsDuplicatedError = errors.New("account with this title is already exists")
-	AccountIsNotExistsError       = errors.New("account is not exists")
+	ErrorAccountTitleIsDuplicated = errors.New("account with this title is already exists")
+	ErrorAccountIsNotExists       = errors.New("account is not exists")
 )
 
 type AccountService interface {
@@ -26,7 +26,7 @@ func (s *accountService) Create(title string, initialBalance MoneyAmount) error 
 		return fmt.Errorf("exists checking failed: %v", err)
 	}
 	if exists {
-		return AccountTitleIsDuplicatedError
+		return ErrorAccountTitleIsDuplicated
 	}
 
 	acc, err := NewAccount(s.repo.NextID(), title, initialBalance)
@@ -47,7 +47,7 @@ func (s *accountService) Rename(id AccountID, title string) error {
 		return fmt.Errorf("exists checking failed: %v", err)
 	}
 	if exists {
-		return AccountTitleIsDuplicatedError
+		return ErrorAccountTitleIsDuplicated
 	}
 
 	acc, err := s.repo.GetByID(id)
@@ -55,7 +55,7 @@ func (s *accountService) Rename(id AccountID, title string) error {
 		return fmt.Errorf("failed to get account: %v", err)
 	}
 	if acc == nil {
-		return AccountIsNotExistsError
+		return ErrorAccountIsNotExists
 	}
 	err = acc.ChangeTitle(title)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *accountService) Delete(id AccountID) error {
 		return fmt.Errorf("failed to get account: %v", err)
 	}
 	if acc == nil {
-		return AccountIsNotExistsError
+		return ErrorAccountIsNotExists
 	}
 	err = acc.Delete()
 	if err != nil {

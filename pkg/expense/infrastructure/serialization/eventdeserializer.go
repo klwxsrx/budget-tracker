@@ -17,11 +17,11 @@ type eventDeserializer struct{}
 
 func (ed *eventDeserializer) Deserialize(event *storedevent.StoredEvent) (domainEvent.Event, error) {
 	switch event.Type {
-	case domain.AccountCreatedEventType:
+	case domain.EventTypeAccountCreated:
 		return ed.deserializeAccountCreatedEvent(event.EventData)
-	case domain.AccountTitleChangedEventType:
+	case domain.EventTypeAccountTitleChanged:
 		return ed.deserializeAccountTitleChangedEvent(event.EventData)
-	case domain.AccountDeletedEventType:
+	case domain.EventTypeAccountDeleted:
 		return ed.deserializeAccountDeletedEvent(event.EventData)
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown event, %v", event.Type))

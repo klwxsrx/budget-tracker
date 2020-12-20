@@ -13,9 +13,9 @@ const (
 )
 
 var (
-	InvalidAccountTitleError   = errors.New("invalid title")
-	AlreadyDeletedAccountError = errors.New("account is already deleted")
-	UnknownAccountEventError   = errors.New("unknown event type")
+	ErrorInvalidAccountTitle   = errors.New("invalid title")
+	ErrorAlreadyDeletedAccount = errors.New("account is already deleted")
+	ErrorUnknownAccountEvent   = errors.New("unknown event type")
 )
 
 type AccountID struct {
@@ -25,8 +25,8 @@ type AccountID struct {
 type AccountStatus int
 
 const (
-	AccountActiveStatus AccountStatus = iota
-	AccountDeletedStatus
+	AccountStatusActive AccountStatus = iota
+	AccountStatusDeleted
 )
 
 type AccountState struct {
@@ -38,21 +38,21 @@ type AccountState struct {
 
 func (a *AccountState) Apply(e event.Event) error {
 	switch e.GetType() {
-	case AccountCreatedEventType:
+	case EventTypeAccountCreated:
 		return a.applyCreatedEvent(e)
-	case AccountTitleChangedEventType:
+	case EventTypeAccountTitleChanged:
 		return a.applyTitleChangedEvent(e)
-	case AccountDeletedEventType:
+	case EventTypeAccountDeleted:
 		return a.applyDeletedEvent(e)
 	default:
-		return UnknownAccountEventError
+		return ErrorUnknownAccountEvent
 	}
 }
 
 func (a *AccountState) applyCreatedEvent(e event.Event) error {
 	ev, ok := e.(*AccountCreatedEvent)
 	if !ok {
-		return UnknownAccountEventError
+		return ErrorUnknownAccountEvent
 	}
 
 	a.ID = ev.ID
@@ -64,7 +64,7 @@ func (a *AccountState) applyCreatedEvent(e event.Event) error {
 func (a *AccountState) applyTitleChangedEvent(e event.Event) error {
 	ev, ok := e.(*AccountTitleChangedEvent)
 	if !ok {
-		return UnknownAccountEventError
+		return ErrorUnknownAccountEvent
 	}
 
 	a.Title = ev.Title
@@ -74,9 +74,9 @@ func (a *AccountState) applyTitleChangedEvent(e event.Event) error {
 func (a *AccountState) applyDeletedEvent(e event.Event) error {
 	_, ok := e.(*AccountDeletedEvent)
 	if !ok {
-		return UnknownAccountEventError
+		return ErrorUnknownAccountEvent
 	}
-	a.Status = AccountDeletedStatus
+	a.Status = AccountStatusDeleted
 	return nil
 }
 
@@ -97,8 +97,8 @@ func (a *Account) ChangeTitle(t string) error {
 }
 
 func (a *Account) Delete() error {
-	if a.state.Status == AccountDeletedStatus {
-		return AlreadyDeletedAccountError
+	if a.state.Status == AccountStatusDeleted {
+		return ErrorAlreadyDeletedAccount
 	}
 	a.applyChange(&AccountDeletedEvent{a.state.ID})
 	return nil
@@ -115,7 +115,7 @@ func (a *Account) applyChange(e event.Event) {
 
 func validateAccountTitle(title string) error {
 	if len(title) == 0 || len(title) > accountTitleMaxLength {
-		return InvalidAccountTitleError
+		return ErrorInvalidAccountTitle
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func NewAccount(id AccountID, title string, initialBalance MoneyAmount) (*Accoun
 		return nil, err
 	}
 
-	state := &AccountState{id, AccountActiveStatus, title, initialBalance}
+	state := &AccountState{id, AccountStatusActive, title, initialBalance}
 	events := []event.Event{&AccountCreatedEvent{id, title, initialBalance.Currency, initialBalance.Amount}}
 	return &Account{state, events}, nil
 }

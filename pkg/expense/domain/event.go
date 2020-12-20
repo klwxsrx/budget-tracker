@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	AccountCreatedEventType      = "created"
-	AccountTitleChangedEventType = "changed"
-	AccountDeletedEventType      = "deleted"
+	EventTypeAccountCreated      = "created"
+	EventTypeAccountTitleChanged = "changed"
+	EventTypeAccountDeleted      = "deleted"
 )
 
 type AccountCreatedEvent struct {
@@ -26,7 +26,7 @@ func (e *AccountCreatedEvent) GetAggregateName() event.AggregateName {
 }
 
 func (e *AccountCreatedEvent) GetType() event.Type {
-	return AccountCreatedEventType
+	return EventTypeAccountCreated
 }
 
 type AccountTitleChangedEvent struct {
@@ -43,7 +43,7 @@ func (e *AccountTitleChangedEvent) GetAggregateName() event.AggregateName {
 }
 
 func (e *AccountTitleChangedEvent) GetType() event.Type {
-	return AccountTitleChangedEventType
+	return EventTypeAccountTitleChanged
 }
 
 type AccountDeletedEvent struct {
@@ -59,5 +59,5 @@ func (e *AccountDeletedEvent) GetAggregateName() event.AggregateName {
 }
 
 func (e *AccountDeletedEvent) GetType() event.Type {
-	return AccountDeletedEventType
+	return EventTypeAccountDeleted
 }

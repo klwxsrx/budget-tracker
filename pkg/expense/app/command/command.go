@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	createAccountType = "expense.account.create"
-	renameAccountType = "expense.account.rename"
-	deleteAccountType = "expense.account.delete"
+	typeCreateAccount = "expense.account.create"
+	typeRenameAccount = "expense.account.rename"
+	typeDeleteAccount = "expense.account.delete"
 )
 
 type CreateAccount struct {
@@ -18,7 +18,7 @@ type CreateAccount struct {
 }
 
 func (c *CreateAccount) GetType() command.Type {
-	return createAccountType
+	return typeCreateAccount
 }
 
 type RenameAccount struct {
@@ -27,7 +27,7 @@ type RenameAccount struct {
 }
 
 func (c *RenameAccount) GetType() command.Type {
-	return renameAccountType
+	return typeRenameAccount
 }
 
 type DeleteAccount struct {
@@ -35,5 +35,5 @@ type DeleteAccount struct {
 }
 
 func (c *DeleteAccount) GetType() command.Type {
-	return deleteAccountType
+	return typeDeleteAccount
 }

@@ -6,9 +6,9 @@ import (
 )
 
 var ResultMap = map[error]commonCommand.Result{
-	domain.InvalidAccountTitleError:      commonCommand.ResultInvalidArgument,
-	domain.AlreadyDeletedAccountError:    commonCommand.ResultNotFound,
-	domain.AccountTitleIsDuplicatedError: commonCommand.ResultDuplicateConflict,
-	domain.AccountIsNotExistsError:       commonCommand.ResultNotFound,
-	domain.InvalidCurrencyError:          commonCommand.ResultInvalidArgument,
+	domain.ErrorInvalidAccountTitle:      commonCommand.ResultInvalidArgument,
+	domain.ErrorAlreadyDeletedAccount:    commonCommand.ResultNotFound,
+	domain.ErrorAccountTitleIsDuplicated: commonCommand.ResultDuplicateConflict,
+	domain.ErrorAccountIsNotExists:       commonCommand.ResultNotFound,
+	domain.ErrorInvalidCurrency:          commonCommand.ResultInvalidArgument,
 }
