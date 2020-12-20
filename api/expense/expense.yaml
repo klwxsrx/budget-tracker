@@ -33,6 +33,10 @@ paths:
       responses:
         204:
           description: ''
+        400:
+          description: 'Returns when invalid parameters were specified'
+        409:
+          description: 'Returns when the title is duplicated'
   /account/{accountId}/title:
     put:
       tags:
@@ -60,6 +64,12 @@ paths:
       responses:
         204:
           description: ''
+        400:
+          description: 'Returns when invalid parameters were specified'
+        404:
+          description: 'Returns when the account is not exist or deleted'
+        409:
+          description: 'Returns when the title is duplicated'
   /account/{accountId}:
     delete:
       tags:
@@ -76,3 +86,7 @@ paths:
       responses:
         204:
           description: ''
+        400:
+          description: 'Returns when invalid parameters were specified'
+        404:
+          description: 'Returns when the account is not exist or deleted'

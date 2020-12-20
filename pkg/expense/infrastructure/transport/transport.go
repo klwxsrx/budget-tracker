@@ -100,11 +100,21 @@ func getHandlerFunc(bus appCommand.Bus, parser commandParser) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if bus.Publish(cmd) != nil {
+
+		switch bus.Publish(cmd) {
+		case appCommand.ResultSuccess:
+			w.WriteHeader(http.StatusNoContent)
+		case appCommand.ResultInvalidArgument:
+			w.WriteHeader(http.StatusBadRequest)
+		case appCommand.ResultNotFound:
+			w.WriteHeader(http.StatusNotFound)
+		case appCommand.ResultDuplicateConflict:
+			w.WriteHeader(http.StatusConflict)
+		case appCommand.ResultUnknownError:
 			w.WriteHeader(http.StatusInternalServerError)
-			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
 		}
-		w.WriteHeader(http.StatusOK)
 	}
 }
 

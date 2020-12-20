@@ -48,7 +48,8 @@ func NewContainer(client commonMysql.TransactionalClient, broker pulsar.Connecti
 	storedEventHandler := commandStoreEvent.NewHandler(unsentEventProvider, eventBus, sync, logger)
 	storedEventHandlingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
 
-	bus := registerCommandHandlers(commonCommand.NewBusRegistry(logger), storedEventHandlingUnitOfWork)
+	busRegistry := commonCommand.NewBusRegistry(command.ResultMap, logger)
+	bus := registerCommandHandlers(busRegistry, storedEventHandlingUnitOfWork)
 
 	return &container{bus}, nil
 }
