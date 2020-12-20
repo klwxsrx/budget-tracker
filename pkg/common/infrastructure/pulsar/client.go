@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
-const connectionTimeout = time.Minute
-const operationTimeout = time.Minute
+const (
+	connectionTimeout = time.Minute
+	operationTimeout  = time.Minute
+)
 
 type Config struct {
 	URL string

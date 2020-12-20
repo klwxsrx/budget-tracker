@@ -15,10 +15,11 @@ type Handler interface {
 }
 
 type handler struct {
-	busHandler   *UnsentEventBusHandler
-	logger       logger.Logger
-	needDispatch int32
-	stopChan     chan struct{}
+	busHandler     *UnsentEventBusHandler
+	logger         logger.Logger
+	needDispatch   int32
+	stopChan       chan struct{}
+	stopErrorsChan chan struct{}
 }
 
 func (d *handler) HandleUnsentStoredEvents() {
@@ -35,7 +36,9 @@ func (d *handler) start() {
 		for {
 			select {
 			case err := <-errorsChan:
-				d.logger.WithError(err).Error("failed to handle unsent events") // TODO another stopchan
+				d.logger.WithError(err).Error("failed to handle unsent events")
+			case <-d.stopErrorsChan:
+				return
 			}
 		}
 	}()
@@ -50,10 +53,12 @@ func (d *handler) start() {
 					err := d.busHandler.ProcessUnsentEvents()
 					if err != nil {
 						atomic.StoreInt32(&d.needDispatch, 1)
-						errorsChan <- err // TODO: test case without connection
+						errorsChan <- err
 					}
 				}
 			case <-d.stopChan:
+				ticker.Stop()
+				d.stopErrorsChan <- struct{}{}
 				return
 			}
 		}
@@ -62,7 +67,7 @@ func (d *handler) start() {
 
 func NewHandler(unsentEventProvider UnsentEventProvider, eventBus Bus, sync persistence.Synchronization, logger logger.Logger) Handler {
 	busHandler := &UnsentEventBusHandler{unsentEventProvider, eventBus, sync}
-	dispatcher := &handler{busHandler, logger, 1, make(chan struct{})}
+	dispatcher := &handler{busHandler, logger, 1, make(chan struct{}), make(chan struct{})}
 	go dispatcher.start()
 	return dispatcher
 }
