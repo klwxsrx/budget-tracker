@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-var ErrorInvalidParameter = errors.New("invalid parameter")
+var errorInvalidParameter = errors.New("invalid parameter")
 
 type commandParser func(r *http.Request) (appCommand.Command, error)
 
@@ -59,7 +59,7 @@ func createAccountParser(r *http.Request) (appCommand.Command, error) {
 		return nil, err
 	}
 	if body.Title == "" || body.Currency == "" {
-		return nil, ErrorInvalidParameter
+		return nil, errorInvalidParameter
 	}
 	return &command.CreateAccount{Title: body.Title, Currency: body.Currency, InitialBalance: body.InitialBalance}, nil
 }
@@ -72,7 +72,7 @@ func renameAccountParser(r *http.Request) (appCommand.Command, error) {
 
 	accountID, err := parseUuid(mux.Vars(r)["accountId"])
 	if body.Title == "" || err != nil {
-		return nil, ErrorInvalidParameter
+		return nil, errorInvalidParameter
 	}
 	return &command.RenameAccount{ID: accountID, Title: body.Title}, nil
 }
@@ -96,9 +96,14 @@ func parseJsonFromBody(r *http.Request, v interface{}) error {
 func getHandlerFunc(bus appCommand.Bus, parser commandParser) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cmd, err := parser(r)
-		if err != nil {
+		switch {
+		case errors.Is(err, errorInvalidParameter):
 			w.WriteHeader(http.StatusBadRequest)
 			return
+		case err != nil:
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		default:
 		}
 
 		switch bus.Publish(cmd) {

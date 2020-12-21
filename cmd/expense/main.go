@@ -16,8 +16,6 @@ import (
 	"syscall"
 )
 
-// TODO: use error package with stacktrace
-
 func main() {
 	logger := infrastructureLogger.New(initLogrus())
 	config, err := ParseConfig()

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
 	"strings"
@@ -15,7 +16,7 @@ const (
 var (
 	ErrorInvalidAccountTitle   = errors.New("invalid title")
 	ErrorAlreadyDeletedAccount = errors.New("account is already deleted")
-	ErrorUnknownAccountEvent   = errors.New("unknown event type")
+	errorUnknownAccountEvent   = errors.New("unknown account event")
 )
 
 type AccountID struct {
@@ -37,22 +38,27 @@ type AccountState struct {
 }
 
 func (a *AccountState) Apply(e event.Event) error {
+	var err error
 	switch e.GetType() {
 	case EventTypeAccountCreated:
-		return a.applyCreatedEvent(e)
+		err = a.applyCreatedEvent(e)
 	case EventTypeAccountTitleChanged:
-		return a.applyTitleChangedEvent(e)
+		err = a.applyTitleChangedEvent(e)
 	case EventTypeAccountDeleted:
-		return a.applyDeletedEvent(e)
+		err = a.applyDeletedEvent(e)
 	default:
-		return ErrorUnknownAccountEvent
+		err = errorUnknownAccountEvent
 	}
+	if err != nil {
+		return fmt.Errorf("%v %v", err, e.GetType())
+	}
+	return nil
 }
 
 func (a *AccountState) applyCreatedEvent(e event.Event) error {
 	ev, ok := e.(*AccountCreatedEvent)
 	if !ok {
-		return ErrorUnknownAccountEvent
+		return errorUnknownAccountEvent
 	}
 
 	a.ID = ev.ID
@@ -64,7 +70,7 @@ func (a *AccountState) applyCreatedEvent(e event.Event) error {
 func (a *AccountState) applyTitleChangedEvent(e event.Event) error {
 	ev, ok := e.(*AccountTitleChangedEvent)
 	if !ok {
-		return ErrorUnknownAccountEvent
+		return errorUnknownAccountEvent
 	}
 
 	a.Title = ev.Title
@@ -74,7 +80,7 @@ func (a *AccountState) applyTitleChangedEvent(e event.Event) error {
 func (a *AccountState) applyDeletedEvent(e event.Event) error {
 	_, ok := e.(*AccountDeletedEvent)
 	if !ok {
-		return ErrorUnknownAccountEvent
+		return errorUnknownAccountEvent
 	}
 	a.Status = AccountStatusDeleted
 	return nil

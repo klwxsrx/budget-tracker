@@ -1,6 +1,9 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	ErrorInvalidCurrency = errors.New("currency is invalid")
@@ -21,7 +24,7 @@ var availableCurrencies = map[Currency]bool{
 
 func validateCurrency(c Currency) error {
 	if _, ok := availableCurrencies[c]; !ok {
-		return ErrorInvalidCurrency
+		return fmt.Errorf("%v: %v", ErrorInvalidCurrency, c)
 	}
 	return nil
 }
