@@ -1,6 +1,7 @@
 package storedevent
 
 import (
+	"context"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/persistence"
 	"sync/atomic"
@@ -11,38 +12,19 @@ const dispatchPeriod = time.Second
 
 type Handler interface {
 	HandleUnsentStoredEvents()
-	Stop()
 }
 
 type handler struct {
-	busHandler     *UnsentEventBusHandler
-	logger         logger.Logger
-	needDispatch   int32
-	stopChan       chan struct{}
-	stopErrorsChan chan struct{}
+	busHandler   *UnsentEventBusHandler
+	logger       logger.Logger
+	needDispatch int32
 }
 
 func (d *handler) HandleUnsentStoredEvents() {
 	atomic.StoreInt32(&d.needDispatch, 1)
 }
 
-func (d *handler) Stop() {
-	d.stopChan <- struct{}{}
-}
-
-func (d *handler) start() {
-	errorsChan := make(chan error)
-	go func() {
-		for {
-			select {
-			case err := <-errorsChan:
-				d.logger.WithError(err).Error("failed to handle unsent events")
-			case <-d.stopErrorsChan:
-				return
-			}
-		}
-	}()
-
+func (d *handler) start(ctx context.Context) {
 	ticker := time.NewTicker(dispatchPeriod)
 	go func() {
 		for {
@@ -53,21 +35,25 @@ func (d *handler) start() {
 					err := d.busHandler.ProcessUnsentEvents()
 					if err != nil {
 						atomic.StoreInt32(&d.needDispatch, 1)
-						errorsChan <- err
+						d.logger.WithError(err).Error("failed to handle unsent events")
 					}
 				}
-			case <-d.stopChan:
+			case <-ctx.Done():
 				ticker.Stop()
-				d.stopErrorsChan <- struct{}{}
 				return
 			}
 		}
 	}()
 }
 
-func NewHandler(unsentEventProvider UnsentEventProvider, eventBus Bus, sync persistence.Synchronization, logger logger.Logger) Handler {
+func NewHandler(
+	unsentEventProvider UnsentEventProvider,
+	eventBus Bus, sync persistence.Synchronization,
+	logger logger.Logger,
+	ctx context.Context,
+) Handler {
 	busHandler := &UnsentEventBusHandler{unsentEventProvider, eventBus, sync}
-	dispatcher := &handler{busHandler, logger, 1, make(chan struct{}), make(chan struct{})}
-	go dispatcher.start()
+	dispatcher := &handler{busHandler, logger, 1}
+	dispatcher.start(ctx)
 	return dispatcher
 }

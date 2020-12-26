@@ -3,26 +3,32 @@ package pulsar
 import (
 	"context"
 	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/klwxsrx/expense-tracker/pkg/common/app/messaging"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
 )
 
-type bus struct {
-	producer pulsar.Producer
-	ctx      context.Context
+type eventbus struct {
+	producer   pulsar.Producer
+	serializer messaging.StoredEventSerializer
+	ctx        context.Context
 }
 
-func (b *bus) Dispatch(event *storedevent.StoredEvent) error {
-	msg := &pulsar.ProducerMessage{
-		Payload: event.EventData,
+func (b *eventbus) Dispatch(event *storedevent.StoredEvent) error {
+	eventMsg, err := b.serializer.Serialize(event)
+	if err != nil {
+		return err
 	}
-	_, err := b.producer.Send(b.ctx, msg)
+	msg := &pulsar.ProducerMessage{
+		Payload: eventMsg,
+	}
+	_, err = b.producer.Send(b.ctx, msg)
 	return err
 }
 
-func NewEventBus(con Connection, ctx context.Context) (storedevent.Bus, error) {
-	p, err := con.CreateProducer(&ProducerConfig{Topic: "domain-event"})
+func NewEventBus(con Connection, serializer messaging.StoredEventSerializer, ctx context.Context) (storedevent.Bus, error) {
+	producer, err := con.CreateProducer(&ProducerConfig{Topic: domainEventTopic})
 	if err != nil {
 		return nil, err
 	}
-	return &bus{p, ctx}, nil
+	return &eventbus{producer, serializer, ctx}, nil
 }

@@ -17,6 +17,6 @@ func (s *eventSerializer) Serialize(event domain.Event) (string, error) {
 	return string(result), nil
 }
 
-func NewSerializer() appEvent.Serializer {
+func NewEventSerializer() appEvent.Serializer {
 	return &eventSerializer{}
 }

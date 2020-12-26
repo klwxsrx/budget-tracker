@@ -22,6 +22,7 @@ type ProducerConfig struct {
 type ConsumerConfig struct {
 	Topic            string
 	SubscriptionName string
+	InitialPosition  *pulsar.SubscriptionInitialPosition
 }
 
 type Connection interface {
@@ -41,10 +42,14 @@ func (c *connection) CreateProducer(config *ProducerConfig) (pulsar.Producer, er
 }
 
 func (c *connection) Subscribe(config *ConsumerConfig) (pulsar.Consumer, error) {
-	return c.client.Subscribe(pulsar.ConsumerOptions{
+	consumerConfig := pulsar.ConsumerOptions{
 		Topic:            config.Topic,
 		SubscriptionName: config.SubscriptionName,
-	})
+	}
+	if config.InitialPosition != nil {
+		consumerConfig.SubscriptionInitialPosition = *config.InitialPosition
+	}
+	return c.client.Subscribe(consumerConfig)
 }
 
 func (c *connection) Close() {

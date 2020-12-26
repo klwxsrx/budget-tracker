@@ -33,19 +33,25 @@ func registerCommandHandlers(bus commonCommand.BusRegistry, unitOfWork command.U
 	return bus
 }
 
-func NewContainer(client commonMysql.TransactionalClient, broker pulsar.Connection, logger logger.Logger, ctx context.Context) (Container, error) {
-	serializer := commonSerialization.NewSerializer()
+func NewContainer(
+	client commonMysql.TransactionalClient,
+	broker pulsar.Connection,
+	logger logger.Logger,
+	ctx context.Context,
+) (Container, error) {
+	serializer := commonSerialization.NewEventSerializer()
 	deserializer := serialization.NewEventDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
 	eventStore := commonMysql.NewStore(client, serializer)
 	unsentEventProvider := commonMysql.NewUnsentEventProvider(eventStore, client)
-	eventBus, err := pulsar.NewEventBus(broker, ctx)
+	storedEventSerializer := commonSerialization.NewStoredEventSerializer()
+	eventBus, err := pulsar.NewEventBus(broker, storedEventSerializer, ctx)
 	if err != nil {
 		return nil, err
 	}
 	sync := commonMysql.NewSynchronization(client)
-	storedEventHandler := commandStoreEvent.NewHandler(unsentEventProvider, eventBus, sync, logger)
+	storedEventHandler := commandStoreEvent.NewHandler(unsentEventProvider, eventBus, sync, logger, ctx)
 	storedEventHandlingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
 
 	busRegistry := commonCommand.NewBusRegistry(command.ResultMap, logger)
