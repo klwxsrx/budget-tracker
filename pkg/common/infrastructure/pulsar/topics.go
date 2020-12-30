@@ -1,3 +1,3 @@
 package pulsar
 
-const domainEventTopic = "domain_event"
+const TopicDomainEvent = "domain_event"

@@ -26,7 +26,7 @@ func (b *eventbus) Dispatch(event *storedevent.StoredEvent) error {
 }
 
 func NewEventBus(con Connection, serializer messaging.StoredEventSerializer, ctx context.Context) (storedevent.Bus, error) {
-	producer, err := con.CreateProducer(&ProducerConfig{Topic: domainEventTopic})
+	producer, err := con.CreateProducer(&ProducerConfig{Topic: TopicDomainEvent})
 	if err != nil {
 		return nil, err
 	}

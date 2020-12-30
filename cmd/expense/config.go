@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-type Config struct {
+type config struct {
 	DbName               string
 	DbAddress            string
 	DbUser               string
@@ -40,7 +40,7 @@ func parseEnvInt(key string, err error) (int, error) {
 	return int(num), nil
 }
 
-func ParseConfig() (*Config, error) {
+func parseConfig() (*config, error) {
 	var err error
 	dbName, err := parseEnvString("DATABASE_NAME", err)
 	dbAddress, err := parseEnvString("DATABASE_ADDRESS", err)
@@ -54,7 +54,7 @@ func ParseConfig() (*Config, error) {
 		return nil, err
 	}
 
-	return &Config{
+	return &config{
 		dbName,
 		dbAddress,
 		dbUser,

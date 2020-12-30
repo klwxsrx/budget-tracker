@@ -18,7 +18,7 @@ import (
 
 func main() {
 	logger := infrastructureLogger.New(initLogrus())
-	config, err := ParseConfig()
+	config, err := parseConfig()
 	if err != nil {
 		logger.WithError(err).Fatal("failed to parse config")
 	}
@@ -36,11 +36,12 @@ func main() {
 	defer broker.Close()
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
+	defer ctxCancel()
+
 	container, err := infrastructure.NewContainer(client, broker, logger, ctx)
 	if err != nil {
 		logger.WithError(err).Fatal(err.Error())
 	}
-	defer ctxCancel()
 
 	server := startServer(container.CommandBus(), logger)
 	logger.Info("app is ready")
@@ -57,11 +58,11 @@ func initLogrus() *logrus.Logger {
 	return l
 }
 
-func getPulsarClient(config *Config, logger appLogger.Logger) (pulsar.Connection, error) {
+func getPulsarClient(config *config, logger appLogger.Logger) (pulsar.Connection, error) {
 	return pulsar.NewConnection(pulsar.Config{URL: config.MessageBrokerAddress}, logger)
 }
 
-func getReadyDatabaseClient(config *Config, logger appLogger.Logger) (mysql.Database, mysql.TransactionalClient, error) {
+func getReadyDatabaseClient(config *config, logger appLogger.Logger) (mysql.Database, mysql.TransactionalClient, error) {
 	db, err := mysql.NewDatabase(mysql.Dsn{
 		User:     config.DbUser,
 		Password: config.DbPassword,
