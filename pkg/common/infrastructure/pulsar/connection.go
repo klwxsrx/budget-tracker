@@ -1,18 +1,19 @@
 package pulsar
 
 import (
+	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/cenkalti/backoff"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	"time"
 )
 
 const (
-	connectionTimeout = time.Minute
-	operationTimeout  = time.Minute
+	maxConnectionTime = time.Minute
 )
 
 type Config struct {
-	URL string
+	Address string
 }
 
 type ProducerConfig struct {
@@ -22,7 +23,6 @@ type ProducerConfig struct {
 type ConsumerConfig struct {
 	Topic            string
 	SubscriptionName string
-	InitialPosition  *pulsar.SubscriptionInitialPosition
 }
 
 type Connection interface {
@@ -46,9 +46,6 @@ func (c *connection) Subscribe(config *ConsumerConfig) (pulsar.Consumer, error) 
 		Topic:            config.Topic,
 		SubscriptionName: config.SubscriptionName,
 	}
-	if config.InitialPosition != nil {
-		consumerConfig.SubscriptionInitialPosition = *config.InitialPosition
-	}
 	return c.client.Subscribe(consumerConfig)
 }
 
@@ -56,15 +53,29 @@ func (c *connection) Close() {
 	c.client.Close()
 }
 
+func newClientExponentialBackoff(config Config, logger logger.Logger) (pulsar.Client, error) {
+	var client pulsar.Client
+	err := backoff.Retry(func() error {
+		var err error
+		client, err = pulsar.NewClient(pulsar.ClientOptions{
+			URL:    fmt.Sprintf("pulsar://%v", config.Address),
+			Logger: &loggerAdapter{logger},
+		})
+		return err
+	}, newOpenConnectionBackoff())
+	return client, err
+}
+
+func newOpenConnectionBackoff() *backoff.ExponentialBackOff {
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = maxConnectionTime
+	return b
+}
+
 func NewConnection(config Config, logger logger.Logger) (Connection, error) {
-	c, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL:               config.URL,
-		ConnectionTimeout: connectionTimeout,
-		OperationTimeout:  operationTimeout,
-		Logger:            &loggerAdapter{logger},
-	})
+	c, err := newClientExponentialBackoff(config, logger)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to broker: %v", err)
 	}
 	return &connection{c}, nil
 }

@@ -8,6 +8,9 @@ import (
 
 type config struct {
 	MessageBrokerAddress string
+	DbAddress            string
+	DbUser               string
+	DbPassword           string
 }
 
 func parseEnvString(key string, err error) (string, error) {
@@ -24,10 +27,18 @@ func parseEnvString(key string, err error) (string, error) {
 func parseConfig() (*config, error) {
 	var err error
 	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
+	dbAddress, err := parseEnvString("DATABASE_ADDRESS", err)
+	dbUser, err := parseEnvString("DATABASE_USER", err)
+	dbPassword, err := parseEnvString("DATABASE_PASSWORD", err)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &config{messageBrokerAddress}, nil
+	return &config{
+		messageBrokerAddress,
+		dbAddress,
+		dbUser,
+		dbPassword,
+	}, nil
 }

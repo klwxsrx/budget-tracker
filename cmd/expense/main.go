@@ -59,16 +59,16 @@ func initLogrus() *logrus.Logger {
 }
 
 func getPulsarClient(config *config, logger appLogger.Logger) (pulsar.Connection, error) {
-	return pulsar.NewConnection(pulsar.Config{URL: config.MessageBrokerAddress}, logger)
+	return pulsar.NewConnection(pulsar.Config{Address: config.MessageBrokerAddress}, logger)
 }
 
-func getReadyDatabaseClient(config *config, logger appLogger.Logger) (mysql.Database, mysql.TransactionalClient, error) {
-	db, err := mysql.NewDatabase(mysql.Dsn{
+func getReadyDatabaseClient(config *config, logger appLogger.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
+	db, err := mysql.NewConnection(mysql.Dsn{
 		User:     config.DbUser,
 		Password: config.DbPassword,
 		Address:  config.DbAddress,
 		Database: config.DbName,
-	}, config.DbMaxConnections)
+	}, config.DbMaxConnections, logger)
 	if err != nil {
 		return nil, nil, err
 	}

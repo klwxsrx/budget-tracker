@@ -1,39 +1,78 @@
-version: "3.8"
+version: "3.9"
 services:
-  expense-app:
+  expense:
     build:
       context: ../
       dockerfile: ./docker/expense.Dockerfile
-    image: klwxsrx/expense-app
-    container_name: expense-app
-    hostname: expense-app
+    image: klwxsrx/expense
+    container_name: expense
+    hostname: expense
     ports:
       - 8080:8080
     environment:
+      MESSAGE_BROKER_ADDRESS: "expense-pulsar:6650"
       DATABASE_NAME: expense
-      DATABASE_ADDRESS: "expense-db:3306"
+      DATABASE_ADDRESS: "expense-mysql:3306"
       DATABASE_USER: expense
       DATABASE_PASSWORD: 1234
       DATABASE_MAX_CONNECTIONS: 10
-      MESSAGE_BROKER_ADDRESS: "pulsar://expense-pulsar:6650"
     depends_on:
-      - expense-db
+      - expense-mysql
       - expense-pulsar
-  expense-db:
+  expense-view:
+    build:
+      context: ../
+      dockerfile: ./docker/expense-view.Dockerfile
+    image: klwxsrx/expense-view
+    container_name: expense-view
+    hostname: expense-view
+    ports:
+      - 8081:8080
+    environment:
+      MESSAGE_BROKER_ADDRESS: "expense-pulsar:6650"
+      DATABASE_ADDRESS: "expense-mongo:27017"
+      DATABASE_USER: expense-view
+      DATABASE_PASSWORD: 1234
+    depends_on:
+      - expense-mongo
+      - expense-pulsar
+  expense-mysql:
     image: mysql:8.0
-    container_name: expense-db
-    hostname: expense-db
+    container_name: expense-mysql
+    hostname: expense-mysql
     volumes:
-      - expense-db-data:/var/lib/mysql:rw
+      - expense-mysql-data:/var/lib/mysql:rw
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: expense
       MYSQL_USER: expense
       MYSQL_PASSWORD: 1234
+    healthcheck:
+      test: mysql -h127.0.0.1 -uexpense -p1234 -e 'SELECT 1'
+      interval: 10s
+      timeout: 1s
+  expense-mongo:
+    image: mongo:4.4
+    container_name: expense-mongo
+    hostname: expense-mongo
+    volumes:
+      - expense-mongo-data:/data/db:rw
+    environment:
+      MONGO_INITDB_DATABASE: expense-view
+      MONGO_INITDB_ROOT_USERNAME: expense-view
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/expense-view --quiet
+      interval: 10ss
+      timeout: 1s
   expense-pulsar:
     image: apachepulsar/pulsar:2.7.0
     container_name: expense-pulsar
     hostname: expense-pulsar
-    entrypoint: ["bin/pulsar", "standalone"]
+    volumes:
+      - expense-pulsar-data:/pulsar/data:rw
+    entrypoint: [ "bin/pulsar", "standalone" ]
 volumes:
-  expense-db-data:
+  expense-mysql-data:
+  expense-mongo-data:
+  expense-pulsar-data:

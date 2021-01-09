@@ -4,6 +4,7 @@ import (
 	"context"
 	appLogger "github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
 	infrastructureLogger "github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/logger"
+	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/mongo"
 	"github.com/klwxsrx/expense-tracker/pkg/common/infrastructure/pulsar"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -24,16 +25,29 @@ func main() {
 	}
 	defer broker.Close()
 
-	_, ctxCancel := context.WithCancel(context.Background())
-	defer ctxCancel()
+	ctx, ctxCancel := context.WithCancel(context.Background())
 
+	client, err := getMongoClient(config, ctx, logger)
+	if err != nil {
+		logger.WithError(err).Fatal("failed to setup mongo connection")
+	}
+	defer client.Close()
+	defer ctxCancel()
 	logger.Info("app is ready")
 
 	listenOSKillSignals()
 }
 
 func getPulsarClient(config *config, logger appLogger.Logger) (pulsar.Connection, error) {
-	return pulsar.NewConnection(pulsar.Config{URL: config.MessageBrokerAddress}, logger)
+	return pulsar.NewConnection(pulsar.Config{Address: config.MessageBrokerAddress}, logger)
+}
+
+func getMongoClient(config *config, ctx context.Context, logger appLogger.Logger) (mongo.Connection, error) {
+	return mongo.NewConnection(mongo.Config{
+		User:     config.DbUser,
+		Password: config.DbPassword,
+		Address:  config.DbAddress,
+	}, ctx, logger)
 }
 
 func initLogrus() *logrus.Logger {
