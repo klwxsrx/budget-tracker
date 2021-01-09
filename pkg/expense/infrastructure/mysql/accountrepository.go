@@ -74,10 +74,10 @@ func (r *accountRepository) buildAccountsFromEvents(events []*storedevent.Stored
 		if err != nil {
 			return nil, fmt.Errorf("failed to deserialize events: %v", err)
 		}
-		state, exists := states[event.GetAggregateID()]
+		state, exists := states[event.AggregateID()]
 		if !exists {
 			state = &domain.AccountState{}
-			states[event.GetAggregateID()] = state
+			states[event.AggregateID()] = state
 		}
 		err = state.Apply(event)
 		if err != nil {

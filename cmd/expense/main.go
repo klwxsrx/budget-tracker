@@ -72,7 +72,7 @@ func getReadyDatabaseClient(config *config, logger appLogger.Logger) (mysql.Data
 	if err != nil {
 		return nil, nil, err
 	}
-	client, err := db.GetClient()
+	client, err := db.Client()
 	if err != nil {
 		db.Close()
 		return nil, nil, err

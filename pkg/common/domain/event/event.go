@@ -9,7 +9,7 @@ type AggregateName string
 type Type string
 
 type Event interface {
-	GetAggregateID() AggregateID
-	GetAggregateName() AggregateName
-	GetType() Type
+	AggregateID() AggregateID
+	AggregateName() AggregateName
+	Type() Type
 }

@@ -43,9 +43,9 @@ func (s *store) Append(e domain.Event) error {
 		"INSERT INTO event"+
 			"(aggregate_id, aggregate_name, event_type, event_data, created_at)"+
 			"VALUES (UUID_TO_BIN(?), ?, ?, ?, ?)",
-		e.GetAggregateID().UUID,
-		e.GetAggregateName(),
-		e.GetType(),
+		e.AggregateID().UUID,
+		e.AggregateName(),
+		e.Type(),
 		eventData,
 		time.Now(),
 	)

@@ -17,7 +17,7 @@ type CreateAccount struct {
 	InitialBalance int
 }
 
-func (c *CreateAccount) GetType() command.Type {
+func (c *CreateAccount) Type() command.Type {
 	return typeCreateAccount
 }
 
@@ -26,7 +26,7 @@ type RenameAccount struct {
 	Title string
 }
 
-func (c *RenameAccount) GetType() command.Type {
+func (c *RenameAccount) Type() command.Type {
 	return typeRenameAccount
 }
 
@@ -34,6 +34,6 @@ type DeleteAccount struct {
 	ID uuid.UUID
 }
 
-func (c *DeleteAccount) GetType() command.Type {
+func (c *DeleteAccount) Type() command.Type {
 	return typeDeleteAccount
 }

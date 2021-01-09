@@ -9,7 +9,7 @@ import (
 type Type string
 
 type Command interface {
-	GetType() Type
+	Type() Type
 }
 
 type Result int
@@ -33,7 +33,7 @@ type BusRegistry interface {
 
 type Handler interface {
 	Execute(c Command) error
-	GetType() Type
+	Type() Type
 }
 
 type bus struct {
@@ -43,9 +43,9 @@ type bus struct {
 }
 
 func (b *bus) Publish(c Command) Result {
-	handler, ok := b.registry[c.GetType()]
+	handler, ok := b.registry[c.Type()]
 	if !ok {
-		b.logger.Error(fmt.Sprintf("cannot find handler for %v", c.GetType()))
+		b.logger.Error(fmt.Sprintf("cannot find handler for %v", c.Type()))
 		return ResultUnknownError
 	}
 
@@ -53,7 +53,7 @@ func (b *bus) Publish(c Command) Result {
 	result := b.getResultByError(err)
 
 	loggerWithFields := b.logger.WithError(err).With(logger.Fields{
-		"command": c.GetType(),
+		"command": c.Type(),
 		"data":    c,
 		"result":  result,
 	})
@@ -79,10 +79,10 @@ func (b *bus) getResultByError(err error) Result {
 }
 
 func (b *bus) Register(h Handler) error {
-	if _, exists := b.registry[h.GetType()]; exists {
-		return errors.New(fmt.Sprintf("handler is already set for %v", h.GetType()))
+	if _, exists := b.registry[h.Type()]; exists {
+		return errors.New(fmt.Sprintf("handler is already set for %v", h.Type()))
 	}
-	b.registry[h.GetType()] = h
+	b.registry[h.Type()] = h
 	return nil
 }
 

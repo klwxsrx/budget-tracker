@@ -16,7 +16,7 @@ type CreateAccountHandler struct {
 func (h *CreateAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*CreateAccount)
 	if !ok {
-		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
+		return errors.New(fmt.Sprintf("invalid command %v", c.Type()))
 	}
 	return h.uw.Critical(updateAccountLockName, func(r DomainRegistry) error {
 		initialBalance, err := domain.NewMoneyAmount(cmd.InitialBalance, domain.Currency(cmd.Currency))
@@ -27,7 +27,7 @@ func (h *CreateAccountHandler) Execute(c command.Command) error {
 	})
 }
 
-func (h *CreateAccountHandler) GetType() command.Type {
+func (h *CreateAccountHandler) Type() command.Type {
 	return typeCreateAccount
 }
 
@@ -38,14 +38,14 @@ type RenameAccountHandler struct {
 func (h *RenameAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*RenameAccount)
 	if !ok {
-		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
+		return errors.New(fmt.Sprintf("invalid command %v", c.Type()))
 	}
 	return h.uw.Critical(updateAccountLockName, func(r DomainRegistry) error {
 		return r.AccountService().Rename(domain.AccountID{UUID: cmd.ID}, cmd.Title)
 	})
 }
 
-func (h *RenameAccountHandler) GetType() command.Type {
+func (h *RenameAccountHandler) Type() command.Type {
 	return typeRenameAccount
 }
 
@@ -56,14 +56,14 @@ type DeleteAccountHandler struct {
 func (h *DeleteAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*DeleteAccount)
 	if !ok {
-		return errors.New(fmt.Sprintf("invalid command %v", c.GetType()))
+		return errors.New(fmt.Sprintf("invalid command %v", c.Type()))
 	}
 	return h.uw.Critical(updateAccountLockName, func(r DomainRegistry) error {
 		return r.AccountService().Delete(domain.AccountID{UUID: cmd.ID})
 	})
 }
 
-func (h *DeleteAccountHandler) GetType() command.Type {
+func (h *DeleteAccountHandler) Type() command.Type {
 	return typeDeleteAccount
 }
 

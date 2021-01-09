@@ -39,7 +39,7 @@ type AccountState struct {
 
 func (a *AccountState) Apply(e event.Event) error {
 	var err error
-	switch e.GetType() {
+	switch e.Type() {
 	case EventTypeAccountCreated:
 		err = a.applyCreatedEvent(e)
 	case EventTypeAccountTitleChanged:
@@ -50,7 +50,7 @@ func (a *AccountState) Apply(e event.Event) error {
 		err = errorUnknownAccountEvent
 	}
 	if err != nil {
-		return fmt.Errorf("%v %v", err, e.GetType())
+		return fmt.Errorf("%v %v", err, e.Type())
 	}
 	return nil
 }

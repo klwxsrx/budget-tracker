@@ -23,7 +23,7 @@ func (d Dsn) String() string {
 }
 
 type Database interface {
-	GetClient() (TransactionalClient, error)
+	Client() (TransactionalClient, error)
 	Close()
 }
 
@@ -33,7 +33,7 @@ type database struct {
 	db      *sqlx.DB
 }
 
-func (d *database) GetClient() (TransactionalClient, error) {
+func (d *database) Client() (TransactionalClient, error) {
 	if d.db == nil {
 		return nil, errors.New("connection is not opened")
 	}

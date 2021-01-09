@@ -17,15 +17,15 @@ type AccountCreatedEvent struct {
 	InitialBalance int       `json:"initial_balance"`
 }
 
-func (e *AccountCreatedEvent) GetAggregateID() event.AggregateID {
+func (e *AccountCreatedEvent) AggregateID() event.AggregateID {
 	return event.AggregateID{UUID: e.ID.UUID}
 }
 
-func (e *AccountCreatedEvent) GetAggregateName() event.AggregateName {
+func (e *AccountCreatedEvent) AggregateName() event.AggregateName {
 	return AccountAggregateName
 }
 
-func (e *AccountCreatedEvent) GetType() event.Type {
+func (e *AccountCreatedEvent) Type() event.Type {
 	return EventTypeAccountCreated
 }
 
@@ -34,15 +34,15 @@ type AccountTitleChangedEvent struct {
 	Title string    `json:"title"`
 }
 
-func (e *AccountTitleChangedEvent) GetAggregateID() event.AggregateID {
+func (e *AccountTitleChangedEvent) AggregateID() event.AggregateID {
 	return event.AggregateID{UUID: e.ID.UUID}
 }
 
-func (e *AccountTitleChangedEvent) GetAggregateName() event.AggregateName {
+func (e *AccountTitleChangedEvent) AggregateName() event.AggregateName {
 	return AccountAggregateName
 }
 
-func (e *AccountTitleChangedEvent) GetType() event.Type {
+func (e *AccountTitleChangedEvent) Type() event.Type {
 	return EventTypeAccountTitleChanged
 }
 
@@ -50,14 +50,14 @@ type AccountDeletedEvent struct {
 	ID AccountID `json:"id"`
 }
 
-func (e *AccountDeletedEvent) GetAggregateID() event.AggregateID {
+func (e *AccountDeletedEvent) AggregateID() event.AggregateID {
 	return event.AggregateID{UUID: e.ID.UUID}
 }
 
-func (e *AccountDeletedEvent) GetAggregateName() event.AggregateName {
+func (e *AccountDeletedEvent) AggregateName() event.AggregateName {
 	return AccountAggregateName
 }
 
-func (e *AccountDeletedEvent) GetType() event.Type {
+func (e *AccountDeletedEvent) Type() event.Type {
 	return EventTypeAccountDeleted
 }
