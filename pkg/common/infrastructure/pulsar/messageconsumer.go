@@ -1,7 +1,6 @@
 package pulsar
 
 import (
-	"context"
 	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
@@ -15,66 +14,65 @@ func (id messageID) Serialize() []byte {
 }
 
 type MessageConsumer struct {
-	handler  messaging.MessageHandler
+	handler  messaging.NamedMessageHandler
 	consumer pulsar.Consumer
-	context  context.Context
 	logger   logger.Logger
 }
 
 func (c *MessageConsumer) start() {
 	for msg := range c.consumer.Chan() {
-		err := c.handler.Handle(msg.Payload())
-		if err != nil {
-			c.logger.WithError(err).Error("failed to handle external event")
-			c.consumer.NackID(msg.ID())
+		typ, ok := msg.Properties()[propertyMessageType]
+		if !ok {
+			c.logger.Error(fmt.Sprintf("failed to get message type for %v", msg.ID().Serialize()))
+			c.consumer.Ack(msg)
 			continue
 		}
 
-		err = c.handler.SetOffset(msg.ID().Serialize())
+		err := c.handler.Handle(&messaging.Message{
+			ID:        msg.ID().Serialize(),
+			Type:      typ,
+			Data:      msg.Payload(),
+			EventTime: msg.EventTime(),
+		})
 		if err != nil {
-			c.logger.WithError(err).Error(fmt.Sprintf("failed to set offset to consumer: %v", c.handler.GetName()))
+			c.logger.WithError(err).Error(fmt.Sprintf("failed to handle message %v", msg.ID().Serialize()))
+			c.consumer.Nack(msg)
+			continue
 		}
+		c.consumer.Ack(msg)
 	}
 }
 
 func NewMessageConsumer(
 	topic string,
-	handler messaging.MessageHandler,
+	handler messaging.NamedMessageHandler,
 	con Connection,
-	ctx context.Context,
 	logger logger.Logger,
 ) (*MessageConsumer, error) {
-	offset, err := handler.GetOffset()
+	offset, err := handler.LatestMessageID()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get initial offset: %v", err)
+		return nil, fmt.Errorf("failed to get latest message: %v", err)
 	}
-
-	var initialPosition *pulsar.SubscriptionInitialPosition
-	if offset == nil {
-		earliest := pulsar.SubscriptionPositionEarliest
-		initialPosition = &earliest
+	initialPosition := pulsar.EarliestMessageID()
+	if offset != nil {
+		initialPosition = messageID(*offset)
 	}
 
 	pulsarConsumer, err := con.Subscribe(&ConsumerConfig{
 		Topic:            topic,
-		SubscriptionName: handler.GetName(),
-		InitialPosition:  initialPosition,
+		SubscriptionName: handler.Name(),
 	})
 	if err != nil {
 		return nil, err
 	}
-
-	if offset != nil {
-		err = pulsarConsumer.Seek(messageID(*offset))
-		if err != nil {
-			return nil, err
-		}
+	err = pulsarConsumer.Seek(initialPosition)
+	if err != nil {
+		return nil, err
 	}
 
 	consumer := &MessageConsumer{
 		handler:  handler,
 		consumer: pulsarConsumer,
-		context:  ctx,
 		logger:   logger,
 	}
 	go consumer.start()

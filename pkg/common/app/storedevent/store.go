@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type ID int
+type ID int64
 
 type StoredEvent struct {
 	ID            ID                  `db:"id"`

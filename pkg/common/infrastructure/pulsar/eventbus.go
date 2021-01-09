@@ -18,8 +18,12 @@ func (b *eventbus) Dispatch(event *storedevent.StoredEvent) error {
 	if err != nil {
 		return err
 	}
+	sequenceId := int64(event.ID)
 	msg := &pulsar.ProducerMessage{
-		Payload: eventMsg,
+		Payload:    eventMsg,
+		Properties: map[string]string{propertyMessageType: string(event.Type)},
+		EventTime:  event.CreatedAt,
+		SequenceID: &sequenceId,
 	}
 	_, err = b.producer.Send(b.ctx, msg)
 	return err

@@ -16,10 +16,10 @@ type MoneyAmount struct {
 	Currency Currency
 }
 
-var availableCurrencies = map[Currency]bool{
-	"RUB": true,
-	"USD": true,
-	"EUR": true,
+var availableCurrencies = map[Currency]struct{}{
+	"RUB": {},
+	"USD": {},
+	"EUR": {},
 }
 
 func validateCurrency(c Currency) error {

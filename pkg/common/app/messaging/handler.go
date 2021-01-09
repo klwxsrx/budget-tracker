@@ -1,11 +1,22 @@
 package messaging
 
+import "time"
+
 type MessageID []byte
-type Message []byte
+
+type Message struct {
+	ID        MessageID
+	Type      string
+	Data      []byte
+	EventTime time.Time
+}
 
 type MessageHandler interface {
-	Handle(e Message) error
-	SetOffset(id MessageID) error
-	GetOffset() *MessageID
-	GetName() string
+	Handle(e *Message) error
+}
+
+type NamedMessageHandler interface {
+	MessageHandler
+	Name() string
+	LatestMessageID() (*MessageID, error)
 }
