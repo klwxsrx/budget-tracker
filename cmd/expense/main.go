@@ -68,7 +68,7 @@ func getReadyDatabaseClient(config *config, logger appLogger.Logger) (mysql.Conn
 		Password: config.DbPassword,
 		Address:  config.DbAddress,
 		Database: config.DbName,
-	}, config.DbMaxConnections, logger)
+	}, logger)
 	if err != nil {
 		return nil, nil, err
 	}

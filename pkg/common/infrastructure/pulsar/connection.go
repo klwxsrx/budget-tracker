@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	maxConnectionTime = time.Minute
+	connectionTimeout     = time.Minute
+	maxTestConnectionTime = time.Minute
 )
 
 type Config struct {
@@ -53,29 +54,39 @@ func (c *connection) Close() {
 	c.client.Close()
 }
 
-func newClientExponentialBackoff(config Config, logger logger.Logger) (pulsar.Client, error) {
-	var client pulsar.Client
-	err := backoff.Retry(func() error {
-		var err error
-		client, err = pulsar.NewClient(pulsar.ClientOptions{
-			URL:    fmt.Sprintf("pulsar://%v", config.Address),
-			Logger: &loggerAdapter{logger},
-		})
-		return err
-	}, newOpenConnectionBackoff())
-	return client, err
-}
+func testCreateProducer(client pulsar.Client) error {
+	exponentialBackOff := backoff.NewExponentialBackOff()
+	exponentialBackOff.MaxElapsedTime = maxTestConnectionTime
 
-func newOpenConnectionBackoff() *backoff.ExponentialBackOff {
-	b := backoff.NewExponentialBackOff()
-	b.MaxElapsedTime = maxConnectionTime
-	return b
+	err := backoff.Retry(func() error {
+		p, err := client.CreateProducer(pulsar.ProducerOptions{
+			Topic: "non-persistent://public/default/test-topic",
+		})
+		if err != nil {
+			return err
+		}
+		p.Close()
+		return nil
+	}, exponentialBackOff)
+	if err != nil {
+		return fmt.Errorf("failed to create test producer: %v", err)
+	}
+	return nil
 }
 
 func NewConnection(config Config, logger logger.Logger) (Connection, error) {
-	c, err := newClientExponentialBackoff(config, logger)
+	c, err := pulsar.NewClient(pulsar.ClientOptions{
+		URL:               fmt.Sprintf("pulsar://%v", config.Address),
+		ConnectionTimeout: connectionTimeout,
+		Logger:            &loggerAdapter{logger},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to broker: %v", err)
+	}
+
+	err = testCreateProducer(c)
+	if err != nil {
+		return nil, err
 	}
 	return &connection{c}, nil
 }

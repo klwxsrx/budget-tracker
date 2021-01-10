@@ -15,7 +15,6 @@ services:
       DATABASE_ADDRESS: "expense-mysql:3306"
       DATABASE_USER: expense
       DATABASE_PASSWORD: 1234
-      DATABASE_MAX_CONNECTIONS: 10
     depends_on:
       - expense-mysql
       - expense-pulsar

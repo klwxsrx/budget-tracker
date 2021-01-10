@@ -12,7 +12,6 @@ type config struct {
 	DbAddress            string
 	DbUser               string
 	DbPassword           string
-	DbMaxConnections     int
 	MigrationsDir        string
 	MessageBrokerAddress string
 }
@@ -46,7 +45,6 @@ func parseConfig() (*config, error) {
 	dbAddress, err := parseEnvString("DATABASE_ADDRESS", err)
 	dbUser, err := parseEnvString("DATABASE_USER", err)
 	dbPassword, err := parseEnvString("DATABASE_PASSWORD", err)
-	dbMaxConnections, err := parseEnvInt("DATABASE_MAX_CONNECTIONS", err)
 	migrationsDir, err := parseEnvString("MIGRATIONS_DIR", err)
 	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
 
@@ -59,7 +57,6 @@ func parseConfig() (*config, error) {
 		dbAddress,
 		dbUser,
 		dbPassword,
-		dbMaxConnections,
 		migrationsDir,
 		messageBrokerAddress,
 	}, nil

@@ -9,7 +9,10 @@ import (
 	"time"
 )
 
-const maxConnectionTime = time.Minute
+const (
+	maxConnectionTime  = time.Minute
+	maxOpenConnections = 10
+)
 
 type Dsn struct {
 	User     string
@@ -28,10 +31,9 @@ type Connection interface {
 }
 
 type connection struct {
-	config  Dsn
-	maxConn int
-	db      *sqlx.DB
-	logger  logger.Logger
+	config Dsn
+	db     *sqlx.DB
+	logger logger.Logger
 }
 
 func (c *connection) Client() (TransactionalClient, error) {
@@ -48,7 +50,7 @@ func (c *connection) Close() {
 func (c *connection) openConnection() error {
 	var err error
 	c.db, err = sqlx.Open("mysql", c.config.String()+"?parseTime=true")
-	c.db.SetMaxOpenConns(c.maxConn)
+	c.db.SetMaxOpenConns(maxOpenConnections)
 	err = backoff.Retry(func() error {
 		return c.db.Ping()
 	}, newOpenConnectionBackoff())
@@ -65,8 +67,8 @@ func newOpenConnectionBackoff() *backoff.ExponentialBackOff {
 	return b
 }
 
-func NewConnection(config Dsn, maxConnections int, logger logger.Logger) (Connection, error) {
-	db := &connection{config: config, maxConn: maxConnections, logger: logger}
+func NewConnection(config Dsn, logger logger.Logger) (Connection, error) {
+	db := &connection{config: config, logger: logger}
 	err := db.openConnection()
 	return db, err
 }
