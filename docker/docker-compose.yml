@@ -62,7 +62,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: 1234
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/expense-view --quiet
-      interval: 10ss
+      interval: 10s
       timeout: 1s
   expense-pulsar:
     image: apachepulsar/pulsar:2.7.0
