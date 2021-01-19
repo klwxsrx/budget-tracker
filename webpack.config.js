@@ -3,11 +3,14 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
-  entry: './src/main.js',
+  entry: './web/main.js',
   output: {
     filename: 'bundle.js',
   },
   devtool: 'source-map',
+  devServer: {
+    contentBase: __dirname,
+  },
   module: {
     rules: [
       {test: /\.js$/, use: 'babel-loader'},
@@ -31,7 +34,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/index.html',
+      template: './web/index.html',
     }),
     new MiniCssExtractPlugin({
       filename: 'styles.css',

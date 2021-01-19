@@ -24,7 +24,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "src/scss/variables";
+@import "web/scss/variables";
 
 .page-container {
   background-color: $background;

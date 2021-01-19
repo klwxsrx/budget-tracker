@@ -4,7 +4,7 @@
   "main": "main.js",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "fix": "eslint --fix --ext .js,.vue src",
+    "fix": "eslint --fix --ext .js,.vue web",
     "clean": "rimraf dist",
     "build": "webpack --mode production",
     "serve": "webpack-dev-server --history-api-fallback --mode development"
