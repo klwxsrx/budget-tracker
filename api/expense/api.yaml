@@ -1,18 +1,16 @@
 openapi: 3.0.0
 info:
-  description: This is an API for the expense microservice
   version: 1.0.0
-  title: Expense Microservice
+  title: Expense Service
 tags:
   - name: Account
-    description: Manipulates accounts
 paths:
   /account:
     post:
       tags:
         - Account
-      summary: Create a new account
-      operationId: createAccount
+      summary: Add a new account
+      operationId: add
       requestBody:
         content:
           application/json:
@@ -32,19 +30,19 @@ paths:
         required: true
       responses:
         204:
-          description: ''
+          description: 'Success result'
         400:
           description: 'Returns when invalid parameters were specified'
         409:
           description: 'Returns when the title is duplicated'
-  /account/{accountId}/title:
+  /account/{accountID}/title: # TODO: change in code
     put:
       tags:
         - Account
-      summary: Changes a title for an account
-      operationId: renameAccount
+      summary: Change a title for an account
+      operationId: rename
       parameters:
-        - name: accountId
+        - name: accountID
           in: path
           required: true
           schema:
@@ -63,30 +61,41 @@ paths:
         required: true
       responses:
         204:
-          description: ''
+          description: 'Success result'
         400:
           description: 'Returns when invalid parameters were specified'
         404:
           description: 'Returns when the account is not exist or deleted'
         409:
           description: 'Returns when the title is duplicated'
-  /account/{accountId}:
-    delete:
+  /account/{accountID}/status/{status}:
+    put:
       tags:
         - Account
-      summary: Deletes an account
-      operationId: deleteAccount
+      summary: Change a status for an account
+      operationId: changeStatus
       parameters:
-        - name: accountId
+        - name: accountID
           in: path
           required: true
           schema:
             type: string
             format: uuid
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - active
+              - cancelled
+              - deleted
       responses:
         204:
-          description: ''
+          description: 'Success result'
         400:
           description: 'Returns when invalid parameters were specified'
+        403:
+          description: 'Returns when the status cannot be changed to specified'
         404:
           description: 'Returns when the account is not exist or deleted'

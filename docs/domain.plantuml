@@ -1,0 +1,164 @@
+@startuml
+hide empty fields
+hide empty methods
+
+enum PayerStatus {
+ VISIBLE
+ HIDDEN
+}
+
+entity Payer {
+ -id PayerID
+ -status PayerStatus
+ -title string
+}
+
+Payer ..> PayerStatus
+
+entity PayerList {
+ -id BudgetID
+ -payers Payer[]
+ +AddPayer(title string)
+ +RenamePayer(id PayerID, title string)
+ +ShowPayer(id PayerID)
+ +HidePayer(id PayerID)
+ +DeletePayer(id PayerID)
+}
+
+PayerList *-- Payer
+
+
+
+enum AccountStatus {
+ ACTIVE
+ CANCELLED
+}
+
+entity Account {
+ -id AccountID
+ -status AccountStatus
+ -title string
+ -currency Currency
+ +rename(name string)
+ +activate()
+ +cancel()
+}
+
+Account ..> AccountStatus
+
+entity AccountList {
+ -id BudgetID
+ -accounts Account[]
+ +AddAccount(title string, status AccountStatus, currency Currency)
+ +ReorderAccount(id AccountID, uint position)
+ +RenameAccount(id AccountID, name string)
+ +ActivateAccount(id AccountID)
+ +CancelAccount(id AccountID)
+ +DeleteAccount(id AccountID)
+}
+
+AccountList *-- Account
+
+
+
+entity Category {
+ -id CategoryID
+ -title string
+ -currency Currency
+ +rename(name string)
+}
+
+entity CategoryGroup {
+ -id CategoryGroupID
+ -title string
+ -categories []Category
+ +rename(title string)
+ +addCategory(category Category)
+ +renameCategory(categoryID CategoryID, name string)
+ +reorderCategory(categoryID CategoryID, uint position)
+ +extractCategory(id CategoryID)
+}
+
+CategoryGroup *-- Category
+
+entity CategoryList {
+ -id BudgetID
+ -categories []CategoryGroup
+ -defaultCategories map[Currency]Category
+ -hiddenCategory CategoryGroup
+ +AddGroup(title string)
+ +RenameGroup(id CategoryGroupID, title string)
+ +ReorderGroup(id CategoryGroupID, uint position)
+ +DeleteGroup(id CategoryGroupID)
+ +AddCategory(title string, status CategoryStatus, groupID CategoryGroupID, currency Currency)
+ +RenameCategory(id CategoryID, title string)
+ +MoveCategory(id CategoryID, groupID CategoryGroupID, uint position)
+ +MoveCategories(from CategoryGroupID, to CategoryGroupID)
+ +HideCategory(id CategoryID)
+ +DeleteCategory(id CategoryID)
+}
+
+CategoryList *-- CategoryGroup
+
+
+
+class MoneyAmount {
+ +Amount int
+ +Currency Currency
+}
+
+entity Transaction {
+ -id TransactionID
+ -payer PayerID
+ -accountFrom AccountID
+ -accountTo AccountID
+ -category CategoryID
+ -out MoneyAmount
+ -in MoneyAmount
+ -createdAt Time
+}
+
+entity TransactionList {
+ -id BudgetID
+ +SaveExpense(id ?TransactionID, from Account, to Category, out, in MoneyAmount)
+ +SaveIncome(id ?TransactionID, from Payer, to Account, out, in MoneyAmount)
+ +SaveTransfer(id ?TransactionID, from, to Account, out, in MoneyAmount)
+ +ChangeCategory(from, to Category)
+ +Delete(id TransactionID)
+}
+
+TransactionList *-- Transaction
+TransactionList ..> Payer
+TransactionList ..> Account
+TransactionList ..> Category
+
+
+
+class BudgetPeriodID {
+  +month uint
+  +year uint
+}
+
+entity Budget {
+ -id BudgetID
+ -mainCurrency Currency
+ -periodFirstDay uint
+ +SetMainCurrency(currency Currency)
+ +SetPeriodFirstDay(day uint)
+ +SetGoal(id BudgetPeriodID, category Category, TODO)
+ +SetNote(id BudgetPeriodID, category Category, note string)
+ +MoveMoney(id BudgetPeriodID, from, to Category, amount MoneyAmount)
+ TODO: other methods
+}
+
+Budget ..> Category
+
+entity BudgetPeriod {
+ -id BudgetPeriodID
+ -goal Goal
+ -note string
+}
+
+Budget *-- BudgetPeriod
+
+@enduml
