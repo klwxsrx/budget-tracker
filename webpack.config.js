@@ -20,11 +20,6 @@ module.exports = {
       {test: /\.svg$/, use: 'file-loader'},
       {test: /\.(woff|woff2|eot|ttf|otf)$/, use: 'file-loader'},
       {
-        resourceQuery: /blockType=i18n/,
-        type: 'javascript/auto',
-        loader: '@kazupon/vue-i18n-loader',
-      },
-      {
         enforce: 'pre',
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',

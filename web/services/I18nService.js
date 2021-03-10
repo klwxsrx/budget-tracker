@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import moment from 'moment'
 
+import ru from '../locales/ru.json'
+import en from '../locales/en.json'
 const supportedLocales = [
   'en',
   'ru',
@@ -10,6 +12,10 @@ const supportedLocales = [
 Vue.use(VueI18n)
 let vueI18n = new VueI18n({
   locale: getUserLocale(),
+  messages: {
+    en,
+    ru,
+  },
 })
 
 moment.locale(vueI18n.locale)

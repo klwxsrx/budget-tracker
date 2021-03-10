@@ -1,0 +1,9 @@
+{
+  "balance": {
+    "total_balance": "Баланс"
+  },
+  "navigation": {
+    "transactions": "Операции",
+    "settings": "Настройки"
+  }
+}

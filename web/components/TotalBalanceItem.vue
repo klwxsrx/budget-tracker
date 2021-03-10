@@ -1,17 +1,6 @@
-<i18n path="navigation">
-{
-"en": {
-"total_balance": "Total Balance"
-},
-"ru": {
-"total_balance": "Баланс"
-}
-}
-</i18n>
-
 <template>
   <div class="total-balance">
-    <span class="balance">{{ $t('total_balance') }} </span>
+    <span class="balance">{{ $t('balance.total_balance') }} </span>
     <money-amount
       v-if="isLoaded"
       :amount="totalBalance.balance"

@@ -1,16 +1,3 @@
-<i18n path="navigation">
-{
-"en": {
-"transactions": "Transactions",
-"settings": "Settings"
-},
-"ru": {
-"transactions": "Операции",
-"settings": "Настройки"
-}
-}
-</i18n>
-
 <template>
   <b-navbar
     centered
@@ -30,14 +17,14 @@
         :to="transactionsPath"
         tag="router-link"
       >
-        {{ $t('transactions') }}
+        {{ $t('navigation.transactions') }}
       </b-navbar-item>
       <b-navbar-item
         :active="$route.path === settingsPath"
         :to="settingsPath"
         tag="router-link"
       >
-        {{ $t('settings') }}
+        {{ $t('navigation.settings') }}
       </b-navbar-item>
     </template>
   </b-navbar>
