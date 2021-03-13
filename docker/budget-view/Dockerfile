@@ -6,7 +6,7 @@ RUN go mod download
 
 
 # Build the binary
-FROM golang:1.16 AS builderF
+FROM golang:1.16 AS builder
 
 RUN useradd -u 1001 appuser
 
