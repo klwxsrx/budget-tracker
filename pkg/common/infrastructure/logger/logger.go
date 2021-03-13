@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	external "github.com/sirupsen/logrus"
 )
 

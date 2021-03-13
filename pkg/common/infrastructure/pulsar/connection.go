@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/cenkalti/backoff"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	"time"
 )
 

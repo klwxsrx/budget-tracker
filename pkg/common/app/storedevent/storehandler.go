@@ -2,8 +2,8 @@ package storedevent
 
 import (
 	"fmt"
-	appEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
-	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	appEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
 type storeEventHandler struct {

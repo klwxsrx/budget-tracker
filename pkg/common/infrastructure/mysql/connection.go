@@ -5,7 +5,7 @@ import (
 	"github.com/cenkalti/backoff"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	"time"
 )
 

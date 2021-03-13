@@ -9,7 +9,7 @@
 import TheNavigation from './components/TheNavigation.vue'
 
 export default {
-  name: 'ExpenseApp',
+  name: 'BudgetTracker',
   components: {
     TheNavigation: TheNavigation,
   },

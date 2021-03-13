@@ -1,4 +1,4 @@
-module github.com/klwxsrx/expense-tracker
+module github.com/klwxsrx/budget-tracker
 
 go 1.15
 

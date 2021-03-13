@@ -3,7 +3,7 @@ package pulsar
 import (
 	"fmt"
 	pulsarLog "github.com/apache/pulsar-client-go/pulsar/log"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 )
 
 type loggerAdapter struct {

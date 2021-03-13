@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"fmt"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
 type unsentEventProvider struct {

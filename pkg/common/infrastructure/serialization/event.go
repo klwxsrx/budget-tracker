@@ -3,8 +3,8 @@ package serialization
 import (
 	"encoding/json"
 	"fmt"
-	appEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
-	domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	appEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
+	domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
 type eventSerializer struct{}

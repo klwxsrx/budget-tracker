@@ -1,8 +1,9 @@
 {
-  "name": "expense-tracker",
+  "name": "budget-tracker",
   "version": "1.0.0",
   "main": "main.js",
-  "license": "GPL-3.0-or-later",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
     "fix": "eslint --fix --ext .js,.vue web",
     "clean": "rimraf dist",

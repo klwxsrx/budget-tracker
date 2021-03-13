@@ -1,7 +1,7 @@
 package storedevent
 
 import (
-	"github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 	"time"
 )
 

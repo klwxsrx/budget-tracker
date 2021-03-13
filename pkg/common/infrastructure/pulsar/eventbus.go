@@ -3,8 +3,8 @@ package pulsar
 import (
 	"context"
 	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/messaging"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
 type eventbus struct {

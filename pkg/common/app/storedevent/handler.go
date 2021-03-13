@@ -2,8 +2,8 @@ package storedevent
 
 import (
 	"context"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/logger"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/persistence"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/persistence"
 	"sync/atomic"
 	"time"
 )

@@ -1,6 +1,6 @@
 package event
 
-import domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+import domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 
 type Handler interface {
 	Handle(e domain.Event) error

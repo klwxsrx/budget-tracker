@@ -2,9 +2,9 @@ package mysql
 
 import (
 	"fmt"
-	appEvent "github.com/klwxsrx/expense-tracker/pkg/common/app/event"
-	"github.com/klwxsrx/expense-tracker/pkg/common/app/storedevent"
-	domain "github.com/klwxsrx/expense-tracker/pkg/common/domain/event"
+	appEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
+	domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 	"strings"
 	"time"
 )
