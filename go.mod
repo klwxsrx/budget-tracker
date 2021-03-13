@@ -1,6 +1,6 @@
 module github.com/klwxsrx/budget-tracker
 
-go 1.15
+go 1.16
 
 require (
 	github.com/apache/pulsar-client-go v0.3.0

@@ -1,12 +1,12 @@
 # Download modules
-FROM golang:1.15 AS modules
+FROM golang:1.16 AS modules
 
 COPY ./go.mod ./go.sum /
 RUN go mod download
 
 
 # Build the binary
-FROM golang:1.15 AS builder
+FROM golang:1.16 AS builder
 
 RUN useradd -u 1001 appuser
 
