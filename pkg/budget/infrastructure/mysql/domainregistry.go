@@ -30,6 +30,7 @@ func newDomainRegistry(
 ) command.DomainRegistry {
 	dispatcher := eventApp.NewDispatcher()
 	store := mysql.NewStore(client, serializer)
+	store = mysql.NewUnsentEventHandlingStore(client, store)
 	accountRepo := NewAccountRepository(dispatcher, store, deserializer)
 	registry := &domainRegistry{domain.NewAccountService(accountRepo)}
 	registerEventHandlers(dispatcher, registry, store)

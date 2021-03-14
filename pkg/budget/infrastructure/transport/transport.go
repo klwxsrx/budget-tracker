@@ -8,10 +8,12 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	appCommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"io"
 	"net/http"
 )
 
 var errorInvalidParameter = errors.New("invalid parameter")
+var errorEmptyJsonBody = errors.New("empty json body")
 
 type commandParser func(r *http.Request) (appCommand.Command, error)
 
@@ -90,7 +92,11 @@ func parseUuid(str string) (uuid.UUID, error) {
 }
 
 func parseJsonFromBody(r *http.Request, v interface{}) error {
-	return json.NewDecoder(r.Body).Decode(v)
+	err := json.NewDecoder(r.Body).Decode(v)
+	if errors.Is(err, io.EOF) {
+		return errorEmptyJsonBody
+	}
+	return err
 }
 
 func getHandlerFunc(bus appCommand.Bus, parser commandParser) http.HandlerFunc {
@@ -98,6 +104,7 @@ func getHandlerFunc(bus appCommand.Bus, parser commandParser) http.HandlerFunc {
 		cmd, err := parser(r)
 		switch {
 		case errors.Is(err, errorInvalidParameter):
+		case errors.Is(err, errorEmptyJsonBody):
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		case err != nil:
@@ -116,7 +123,6 @@ func getHandlerFunc(bus appCommand.Bus, parser commandParser) http.HandlerFunc {
 		case appCommand.ResultDuplicateConflict:
 			w.WriteHeader(http.StatusConflict)
 		case appCommand.ResultUnknownError:
-			w.WriteHeader(http.StatusInternalServerError)
 		default:
 			w.WriteHeader(http.StatusInternalServerError)
 		}

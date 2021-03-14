@@ -74,6 +74,8 @@ services:
     hostname: budget-pulsar
     volumes:
       - budget-pulsar-data:/pulsar/data:rw
+    ports:
+      - 127.0.0.1:6650:6650
     entrypoint: [ "bin/pulsar", "standalone" ]
 volumes:
   budget-mysql-data:

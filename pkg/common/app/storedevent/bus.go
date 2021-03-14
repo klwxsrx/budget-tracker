@@ -10,7 +10,7 @@ type Bus interface {
 
 type UnsentEventProvider interface {
 	GetBatch() ([]*StoredEvent, error)
-	SetOffset(id ID) error
+	Ack(id ID) error
 }
 
 type UnsentEventBusHandler struct {
@@ -23,12 +23,12 @@ func (handler *UnsentEventBusHandler) ProcessUnsentEvents() error {
 	return handler.sync.CriticalSection("process_unsent_events", func() error {
 		events, err := handler.eventProvider.GetBatch()
 		for events != nil {
-			for _, event := range events {
-				err := handler.bus.Dispatch(event)
+			for _, e := range events {
+				err := handler.bus.Dispatch(e)
 				if err != nil {
 					return err
 				}
-				err = handler.eventProvider.SetOffset(event.ID)
+				err = handler.eventProvider.Ack(e.ID)
 				if err != nil {
 					return err
 				}

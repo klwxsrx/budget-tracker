@@ -1,7 +1,8 @@
-CREATE TABLE IF NOT EXISTS `last_notified_event`
+CREATE TABLE IF NOT EXISTS `unsent_event`
 (
-    id       INT PRIMARY KEY,
-    event_id INT NOT NULL
+    id BINARY(16) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES event(id) ON DELETE CASCADE
 ) ENGINE = InnoDB
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci

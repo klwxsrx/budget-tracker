@@ -3,21 +3,22 @@ package serialization
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
 type storedEventMessage struct {
-	ID   int    `json:"id"`
-	Type string `json:"type"`
-	Data []byte `json:"data"`
+	ID   uuid.UUID `json:"id"`
+	Type string    `json:"type"`
+	Data []byte    `json:"data"`
 }
 
 type storedEventSerializer struct{}
 
 func (s *storedEventSerializer) Serialize(event *storedevent.StoredEvent) ([]byte, error) {
 	jsonObj := storedEventMessage{
-		ID:   int(event.ID),
+		ID:   event.ID.UUID,
 		Type: fmt.Sprintf("%v.%v", event.AggregateName, event.Type),
 		Data: event.EventData,
 	}
