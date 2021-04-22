@@ -48,7 +48,8 @@ func (d *handler) start(ctx context.Context) {
 
 func NewHandler(
 	unsentEventProvider UnsentEventProvider,
-	eventBus Bus, sync persistence.Synchronization,
+	eventBus Bus,
+	sync persistence.Synchronization,
 	logger logger.Logger,
 	ctx context.Context,
 ) Handler {

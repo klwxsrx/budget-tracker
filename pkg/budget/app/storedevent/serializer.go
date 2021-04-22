@@ -1,11 +1,14 @@
-package serialization
+package storedevent
 
 import (
 	"encoding/json"
 	"fmt"
-	appEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
 	domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
+
+type Serializer interface { // TODO: implement json dto of events
+	Serialize(event domain.Event) (string, error)
+}
 
 type eventSerializer struct{}
 
@@ -17,6 +20,6 @@ func (s *eventSerializer) Serialize(event domain.Event) (string, error) {
 	return string(result), nil
 }
 
-func NewEventSerializer() appEvent.Serializer {
+func NewSerializer() Serializer {
 	return &eventSerializer{}
 }

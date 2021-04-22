@@ -3,15 +3,16 @@ package mysql
 import (
 	"fmt"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/serialization"
-	appEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
+	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
+	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
+	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 )
 
 type unitOfWork struct {
 	client       mysql.TransactionalClient
-	serializer   appEvent.Serializer
-	deserializer serialization.EventDeserializer
+	serializer   storedevent.Serializer
+	deserializer storedevent.Deserializer
 }
 
 func (uw *unitOfWork) Execute(f func(r command.DomainRegistry) error) error {
@@ -19,7 +20,8 @@ func (uw *unitOfWork) Execute(f func(r command.DomainRegistry) error) error {
 	if err != nil {
 		return fmt.Errorf("can't begin new transaction: %v", err)
 	}
-	registry := newDomainRegistry(tx, uw.serializer, uw.deserializer)
+
+	registry := service.NewDomainRegistry(uw.newStore(tx), uw.deserializer)
 	err = f(registry)
 	if err != nil {
 		_ = tx.Rollback()
@@ -38,10 +40,15 @@ func (uw *unitOfWork) Critical(lock string, f func(r command.DomainRegistry) err
 	return uw.Execute(f)
 }
 
+func (uw *unitOfWork) newStore(client mysql.Client) commonStoredEvent.Store {
+	store := mysql.NewStore(client, uw.serializer)
+	return mysql.NewUnsentEventHandlingStore(client, store)
+}
+
 func NewUnitOfWork(
 	client mysql.TransactionalClient,
-	serializer appEvent.Serializer,
-	deserializer serialization.EventDeserializer,
+	serializer storedevent.Serializer,
+	deserializer storedevent.Deserializer,
 ) command.UnitOfWork {
 	return &unitOfWork{client, serializer, deserializer}
 }

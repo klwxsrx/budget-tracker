@@ -36,7 +36,7 @@ func getLoggingMiddleware(l logger.Logger) func(next http.Handler) http.Handler 
 				"body":         string(body),
 				"responseCode": lrw.code,
 			})
-			if lrw.code == 500 {
+			if lrw.code == http.StatusInternalServerError {
 				loggerWithFields.Error("internal server error")
 			} else {
 				loggerWithFields.Info("request handled")

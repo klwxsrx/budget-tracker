@@ -3,7 +3,7 @@ package mysql
 import (
 	"fmt"
 	"github.com/google/uuid"
-	appEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
+	storedevent2 "github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 	"strings"
@@ -12,7 +12,7 @@ import (
 
 type store struct {
 	db         Client
-	serializer appEvent.Serializer
+	serializer storedevent2.Serializer
 }
 
 func (s *store) GetByIDs(ids []storedevent.ID) ([]*storedevent.StoredEvent, error) {
@@ -88,6 +88,6 @@ func selectEvents(db Client, fromID storedevent.ID, conditions []string, args ..
 	return events, err
 }
 
-func NewStore(client Client, serializer appEvent.Serializer) storedevent.Store {
+func NewStore(client Client, serializer storedevent2.Serializer) storedevent.Store {
 	return &store{client, serializer}
 }

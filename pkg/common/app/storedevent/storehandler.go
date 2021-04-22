@@ -2,7 +2,6 @@ package storedevent
 
 import (
 	"fmt"
-	appEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
@@ -18,6 +17,6 @@ func (eh *storeEventHandler) Handle(e event.Event) error {
 	return nil
 }
 
-func NewStoreEventHandler(es Store) appEvent.Handler {
+func NewStoreEventHandler(es Store) event.Handler {
 	return &storeEventHandler{es}
 }

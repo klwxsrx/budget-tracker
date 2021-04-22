@@ -1,13 +1,11 @@
 package event
 
-import domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
-
 type Handler interface {
-	Handle(e domain.Event) error
+	Handle(e Event) error
 }
 
 type Dispatcher interface {
-	Dispatch(events []domain.Event) error
+	Dispatch(events []Event) error
 	Subscribe(h Handler)
 }
 
@@ -15,7 +13,7 @@ type dispatcher struct {
 	handlers []Handler
 }
 
-func (d *dispatcher) Dispatch(events []domain.Event) error {
+func (d *dispatcher) Dispatch(events []Event) error {
 	for _, e := range events {
 		for _, h := range d.handlers {
 			err := h.Handle(e)

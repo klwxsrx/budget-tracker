@@ -5,13 +5,12 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/mysql"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/serialization"
 	commonCommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
-	commandStoreEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
+	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	commonMysql "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
-	commonSerialization "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/serialization"
 )
 
 type Container interface {
@@ -39,19 +38,20 @@ func NewContainer(
 	logger logger.Logger,
 	ctx context.Context,
 ) (Container, error) {
-	serializer := commonSerialization.NewEventSerializer()
-	deserializer := serialization.NewEventDeserializer()
+	serializer := storedevent.NewSerializer()
+	deserializer := storedevent.NewDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
 	eventStore := commonMysql.NewStore(client, serializer)
 	unsentEventProvider := commonMysql.NewUnsentEventProvider(eventStore, client)
-	storedEventSerializer := commonSerialization.NewStoredEventSerializer()
+	storedEventSerializer := messaging.NewStoredEventSerializer()
 	eventBus, err := pulsar.NewEventBus(broker, storedEventSerializer, ctx)
 	if err != nil {
 		return nil, err
 	}
+
 	sync := commonMysql.NewSynchronization(client)
-	storedEventHandler := commandStoreEvent.NewHandler(unsentEventProvider, eventBus, sync, logger, ctx)
+	storedEventHandler := commonStoredEvent.NewHandler(unsentEventProvider, eventBus, sync, logger, ctx)
 	storedEventHandlingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
 
 	busRegistry := commonCommand.NewBusRegistry(command.ResultMap, logger)
