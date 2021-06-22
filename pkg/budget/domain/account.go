@@ -1,24 +1,21 @@
 package domain
 
-// TODO: replace by real model from docs
-
 import (
 	"errors"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 	"strings"
 )
 
 const (
-	AccountAggregateName  = "account"
-	accountTitleMaxLength = 100
+	accountListAggregateName = "account_list"
+	accountTitleMaxLength    = 100
 )
 
 var (
-	ErrorInvalidAccountTitle   = errors.New("invalid title")
-	ErrorAlreadyDeletedAccount = errors.New("account is already deleted")
-	errorUnknownAccountEvent   = errors.New("unknown account event")
+	ErrorAccountDoesNotExist   = errors.New("account does not exist")
+	ErrorAccountInvalidTitle   = errors.New("invalid title")
+	ErrorAccountDuplicateTitle = errors.New("account with this title already exist")
 )
 
 type AccountID struct {
@@ -29,116 +26,164 @@ type AccountStatus int
 
 const (
 	AccountStatusActive AccountStatus = iota
-	AccountStatusDeleted
+	AccountStatusCancelled
 )
 
-type AccountState struct {
-	ID             AccountID
-	Status         AccountStatus
-	Title          string
-	InitialBalance MoneyAmount
+type Account interface {
+	GetID() AccountID
+	GetStatus() AccountStatus
+	GetTitle() string
+	GetInitialBalance() MoneyAmount
 }
 
-func (a *AccountState) Apply(e event.Event) error {
-	var err error
-	switch e.Type() {
-	case EventTypeAccountCreated:
-		err = a.applyCreatedEvent(e)
-	case EventTypeAccountTitleChanged:
-		err = a.applyTitleChangedEvent(e)
-	case EventTypeAccountDeleted:
-		err = a.applyDeletedEvent(e)
-	default:
-		err = errorUnknownAccountEvent
-	}
-	if err != nil {
-		return fmt.Errorf("%v %v", err, e.Type())
-	}
-	return nil
-}
-
-func (a *AccountState) applyCreatedEvent(e event.Event) error {
-	ev, ok := e.(*AccountCreatedEvent)
-	if !ok {
-		return errorUnknownAccountEvent
-	}
-
-	a.ID = ev.ID
-	a.Title = ev.Title
-	a.InitialBalance = MoneyAmount{ev.InitialBalance, ev.Currency}
-	return nil
-}
-
-func (a *AccountState) applyTitleChangedEvent(e event.Event) error {
-	ev, ok := e.(*AccountTitleChangedEvent)
-	if !ok {
-		return errorUnknownAccountEvent
-	}
-
-	a.Title = ev.Title
-	return nil
-}
-
-func (a *AccountState) applyDeletedEvent(e event.Event) error {
-	_, ok := e.(*AccountDeletedEvent)
-	if !ok {
-		return errorUnknownAccountEvent
-	}
-	a.Status = AccountStatusDeleted
-	return nil
-}
-
-type Account struct {
-	state   *AccountState
+type AccountList struct {
+	state   *AccountListState
 	changes []event.Event
 }
 
-func (a *Account) ChangeTitle(t string) error {
-	if a.state.Title == t {
+func (list *AccountList) GetID() BudgetID {
+	return list.state.ID
+}
+
+func (list *AccountList) Add(title string, initialBalance MoneyAmount) (AccountID, error) {
+	title, err := list.validateTitle(title)
+	if err != nil {
+		return AccountID{}, err
+	}
+	err = list.assertAccountWithTitleNotExist(title)
+	if err != nil {
+		return AccountID{}, err
+	}
+	accountID := AccountID{uuid.New()}
+	err = list.applyChange(NewEventAccountCreated(
+		list.state.ID,
+		accountID,
+		title,
+		initialBalance.Currency,
+		initialBalance.Amount,
+	))
+	return accountID, err
+}
+
+func (list *AccountList) Reorder(id AccountID, position int) error {
+	account := list.findAccount(id)
+	if account == nil {
+		return ErrorAccountDoesNotExist
+	}
+	if position >= len(list.state.accounts) {
+		position = len(list.state.accounts) - 1
+	}
+	if position < 0 {
+		position = 0
+	}
+	if list.state.accounts[position].ID == id {
 		return nil
 	}
-	if err := validateAccountTitle(t); err != nil {
+	return list.applyChange(NewEventAccountReordered(list.state.ID, id, position))
+}
+
+func (list *AccountList) Rename(id AccountID, title string) error {
+	title, err := list.validateTitle(title)
+	if err != nil {
 		return err
 	}
-	a.applyChange(&AccountTitleChangedEvent{a.state.ID, t})
-	return nil
-}
-
-func (a *Account) Delete() error {
-	if a.state.Status == AccountStatusDeleted {
-		return ErrorAlreadyDeletedAccount
+	account := list.findAccount(id)
+	if account == nil {
+		return ErrorAccountDoesNotExist
 	}
-	a.applyChange(&AccountDeletedEvent{a.state.ID})
-	return nil
+	if account.GetTitle() == title {
+		return nil
+	}
+	err = list.assertAccountWithTitleNotExist(title)
+	if err != nil {
+		return err
+	}
+	return list.applyChange(NewEventAccountRenamed(list.state.ID, id, title))
 }
 
-func (a *Account) GetChanges() []event.Event {
-	return a.changes
+func (list *AccountList) Activate(id AccountID) error {
+	account := list.findAccount(id)
+	if account == nil {
+		return ErrorAccountDoesNotExist
+	}
+	if account.GetStatus() == AccountStatusActive {
+		return nil
+	}
+	return list.applyChange(NewEventAccountActivated(list.state.ID, id))
 }
 
-func (a *Account) applyChange(e event.Event) {
-	_ = a.state.Apply(e)
-	a.changes = append(a.changes, e)
+func (list *AccountList) Cancel(id AccountID) error {
+	account := list.findAccount(id)
+	if account == nil {
+		return ErrorAccountDoesNotExist
+	}
+	if account.GetStatus() == AccountStatusCancelled {
+		return nil
+	}
+	return list.applyChange(NewEventAccountCancelled(list.state.ID, id))
 }
 
-func validateAccountTitle(title string) error {
-	if len(title) == 0 || len(title) > accountTitleMaxLength {
-		return ErrorInvalidAccountTitle
+func (list *AccountList) Delete(id AccountID) error {
+	account := list.findAccount(id)
+	if account == nil {
+		return ErrorAccountDoesNotExist
+	}
+	return list.applyChange(NewEventAccountDeleted(list.state.ID, id))
+}
+
+func (list *AccountList) GetChanges() []event.Event {
+	return list.changes
+}
+
+func (list *AccountList) findAccount(id AccountID) Account {
+	for _, acc := range list.state.accounts {
+		if acc.ID == id {
+			return acc
+		}
 	}
 	return nil
 }
 
-func NewAccount(id AccountID, title string, initialBalance MoneyAmount) (*Account, error) {
+func (list *AccountList) getAccounts() []Account {
+	accounts := make([]Account, 0, len(list.state.accounts))
+	for _, acc := range list.state.accounts {
+		accounts = append(accounts, acc)
+	}
+	return accounts
+}
+
+func (list *AccountList) validateTitle(title string) (string, error) {
 	title = strings.TrimSpace(title)
-	if err := validateAccountTitle(title); err != nil {
-		return nil, err
+	if len(title) == 0 || len(title) > accountTitleMaxLength {
+		return title, ErrorAccountInvalidTitle
 	}
-
-	state := &AccountState{id, AccountStatusActive, title, initialBalance}
-	events := []event.Event{&AccountCreatedEvent{id, title, initialBalance.Currency, initialBalance.Amount}}
-	return &Account{state, events}, nil
+	return title, nil
 }
 
-func CreateAccount(s *AccountState) *Account {
-	return &Account{s, make([]event.Event, 0)}
+func (list *AccountList) assertAccountWithTitleNotExist(title string) error {
+	for _, acc := range list.state.accounts {
+		if acc.Title == title {
+			return ErrorAccountDuplicateTitle
+		}
+	}
+	return nil
+}
+
+func (list *AccountList) applyChange(event event.Event) error {
+	err := list.state.Apply(event)
+	if err != nil {
+		return err
+	}
+	list.changes = append(list.changes, event)
+	return nil
+}
+
+func NewAccountList(id BudgetID) *AccountList {
+	list := LoadAccountList(&AccountListState{})
+	_ = list.applyChange(NewEventAccountListCreated(id))
+	return list
+}
+
+func LoadAccountList(state *AccountListState) *AccountList {
+	return &AccountList{state, nil}
 }

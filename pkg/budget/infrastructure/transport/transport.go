@@ -10,6 +10,7 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 var errorInvalidParameter = errors.New("invalid parameter")
@@ -26,69 +27,143 @@ type route struct {
 
 var routes = []route{
 	{
-		"CreateAccount",
+		"AddAccount",
 		"POST",
-		"/account",
-		createAccountParser,
+		"/account/{budgetID}",
+		addAccountParser,
+	},
+	{
+		"ReorderAccount",
+		"PUT",
+		"/account/{budgetID}/{accountID}/order/{position}",
+		reorderAccountParser,
 	},
 	{
 		"RenameAccount",
 		"PUT",
-		"/account/{accountId}/title",
+		"/account/{budgetID}/{accountID}/title",
 		renameAccountParser,
+	},
+	{
+		"ChangeAccountStatus",
+		"PUT",
+		"/account/{budgetID}/{accountID}/status/{status}",
+		changeAccountStatusParser,
 	},
 	{
 		"DeleteAccount",
 		"DELETE",
-		"/account/{accountId}",
+		"/account/{budgetID}/{accountID}",
 		deleteAccountParser,
 	},
 }
 
-type createAccountBody struct {
+type addAccountBody struct {
 	Title          string `json:"title"`
 	Currency       string `json:"currency"`
 	InitialBalance int    `json:"initialBalance"`
 }
 
-type renameAccountBody struct {
-	Title string `json:"title"`
-}
-
-func createAccountParser(r *http.Request) (appCommand.Command, error) {
-	var body createAccountBody
+func addAccountParser(r *http.Request) (appCommand.Command, error) {
+	budgetID, err := parseUuid(mux.Vars(r)["budgetID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	var body addAccountBody
 	if err := parseJsonFromBody(r, &body); err != nil {
 		return nil, err
 	}
 	if body.Title == "" || body.Currency == "" {
 		return nil, errorInvalidParameter
 	}
-	return &command.CreateAccount{Title: body.Title, Currency: body.Currency, InitialBalance: body.InitialBalance}, nil
+	return command.NewAccountAdd(budgetID, body.Title, body.Currency, body.InitialBalance), nil
+}
+
+func reorderAccountParser(r *http.Request) (appCommand.Command, error) {
+	budgetID, err := parseUuid(mux.Vars(r)["budgetID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	accountID, err := parseUuid(mux.Vars(r)["accountID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	position, err := parseInt(mux.Vars(r)["position"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	return command.NewAccountReorder(budgetID, accountID, position), nil
+}
+
+type renameAccountBody struct {
+	Title string `json:"title"`
 }
 
 func renameAccountParser(r *http.Request) (appCommand.Command, error) {
+	budgetID, err := parseUuid(mux.Vars(r)["budgetID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	accountID, err := parseUuid(mux.Vars(r)["accountID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
 	var body renameAccountBody
 	if err := parseJsonFromBody(r, &body); err != nil {
 		return nil, err
 	}
-
-	accountID, err := parseUuid(mux.Vars(r)["accountId"])
-	if body.Title == "" || err != nil {
+	if body.Title == "" {
 		return nil, errorInvalidParameter
 	}
-	return &command.RenameAccount{ID: accountID, Title: body.Title}, nil
+	return command.NewAccountRename(budgetID, accountID, body.Title), nil
+}
+
+const (
+	AccountStatusActive    = "active"
+	AccountStatusCancelled = "cancelled"
+)
+
+func changeAccountStatusParser(r *http.Request) (appCommand.Command, error) {
+	budgetID, err := parseUuid(mux.Vars(r)["budgetID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	accountID, err := parseUuid(mux.Vars(r)["accountID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	status, ok := mux.Vars(r)["status"]
+	if !ok {
+		return nil, errorInvalidParameter
+	}
+	switch status {
+	case AccountStatusActive:
+		return command.NewAccountActivate(budgetID, accountID), nil
+	case AccountStatusCancelled:
+		return command.NewAccountCancel(budgetID, accountID), nil
+	default:
+		return nil, errorInvalidParameter
+	}
 }
 
 func deleteAccountParser(r *http.Request) (appCommand.Command, error) {
-	accountID, err := parseUuid(mux.Vars(r)["accountId"])
+	budgetID, err := parseUuid(mux.Vars(r)["budgetID"])
 	if err != nil {
-		return nil, err
+		return nil, errorInvalidParameter
 	}
-	return &command.DeleteAccount{ID: accountID}, nil
+	accountID, err := parseUuid(mux.Vars(r)["accountID"])
+	if err != nil {
+		return nil, errorInvalidParameter
+	}
+	return command.NewAccountDelete(budgetID, accountID), nil
 }
 
 func parseUuid(str string) (uuid.UUID, error) {
 	return uuid.Parse(str)
+}
+
+func parseInt(str string) (int, error) {
+	return strconv.Atoi(str)
 }
 
 func parseJsonFromBody(r *http.Request, v interface{}) error {

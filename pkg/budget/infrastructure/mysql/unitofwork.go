@@ -2,9 +2,8 @@ package mysql
 
 import (
 	"fmt"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 )
@@ -15,7 +14,7 @@ type unitOfWork struct {
 	deserializer storedevent.Deserializer
 }
 
-func (uw *unitOfWork) Execute(f func(r command.DomainRegistry) error) error {
+func (uw *unitOfWork) Execute(f func(r service.DomainRegistry) error) error {
 	tx, err := uw.client.Begin()
 	if err != nil {
 		return fmt.Errorf("can't begin new transaction: %v", err)
@@ -30,7 +29,7 @@ func (uw *unitOfWork) Execute(f func(r command.DomainRegistry) error) error {
 	return tx.Commit()
 }
 
-func (uw *unitOfWork) Critical(lock string, f func(r command.DomainRegistry) error) error {
+func (uw *unitOfWork) Critical(lock string, f func(r service.DomainRegistry) error) error {
 	dbLock := mysql.NewLock(uw.client, lock)
 	err := dbLock.Get()
 	if err != nil {
@@ -49,6 +48,6 @@ func NewUnitOfWork(
 	client mysql.TransactionalClient,
 	serializer storedevent.Serializer,
 	deserializer storedevent.Deserializer,
-) command.UnitOfWork {
+) service.UnitOfWork {
 	return &unitOfWork{client, serializer, deserializer}
 }

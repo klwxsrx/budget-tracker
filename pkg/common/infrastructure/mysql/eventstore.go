@@ -3,7 +3,6 @@ package mysql
 import (
 	"fmt"
 	"github.com/google/uuid"
-	storedevent2 "github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 	"strings"
@@ -12,7 +11,7 @@ import (
 
 type store struct {
 	db         Client
-	serializer storedevent2.Serializer
+	serializer storedevent.Serializer
 }
 
 func (s *store) GetByIDs(ids []storedevent.ID) ([]*storedevent.StoredEvent, error) {
@@ -30,8 +29,8 @@ func (s *store) GetByAggregateID(id domain.AggregateID, fromID storedevent.ID) (
 	return selectEvents(s.db, fromID, []string{"aggregate_id = UUID_TO_BIN(?)"}, id.String())
 }
 
-func (s *store) GetByAggregateName(name domain.AggregateName, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
-	return selectEvents(s.db, fromID, []string{"aggregate_name = ?"}, string(name))
+func (s *store) GetByAggregateName(name string, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
+	return selectEvents(s.db, fromID, []string{"aggregate_name = ?"}, name)
 }
 
 func (s *store) Append(e domain.Event) (storedevent.ID, error) {
@@ -88,6 +87,6 @@ func selectEvents(db Client, fromID storedevent.ID, conditions []string, args ..
 	return events, err
 }
 
-func NewStore(client Client, serializer storedevent2.Serializer) storedevent.Store {
+func NewStore(client Client, serializer storedevent.Serializer) storedevent.Store {
 	return &store{client, serializer}
 }

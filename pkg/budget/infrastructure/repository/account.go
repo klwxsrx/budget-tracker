@@ -3,32 +3,28 @@ package repository
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	domainEvent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
-type accountRepository struct {
+type accountListRepository struct {
 	dispatcher   domainEvent.Dispatcher
 	store        commonStoredEvent.Store
 	deserializer storedevent.Deserializer
 }
 
-func (r *accountRepository) NextID() domain.AccountID {
-	return domain.AccountID{UUID: uuid.New()}
-}
-
-func (r *accountRepository) Update(a *domain.Account) error {
-	err := r.dispatcher.Dispatch(a.GetChanges())
+func (r *accountListRepository) Update(list *domain.AccountList) error {
+	err := r.dispatcher.Dispatch(list.GetChanges())
 	if err != nil {
 		return fmt.Errorf("can't update aggregate: %v", err)
 	}
 	return nil
 }
 
-func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error) {
-	state := &domain.AccountState{}
+func (r *accountListRepository) FindByID(id domain.BudgetID) (*domain.AccountList, error) { // TODO: repo base implementation
+	state := &domain.AccountListState{}
 	storedEvents, err := r.store.GetByAggregateID(domainEvent.AggregateID{UUID: id.UUID}, commonStoredEvent.ID{UUID: uuid.Nil})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events: %v", err)
@@ -43,57 +39,16 @@ func (r *accountRepository) GetByID(id domain.AccountID) (*domain.Account, error
 		}
 		err = state.Apply(event)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create accountState: %v", err)
+			return nil, fmt.Errorf("failed to create accountListState: %v", err)
 		}
 	}
-	return domain.CreateAccount(state), nil
-}
-
-func (r *accountRepository) Exists(spec domain.AccountSpecification) (bool, error) {
-	storedEvents, err := r.store.GetByAggregateName(domain.AccountAggregateName, commonStoredEvent.ID{UUID: uuid.Nil})
-	if err != nil {
-		return false, fmt.Errorf("failed to get events of agregates %v: %v", domain.AccountAggregateName, err)
-	}
-	accounts, err := r.buildAccountsFromEvents(storedEvents)
-	if err != nil {
-		return false, fmt.Errorf("failed to deserialize events of agregates: %v", err)
-	}
-	for _, acc := range accounts {
-		if spec.IsSatisfied(acc) {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func (r *accountRepository) buildAccountsFromEvents(events []*commonStoredEvent.StoredEvent) ([]*domain.Account, error) {
-	states := make(map[domainEvent.AggregateID]*domain.AccountState)
-	for _, storedEvent := range events {
-		event, err := r.deserializer.Deserialize(storedEvent)
-		if err != nil {
-			return nil, fmt.Errorf("failed to deserialize events: %v", err)
-		}
-		state, exists := states[event.AggregateID()]
-		if !exists {
-			state = &domain.AccountState{}
-			states[event.AggregateID()] = state
-		}
-		err = state.Apply(event)
-		if err != nil {
-			return nil, fmt.Errorf("failed to apply account state: %v", err)
-		}
-	}
-	var result []*domain.Account
-	for _, state := range states {
-		result = append(result, domain.CreateAccount(state))
-	}
-	return result, nil
+	return domain.LoadAccountList(state), nil
 }
 
 func NewAccountRepository(
 	dispatcher domainEvent.Dispatcher,
 	store commonStoredEvent.Store,
 	deserializer storedevent.Deserializer,
-) domain.AccountRepository {
-	return &accountRepository{dispatcher, store, deserializer}
+) domain.AccountListRepository {
+	return &accountListRepository{dispatcher, store, deserializer}
 }

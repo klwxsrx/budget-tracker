@@ -1,23 +1,30 @@
 package service
 
 import (
-	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/repository"
 	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
+type UnitOfWork interface {
+	Execute(f func(r DomainRegistry) error) error
+	Critical(lock string, f func(r DomainRegistry) error) error
+}
+
+type DomainRegistry interface {
+	AccountListService() domain.AccountListService
+}
+
 type domainRegistry struct {
-	accountService domain.AccountService
+	accountListService domain.AccountListService
 }
 
-func (dr *domainRegistry) AccountService() domain.AccountService {
-	return dr.accountService
+func (dr *domainRegistry) AccountListService() domain.AccountListService {
+	return dr.accountListService
 }
 
-func registerEventHandlers(dispatcher event.Dispatcher, registry command.DomainRegistry, store commonStoredEvent.Store) event.Dispatcher {
+func registerEventHandlers(dispatcher event.Dispatcher, registry DomainRegistry, store commonStoredEvent.Store) event.Dispatcher {
 	dispatcher.Subscribe(commonStoredEvent.NewStoreEventHandler(store))
 	// TODO: add event handlers
 	return dispatcher
@@ -25,11 +32,11 @@ func registerEventHandlers(dispatcher event.Dispatcher, registry command.DomainR
 
 func NewDomainRegistry(
 	store commonStoredEvent.Store,
-	deserializer storedevent.Deserializer,
-) command.DomainRegistry {
+	deserializer commonStoredEvent.Deserializer,
+) DomainRegistry {
 	dispatcher := event.NewDispatcher()
 	accountRepo := repository.NewAccountRepository(dispatcher, store, deserializer)
-	registry := &domainRegistry{domain.NewAccountService(accountRepo)}
+	registry := &domainRegistry{domain.NewAccountListService(accountRepo)}
 	registerEventHandlers(dispatcher, registry, store)
 	return registry
 }

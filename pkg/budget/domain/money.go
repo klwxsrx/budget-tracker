@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrorInvalidCurrency = errors.New("currency is invalid")
+	ErrorCurrencyInvalid = errors.New("currency is invalid")
 )
 
 type Currency string
@@ -24,14 +24,15 @@ var availableCurrencies = map[Currency]struct{}{
 
 func validateCurrency(c Currency) error {
 	if _, ok := availableCurrencies[c]; !ok {
-		return fmt.Errorf("%v: %v", ErrorInvalidCurrency, c)
+		return fmt.Errorf("%w: %v", ErrorCurrencyInvalid, c)
 	}
 	return nil
 }
 
-func NewMoneyAmount(amount int, currency Currency) (MoneyAmount, error) {
-	if err := validateCurrency(currency); err != nil {
+func NewMoneyAmount(amount int, currency string) (MoneyAmount, error) {
+	domainCurrency := Currency(currency)
+	if err := validateCurrency(domainCurrency); err != nil {
 		return MoneyAmount{}, err
 	}
-	return MoneyAmount{amount, currency}, nil
+	return MoneyAmount{amount, domainCurrency}, nil
 }

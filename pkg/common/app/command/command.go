@@ -12,6 +12,14 @@ type Command interface {
 	Type() Type
 }
 
+type Base struct {
+	CommandType string
+}
+
+func (b *Base) Type() Type {
+	return Type(b.CommandType)
+}
+
 type Result int
 
 const (

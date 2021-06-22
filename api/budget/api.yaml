@@ -3,14 +3,21 @@ info:
   version: 1.0.0
   title: Budget Service
 tags:
-  - name: Account
+  - name: AccountList
 paths:
-  /account:
+  /account/{budgetID}:
     post:
       tags:
-        - Account
-      summary: Add a new account
+        - AccountList
+      summary: Add a new account to specific list
       operationId: add
+      parameters:
+        - name: budgetID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         content:
           application/json:
@@ -35,13 +42,50 @@ paths:
           description: 'Returns when invalid parameters were specified'
         409:
           description: 'Returns when the title is duplicated'
-  /account/{accountID}/title: # TODO: change in code
+  /account/{budgetID}/{accountID}/order/{position}:
     put:
       tags:
-        - Account
-      summary: Change a title for an account
+        - AccountList
+      summary: Change an order for an account to specific list
+      operationId: reorder
+      parameters:
+        - name: budgetID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: accountID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: 'Success result'
+        400:
+          description: 'Returns when invalid parameters were specified'
+        404:
+          description: 'Returns when the account is not exist or deleted'
+  /account/{budgetID}/{accountID}/title:
+    put:
+      tags:
+        - AccountList
+      summary: Change a title for an account to specific list
       operationId: rename
       parameters:
+        - name: budgetID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
         - name: accountID
           in: path
           required: true
@@ -68,13 +112,19 @@ paths:
           description: 'Returns when the account is not exist or deleted'
         409:
           description: 'Returns when the title is duplicated'
-  /account/{accountID}/status/{status}:
+  /account/{budgetID}/{accountID}/status/{status}:
     put:
       tags:
-        - Account
-      summary: Change a status for an account
+        - AccountList
+      summary: Change a status for an account to specific list
       operationId: changeStatus
       parameters:
+        - name: budgetID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
         - name: accountID
           in: path
           required: true
@@ -89,7 +139,6 @@ paths:
             enum:
               - active
               - cancelled
-              - deleted
       responses:
         204:
           description: 'Success result'
@@ -97,5 +146,31 @@ paths:
           description: 'Returns when invalid parameters were specified'
         403:
           description: 'Returns when the status cannot be changed to specified'
+        404:
+          description: 'Returns when the account is not exist or deleted'
+  /account/{budgetID}/{accountID}:
+    delete:
+      tags:
+        - AccountList
+      summary: Delete an account to specific list
+      operationId: delete
+      parameters:
+        - name: budgetID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: accountID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: 'Success result'
+        400:
+          description: 'Returns when invalid parameters were specified'
         404:
           description: 'Returns when the account is not exist or deleted'

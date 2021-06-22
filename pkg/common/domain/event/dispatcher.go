@@ -30,5 +30,5 @@ func (d *dispatcher) Subscribe(h Handler) {
 }
 
 func NewDispatcher() Dispatcher {
-	return &dispatcher{make([]Handler, 0)}
+	return &dispatcher{nil}
 }

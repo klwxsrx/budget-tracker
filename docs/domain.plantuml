@@ -132,33 +132,4 @@ TransactionList ..> Payer
 TransactionList ..> Account
 TransactionList ..> Category
 
-
-
-class BudgetPeriodID {
-  +month uint
-  +year uint
-}
-
-entity Budget {
- -id BudgetID
- -mainCurrency Currency
- -periodFirstDay uint
- +SetMainCurrency(currency Currency)
- +SetPeriodFirstDay(day uint)
- +SetGoal(id BudgetPeriodID, category Category, TODO)
- +SetNote(id BudgetPeriodID, category Category, note string)
- +MoveMoney(id BudgetPeriodID, from, to Category, amount MoneyAmount)
- TODO: other methods
-}
-
-Budget ..> Category
-
-entity BudgetPeriod {
- -id BudgetPeriodID
- -goal Goal
- -note string
-}
-
-Budget *-- BudgetPeriod
-
 @enduml

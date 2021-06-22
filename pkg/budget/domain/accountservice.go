@@ -2,91 +2,111 @@ package domain
 
 import (
 	"errors"
-	"fmt"
+	"github.com/google/uuid"
 )
+
+type AccountListRepository interface {
+	FindByID(id BudgetID) (*AccountList, error)
+	Update(list *AccountList) error
+}
 
 var (
-	ErrorAccountTitleIsDuplicated = errors.New("account with this title is already exists")
-	ErrorAccountIsNotExists       = errors.New("account is not exists")
+	ErrorAccountListAlreadyExists = errors.New("account list already exists")
+	ErrorAccountListDoesNotExist  = errors.New("account list does not exists")
 )
 
-type AccountService interface {
-	Create(title string, initialBalance MoneyAmount) error
-	Rename(id AccountID, title string) error
-	Delete(id AccountID) error
+type AccountListService interface {
+	Create(listID BudgetID) error
+	Add(listID BudgetID, title string, initialBalance MoneyAmount) (AccountID, error)
+	Reorder(listID BudgetID, id AccountID, position int) error
+	Rename(listID BudgetID, id AccountID, title string) error
+	Activate(listID BudgetID, id AccountID) error
+	Cancel(ListID BudgetID, id AccountID) error
+	Delete(ListID BudgetID, id AccountID) error
 }
 
 type accountService struct {
-	repo AccountRepository
+	repo AccountListRepository
 }
 
-func (s *accountService) Create(title string, initialBalance MoneyAmount) error {
-	exists, err := s.repo.Exists(&accountTitleSpecification{title})
-	if err != nil {
-		return fmt.Errorf("exists checking failed: %v", err)
-	}
-	if exists {
-		return ErrorAccountTitleIsDuplicated
-	}
-
-	acc, err := NewAccount(s.repo.NextID(), title, initialBalance)
+func (service *accountService) Create(listID BudgetID) error {
+	acc, err := service.repo.FindByID(listID)
 	if err != nil {
 		return err
 	}
-
-	err = s.repo.Update(acc)
-	if err != nil {
-		return fmt.Errorf("account creation failed: %v", err)
+	if acc != nil {
+		return ErrorAccountListAlreadyExists
 	}
-	return nil
+	list := NewAccountList(listID)
+	return service.repo.Update(list)
 }
 
-func (s *accountService) Rename(id AccountID, title string) error {
-	exists, err := s.repo.Exists(&accountTitleSpecification{title})
+func (service *accountService) Add(listID BudgetID, title string, initialBalance MoneyAmount) (AccountID, error) {
+	acc, err := service.repo.FindByID(listID)
 	if err != nil {
-		return fmt.Errorf("exists checking failed: %v", err)
-	}
-	if exists {
-		return ErrorAccountTitleIsDuplicated
-	}
-
-	acc, err := s.repo.GetByID(id)
-	if err != nil {
-		return fmt.Errorf("failed to get account: %v", err)
+		return AccountID{uuid.Nil}, err
 	}
 	if acc == nil {
-		return ErrorAccountIsNotExists
+		return AccountID{uuid.Nil}, ErrorAccountListDoesNotExist
 	}
-	err = acc.ChangeTitle(title)
-	if err != nil {
-		return err
-	}
-	err = s.repo.Update(acc)
-	if err != nil {
-		return fmt.Errorf("account renaming failed: %v", err)
-	}
-	return nil
+	return acc.Add(title, initialBalance)
 }
 
-func (s *accountService) Delete(id AccountID) error {
-	acc, err := s.repo.GetByID(id)
+func (service *accountService) Reorder(listID BudgetID, id AccountID, position int) error {
+	acc, err := service.repo.FindByID(listID)
 	if err != nil {
-		return fmt.Errorf("failed to get account: %v", err)
+		return err
 	}
 	if acc == nil {
-		return ErrorAccountIsNotExists
+		return ErrorAccountListDoesNotExist
 	}
-	err = acc.Delete()
+	return acc.Reorder(id, position)
+}
+
+func (service *accountService) Rename(listID BudgetID, id AccountID, title string) error {
+	acc, err := service.repo.FindByID(listID)
 	if err != nil {
 		return err
 	}
-	err = s.repo.Update(acc)
-	if err != nil {
-		return fmt.Errorf("account deletion failed: %v", err)
+	if acc == nil {
+		return ErrorAccountListDoesNotExist
 	}
-	return nil
+	return acc.Rename(id, title)
 }
 
-func NewAccountService(repo AccountRepository) AccountService {
+func (service *accountService) Activate(listID BudgetID, id AccountID) error {
+	acc, err := service.repo.FindByID(listID)
+	if err != nil {
+		return err
+	}
+	if acc == nil {
+		return ErrorAccountListDoesNotExist
+	}
+	return acc.Activate(id)
+}
+
+func (service *accountService) Cancel(listID BudgetID, id AccountID) error {
+	acc, err := service.repo.FindByID(listID)
+	if err != nil {
+		return err
+	}
+	if acc == nil {
+		return ErrorAccountListDoesNotExist
+	}
+	return acc.Cancel(id)
+}
+
+func (service *accountService) Delete(listID BudgetID, id AccountID) error {
+	acc, err := service.repo.FindByID(listID)
+	if err != nil {
+		return err
+	}
+	if acc == nil {
+		return ErrorAccountListDoesNotExist
+	}
+	return acc.Delete(id)
+}
+
+func NewAccountListService(repo AccountListRepository) AccountListService {
 	return &accountService{repo}
 }

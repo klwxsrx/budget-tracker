@@ -18,7 +18,7 @@ func (u *unsentEventHandlingStore) GetByAggregateID(id event.AggregateID, fromID
 	return u.store.GetByAggregateID(id, fromID)
 }
 
-func (u *unsentEventHandlingStore) GetByAggregateName(name event.AggregateName, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
+func (u *unsentEventHandlingStore) GetByAggregateName(name string, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
 	return u.store.GetByAggregateName(name, fromID)
 }
 

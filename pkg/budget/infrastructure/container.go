@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
+	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/mysql"
 	commonCommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
@@ -25,10 +26,13 @@ func (c *container) CommandBus() commonCommand.Bus {
 	return c.bus
 }
 
-func registerCommandHandlers(bus commonCommand.BusRegistry, unitOfWork command.UnitOfWork) commonCommand.Bus {
-	_ = bus.Register(command.NewCreateAccountHandler(unitOfWork))
-	_ = bus.Register(command.NewRenameAccountHandler(unitOfWork))
-	_ = bus.Register(command.NewDeleteAccountHandler(unitOfWork))
+func registerCommandHandlers(bus commonCommand.BusRegistry, unitOfWork service.UnitOfWork) commonCommand.Bus {
+	_ = bus.Register(command.NewAccountAddHandler(unitOfWork))
+	_ = bus.Register(command.NewAccountReorderHandler(unitOfWork))
+	_ = bus.Register(command.NewAccountRenameHandler(unitOfWork))
+	_ = bus.Register(command.NewAccountActivateHandler(unitOfWork))
+	_ = bus.Register(command.NewAccountCancelHandler(unitOfWork))
+	_ = bus.Register(command.NewAccountDeleteHandler(unitOfWork))
 	return bus
 }
 
