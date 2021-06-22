@@ -2,6 +2,40 @@
 hide empty fields
 hide empty methods
 
+enum AccountStatus {
+ Active
+ Cancelled
+}
+
+entity Account {
+ -id AccountID
+ -status AccountStatus
+ -title string
+ -initialBalance MoneyAmount
+ +GetID(): AccountID
+ +GetStatus(): AccountStatus
+ +GetTitle(): string
+ +GetInitialBalance(): MoneyAmount
+}
+
+Account ..> AccountStatus
+
+entity AccountList {
+ -id BudgetID
+ -accounts Account[]
+ +Add(title string, initialBalance MoneyAmount): (AccountID, error)
+ +Reorder(id AccountID, int position): error
+ +Rename(id AccountID, name string): error
+ +Activate(id AccountID): error
+ +Cancel(id AccountID): error
+ +Delete(id AccountID): error
+}
+
+AccountList *-- Account
+
+
+
+' TODO: implement model below
 enum PayerStatus {
  VISIBLE
  HIDDEN
@@ -26,38 +60,6 @@ entity PayerList {
 }
 
 PayerList *-- Payer
-
-
-
-enum AccountStatus {
- ACTIVE
- CANCELLED
-}
-
-entity Account {
- -id AccountID
- -status AccountStatus
- -title string
- -currency Currency
- +rename(name string)
- +activate()
- +cancel()
-}
-
-Account ..> AccountStatus
-
-entity AccountList {
- -id BudgetID
- -accounts Account[]
- +AddAccount(title string, status AccountStatus, currency Currency)
- +ReorderAccount(id AccountID, uint position)
- +RenameAccount(id AccountID, name string)
- +ActivateAccount(id AccountID)
- +CancelAccount(id AccountID)
- +DeleteAccount(id AccountID)
-}
-
-AccountList *-- Account
 
 
 
