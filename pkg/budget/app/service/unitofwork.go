@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/repository"
-	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
+	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent" // TODO: install golangci & fix wrong aliases
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 

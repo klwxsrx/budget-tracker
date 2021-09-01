@@ -2,6 +2,11 @@
 hide empty fields
 hide empty methods
 
+class MoneyAmount {
+ +Amount int
+ +Currency Currency ' TODO: remove currency
+}
+
 enum AccountStatus {
  Active
  Cancelled
@@ -103,11 +108,6 @@ entity CategoryList {
 CategoryList *-- CategoryGroup
 
 
-
-class MoneyAmount {
- +Amount int
- +Currency Currency
-}
 
 entity Transaction {
  -id TransactionID

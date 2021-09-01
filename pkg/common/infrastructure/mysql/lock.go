@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"errors"
+	"errors" // TODO: replace by errors with stack
 )
 
 const lockTimeout = 10
