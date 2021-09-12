@@ -2,6 +2,7 @@ package storedevent
 
 import (
 	"fmt"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
@@ -12,7 +13,7 @@ type storeEventHandler struct {
 func (eh *storeEventHandler) Handle(e event.Event) error {
 	_, err := eh.store.Append(e)
 	if err != nil {
-		return fmt.Errorf("can't append event to store: %v", err)
+		return fmt.Errorf("can't append event to store: %w", err)
 	}
 	return nil
 }

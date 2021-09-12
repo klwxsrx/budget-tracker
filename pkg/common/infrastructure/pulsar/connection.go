@@ -2,10 +2,12 @@ package pulsar
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/cenkalti/backoff"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
-	"time"
 )
 
 const (
@@ -69,19 +71,19 @@ func testCreateProducer(client pulsar.Client) error {
 		return nil
 	}, exponentialBackOff)
 	if err != nil {
-		return fmt.Errorf("failed to create test producer: %v", err)
+		return fmt.Errorf("failed to create test producer: %w", err)
 	}
 	return nil
 }
 
-func NewConnection(config Config, logger logger.Logger) (Connection, error) {
+func NewConnection(config Config, loggerImpl logger.Logger) (Connection, error) {
 	c, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:               fmt.Sprintf("pulsar://%v", config.Address),
 		ConnectionTimeout: connectionTimeout,
-		Logger:            &loggerAdapter{logger},
+		Logger:            &loggerAdapter{loggerImpl},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to broker: %v", err)
+		return nil, fmt.Errorf("failed to connect to broker: %w", err)
 	}
 
 	err = testCreateProducer(c)

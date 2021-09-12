@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 )
@@ -19,7 +18,7 @@ func parseEnvString(key string, err error) (string, error) {
 	}
 	str, ok := os.LookupEnv(key)
 	if !ok {
-		return "", errors.New(fmt.Sprintf("undefined environment variable %v", key))
+		return "", fmt.Errorf("undefined environment variable %v", key)
 	}
 	return str, nil
 }

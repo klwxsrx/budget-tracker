@@ -3,10 +3,11 @@ package domain
 import (
 	"errors"
 	"fmt"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
-var errorUnknownAccountEventType = errors.New("unknown account event")
+var errUnknownAccountEventType = errors.New("unknown account event")
 
 type AccountState struct {
 	ID             AccountID
@@ -54,7 +55,7 @@ func (state *AccountListState) Apply(e event.Event) error {
 	case EventTypeAccountDeleted:
 		err = state.applyDeleted(e)
 	default:
-		err = errorUnknownAccountEventType
+		err = errUnknownAccountEventType
 	}
 	if err != nil {
 		return fmt.Errorf("%w %v", err, e.Type())
@@ -62,19 +63,19 @@ func (state *AccountListState) Apply(e event.Event) error {
 	return err
 }
 
-func (state *AccountListState) applyListCreated(event event.Event) error {
-	createdEvent, ok := event.(*AccountListCreatedEvent)
+func (state *AccountListState) applyListCreated(e event.Event) error {
+	createdEvent, ok := e.(*AccountListCreatedEvent)
 	if !ok {
-		return errorUnknownAccountEventType
+		return errUnknownAccountEventType
 	}
-	state.ID = BudgetID{createdEvent.AggregateId}
+	state.ID = BudgetID{createdEvent.EventAggregateID}
 	return nil
 }
 
-func (state *AccountListState) applyCreated(event event.Event) error {
-	createdEvent, ok := event.(*AccountCreatedEvent)
+func (state *AccountListState) applyCreated(e event.Event) error {
+	createdEvent, ok := e.(*AccountCreatedEvent)
 	if !ok {
-		return errorUnknownAccountEventType
+		return errUnknownAccountEventType
 	}
 	account := &AccountState{
 		ID:             createdEvent.AccountID,
@@ -86,10 +87,10 @@ func (state *AccountListState) applyCreated(event event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyReordered(event event.Event) error {
-	reorderedEvent, ok := event.(*AccountReorderedEvent)
+func (state *AccountListState) applyReordered(e event.Event) error {
+	reorderedEvent, ok := e.(*AccountReorderedEvent)
 	if !ok {
-		return errorUnknownAccountEventType
+		return errUnknownAccountEventType
 	}
 
 	beforeIndex := state.findAccountIndex(reorderedEvent.AccountID)
@@ -107,10 +108,10 @@ func (state *AccountListState) applyReordered(event event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyRenamed(event event.Event) error {
-	renamedEvent, ok := event.(*AccountRenamedEvent)
+func (state *AccountListState) applyRenamed(e event.Event) error {
+	renamedEvent, ok := e.(*AccountRenamedEvent)
 	if !ok {
-		return errorUnknownAccountEventType
+		return errUnknownAccountEventType
 	}
 	for _, acc := range state.accounts {
 		if acc.ID == renamedEvent.AccountID {
@@ -120,10 +121,10 @@ func (state *AccountListState) applyRenamed(event event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyActivated(event event.Event) error {
-	activatedEvent, ok := event.(*AccountActivatedEvent)
+func (state *AccountListState) applyActivated(e event.Event) error {
+	activatedEvent, ok := e.(*AccountActivatedEvent)
 	if !ok {
-		return errorUnknownAccountEventType
+		return errUnknownAccountEventType
 	}
 	for _, acc := range state.accounts {
 		if acc.ID == activatedEvent.AccountID {
@@ -133,10 +134,10 @@ func (state *AccountListState) applyActivated(event event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyCancelled(event event.Event) error {
-	cancelledEvent, ok := event.(*AccountCancelledEvent)
+func (state *AccountListState) applyCancelled(e event.Event) error {
+	cancelledEvent, ok := e.(*AccountCancelledEvent)
 	if !ok {
-		return errorUnknownAccountEventType
+		return errUnknownAccountEventType
 	}
 	for _, acc := range state.accounts {
 		if acc.ID == cancelledEvent.AccountID {
@@ -146,10 +147,10 @@ func (state *AccountListState) applyCancelled(event event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyDeleted(event event.Event) error {
-	deletedEvent, ok := event.(*AccountDeletedEvent)
+func (state *AccountListState) applyDeleted(e event.Event) error {
+	deletedEvent, ok := e.(*AccountDeletedEvent)
 	if !ok {
-		return errorUnknownAccountEventType
+		return errUnknownAccountEventType
 	}
 	index := state.findAccountIndex(deletedEvent.AccountID)
 	state.accounts = append(state.accounts[:index], state.accounts[index+1:]...)

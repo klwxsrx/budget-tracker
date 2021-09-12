@@ -1,15 +1,17 @@
 package main
 
 import (
-	"context"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/transport"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/command"
-	appLogger "github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
-	infrastructureLogger "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/logger"
+	commonapplogger "github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	commoninfrastructurelogger "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
+
 	"github.com/sirupsen/logrus"
+
+	"context"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,7 +19,7 @@ import (
 )
 
 func main() {
-	logger := infrastructureLogger.New(initLogrus())
+	logger := commoninfrastructurelogger.New(initLogrus())
 	config, err := parseConfig()
 	if err != nil {
 		logger.WithError(err).Fatal("failed to parse config")
@@ -38,7 +40,7 @@ func main() {
 	ctx, ctxCancel := context.WithCancel(context.Background())
 	defer ctxCancel()
 
-	container, err := infrastructure.NewContainer(client, broker, logger, ctx)
+	container, err := infrastructure.NewContainer(ctx, client, broker, logger)
 	if err != nil {
 		logger.WithError(err).Fatal(err.Error())
 	}
@@ -58,11 +60,11 @@ func initLogrus() *logrus.Logger {
 	return l
 }
 
-func getPulsarClient(config *config, logger appLogger.Logger) (pulsar.Connection, error) {
+func getPulsarClient(config *config, logger commonapplogger.Logger) (pulsar.Connection, error) {
 	return pulsar.NewConnection(pulsar.Config{Address: config.MessageBrokerAddress}, logger)
 }
 
-func getReadyDatabaseClient(config *config, logger appLogger.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
+func getReadyDatabaseClient(config *config, logger commonapplogger.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
 	db, err := mysql.NewConnection(mysql.Dsn{
 		User:     config.DbUser,
 		Password: config.DbPassword,
@@ -90,10 +92,10 @@ func getReadyDatabaseClient(config *config, logger appLogger.Logger) (mysql.Conn
 	return db, client, nil
 }
 
-func startServer(bus command.Bus, logger appLogger.Logger) *http.Server {
+func startServer(bus command.Bus, logger commonapplogger.Logger) *http.Server {
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: transport.NewHttpHandler(bus, logger),
+		Handler: transport.NewHTTPHandler(bus, logger),
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {

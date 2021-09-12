@@ -3,7 +3,9 @@ package messaging
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/google/uuid"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
@@ -27,7 +29,7 @@ func (s *storedEventSerializer) Serialize(event *storedevent.StoredEvent) ([]byt
 	}
 	result, err := json.Marshal(jsonObj)
 	if err != nil {
-		return nil, fmt.Errorf("can't serialize stored event - %s: %v", jsonObj, err)
+		return nil, fmt.Errorf("can't serialize stored event - %s: %w", jsonObj, err)
 	}
 	return result, nil
 }

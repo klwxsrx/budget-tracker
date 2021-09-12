@@ -2,11 +2,13 @@ package mysql
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	domain "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
+	commondomainevent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
 type store struct {
@@ -18,14 +20,14 @@ func (s *store) GetByIDs(ids []storedevent.ID) ([]*storedevent.StoredEvent, erro
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	var idsStr []string
+	idsStr := make([]string, 0, len(ids))
 	for _, id := range ids {
 		idsStr = append(idsStr, "UUID_TO_BIN('"+id.String()+"')")
 	}
 	return selectEvents(s.db, storedevent.ID{UUID: uuid.Nil}, []string{"id IN (" + strings.Join(idsStr, ",") + ")"})
 }
 
-func (s *store) GetByAggregateID(id domain.AggregateID, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
+func (s *store) GetByAggregateID(id commondomainevent.AggregateID, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
 	return selectEvents(s.db, fromID, []string{"aggregate_id = UUID_TO_BIN(?)"}, id.String())
 }
 
@@ -33,7 +35,7 @@ func (s *store) GetByAggregateName(name string, fromID storedevent.ID) ([]*store
 	return selectEvents(s.db, fromID, []string{"aggregate_name = ?"}, name)
 }
 
-func (s *store) Append(e domain.Event) (storedevent.ID, error) {
+func (s *store) Append(e commondomainevent.Event) (storedevent.ID, error) {
 	id := uuid.New()
 	eventData, err := s.serializer.Serialize(e)
 	if err != nil {
@@ -58,7 +60,7 @@ func selectEvents(db Client, fromID storedevent.ID, conditions []string, args ..
 		var id int64
 		err := db.Get(&id, "SELECT surrogate_id FROM event WHERE id = UUID_TO_BIN(?)", fromID.UUID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get id by event %v: %v", fromID.String(), err)
+			return nil, fmt.Errorf("failed to get id by event %v: %w", fromID.String(), err)
 		}
 
 		conditions = append(conditions, "surrogate_id > ?")

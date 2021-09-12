@@ -3,19 +3,20 @@ package mysql
 import (
 	"errors"
 	"fmt"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 )
 
 const (
 	migrationLock      = "perform_migration_lock"
 	migrationTableName = "migration"
 
-	migrationFileRegexString = "^([0-9]+).sql$"
+	migrationFileRegexString = `^(\d+).sql$`
 	migrationIDVariable      = "%migration_id%"
 	migrationFileNamePattern = migrationIDVariable + ".sql"
 )
@@ -26,6 +27,7 @@ type Migration struct {
 	migrationDirectoryPath string
 }
 
+// nolint:gochecknoglobals
 var migrationFileRegex, migrationFileRegexError = regexp.Compile(migrationFileRegexString)
 
 func (m *Migration) Migrate() error {
@@ -65,27 +67,29 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 	}
 
 	for _, migrationID := range fileMigrationIDs {
-		if !performedMigrationIDs[migrationID] {
-			m.logger.Info(fmt.Sprintf("execute migration #%v", migrationID))
-			migrationSql, err := getMigrationSql(migrationDirectoryPath, migrationID)
-			if err != nil {
-				m.logger.WithError(err).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationID))
-				return err
-			}
-			tx, err := m.client.Begin()
-			if err != nil {
-				return err
-			}
-			err = performMigration(tx, migrationSql, migrationID)
-			if err != nil {
-				_ = tx.Rollback()
-				m.logger.WithError(err).Error(fmt.Sprintf("migration #%d failed", migrationID))
-				return err
-			}
-			err = tx.Commit()
-			if err != nil {
-				return err
-			}
+		if performedMigrationIDs[migrationID] {
+			continue
+		}
+
+		m.logger.Info(fmt.Sprintf("execute migration #%v", migrationID))
+		migrationSQL, err := getMigrationSQL(migrationDirectoryPath, migrationID)
+		if err != nil {
+			m.logger.WithError(err).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationID))
+			return err
+		}
+		tx, err := m.client.Begin()
+		if err != nil {
+			return err
+		}
+		err = performMigration(tx, migrationSQL, migrationID)
+		if err != nil {
+			_ = tx.Rollback()
+			m.logger.WithError(err).Error(fmt.Sprintf("migration #%d failed", migrationID))
+			return err
+		}
+		err = tx.Commit()
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -109,7 +113,7 @@ func getFileMigrationIDs(migrationDirectoryPath string) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	var result []int
+	result := make([]int, 0, len(files))
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -135,7 +139,7 @@ func getMigrationIDFromFileName(fileName string) (int, error) {
 	return migrationID, nil
 }
 
-func getMigrationSql(migrationDirectoryPath string, migrationID int) (string, error) {
+func getMigrationSQL(migrationDirectoryPath string, migrationID int) (string, error) {
 	migrationFilePath := filepath.Join(migrationDirectoryPath, getMigrationFileNameFromMigrationID(migrationID))
 	content, err := ioutil.ReadFile(migrationFilePath)
 	if err != nil {
@@ -168,9 +172,9 @@ func createMigrationRecord(client Client, migrationID int) error {
 	return err
 }
 
-func NewMigration(client TransactionalClient, logger logger.Logger, migrationDirectoryPath string) (*Migration, error) {
+func NewMigration(client TransactionalClient, loggerImpl logger.Logger, migrationDirectoryPath string) (*Migration, error) {
 	if migrationFileRegexError != nil {
 		return nil, migrationFileRegexError
 	}
-	return &Migration{client, logger, migrationDirectoryPath}, nil
+	return &Migration{client, loggerImpl, migrationDirectoryPath}, nil
 }

@@ -2,13 +2,14 @@ package domain
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewMoneyAmount(t *testing.T) {
 	_, err := NewMoneyAmount(0, "non-existent")
-	assert.True(t, errors.Is(err, ErrorCurrencyInvalid))
+	assert.True(t, errors.Is(err, ErrCurrencyInvalid))
 
 	amount, err := NewMoneyAmount(4200, "USD")
 	assert.NoError(t, err)

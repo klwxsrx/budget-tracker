@@ -2,9 +2,11 @@ package domain
 
 import (
 	"errors"
-	"github.com/google/uuid"
-	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 	"strings"
+
+	"github.com/google/uuid"
+
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
 const (
@@ -13,9 +15,9 @@ const (
 )
 
 var (
-	ErrorAccountDoesNotExist   = errors.New("account does not exist")
-	ErrorAccountInvalidTitle   = errors.New("invalid title")
-	ErrorAccountDuplicateTitle = errors.New("account with this title already exist")
+	ErrAccountDoesNotExist   = errors.New("account does not exist")
+	ErrAccountInvalidTitle   = errors.New("invalid title")
+	ErrAccountDuplicateTitle = errors.New("account with this title already exist")
 )
 
 type AccountID struct {
@@ -68,7 +70,7 @@ func (list *AccountList) Add(title string, initialBalance MoneyAmount) (AccountI
 func (list *AccountList) Reorder(id AccountID, position int) error {
 	account := list.findAccount(id)
 	if account == nil {
-		return ErrorAccountDoesNotExist
+		return ErrAccountDoesNotExist
 	}
 	if position >= len(list.state.accounts) {
 		position = len(list.state.accounts) - 1
@@ -89,7 +91,7 @@ func (list *AccountList) Rename(id AccountID, title string) error {
 	}
 	account := list.findAccount(id)
 	if account == nil {
-		return ErrorAccountDoesNotExist
+		return ErrAccountDoesNotExist
 	}
 	if account.GetTitle() == title {
 		return nil
@@ -104,7 +106,7 @@ func (list *AccountList) Rename(id AccountID, title string) error {
 func (list *AccountList) Activate(id AccountID) error {
 	account := list.findAccount(id)
 	if account == nil {
-		return ErrorAccountDoesNotExist
+		return ErrAccountDoesNotExist
 	}
 	if account.GetStatus() == AccountStatusActive {
 		return nil
@@ -115,7 +117,7 @@ func (list *AccountList) Activate(id AccountID) error {
 func (list *AccountList) Cancel(id AccountID) error {
 	account := list.findAccount(id)
 	if account == nil {
-		return ErrorAccountDoesNotExist
+		return ErrAccountDoesNotExist
 	}
 	if account.GetStatus() == AccountStatusCancelled {
 		return nil
@@ -126,7 +128,7 @@ func (list *AccountList) Cancel(id AccountID) error {
 func (list *AccountList) Delete(id AccountID) error {
 	account := list.findAccount(id)
 	if account == nil {
-		return ErrorAccountDoesNotExist
+		return ErrAccountDoesNotExist
 	}
 	return list.applyChange(NewEventAccountDeleted(list.state.ID, id))
 }
@@ -154,8 +156,8 @@ func (list *AccountList) getAccounts() []Account {
 
 func (list *AccountList) validateTitle(title string) (string, error) {
 	title = strings.TrimSpace(title)
-	if len(title) == 0 || len(title) > accountTitleMaxLength {
-		return title, ErrorAccountInvalidTitle
+	if title == "" || len(title) > accountTitleMaxLength {
+		return title, ErrAccountInvalidTitle
 	}
 	return title, nil
 }
@@ -163,18 +165,18 @@ func (list *AccountList) validateTitle(title string) (string, error) {
 func (list *AccountList) assertAccountWithTitleNotExist(title string) error {
 	for _, acc := range list.state.accounts {
 		if acc.Title == title {
-			return ErrorAccountDuplicateTitle
+			return ErrAccountDuplicateTitle
 		}
 	}
 	return nil
 }
 
-func (list *AccountList) applyChange(event event.Event) error {
-	err := list.state.Apply(event)
+func (list *AccountList) applyChange(e event.Event) error {
+	err := list.state.Apply(e)
 	if err != nil {
 		return err
 	}
-	list.changes = append(list.changes, event)
+	list.changes = append(list.changes, e)
 	return nil
 }
 

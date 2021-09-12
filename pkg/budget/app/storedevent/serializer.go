@@ -4,111 +4,116 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
+
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	commonEvent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+	commondomainevent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
-var errorUnknownAccountEventType = errors.New("unknown account event")
+var errUnknownAccountEventType = errors.New("unknown account event")
 
-type baseEventJson struct {
+type baseEventJSON struct {
 	AggregateID   uuid.UUID `json:"id"`
 	AggregateName string    `json:"name"`
 	Type          string    `json:"type"`
 }
 
-type accountListCreatedJson struct {
-	baseEventJson
+type accountListCreatedJSON struct {
+	baseEventJSON
 }
 
-type accountCreatedJson struct {
-	baseEventJson
+type accountCreatedJSON struct {
+	baseEventJSON
 	AccountID      uuid.UUID `json:"acc_id"`
 	Title          string    `json:"title"`
 	Currency       string    `json:"curr"`
 	InitialBalance int       `json:"balance"`
 }
 
-type accountReorderedJson struct {
-	baseEventJson
+type accountReorderedJSON struct {
+	baseEventJSON
 	AccountID uuid.UUID `json:"acc_id"`
 	Position  int       `json:"pos"`
 }
 
-type accountRenamedJson struct {
-	baseEventJson
+type accountRenamedJSON struct {
+	baseEventJSON
 	AccountID uuid.UUID `json:"acc_id"`
 	Title     string    `json:"title"`
 }
 
-type accountActivatedJson struct {
-	baseEventJson
+type accountActivatedJSON struct {
+	baseEventJSON
 	AccountID uuid.UUID `json:"acc_id"`
 }
 
-type accountCancelledJson struct {
-	baseEventJson
+type accountCancelledJSON struct {
+	baseEventJSON
 	AccountID uuid.UUID `json:"acc_id"`
 }
 
-type accountDeletedJson struct {
-	baseEventJson
+type accountDeletedJSON struct {
+	baseEventJSON
 	AccountID uuid.UUID `json:"acc_id"`
 }
 
 type eventSerializer struct{}
 
-func (s *eventSerializer) Serialize(event commonEvent.Event) (string, error) {
+func (s *eventSerializer) Serialize(event commondomainevent.Event) (string, error) {
 	var err error
-	var eventJson interface{}
+	var eventJSON interface{}
 	switch event.Type() {
 	case domain.EventTypeAccountListCreated:
-		eventJson, err = s.createAccountListCreatedJson(event)
+		eventJSON, err = s.createAccountListCreatedJSON(event)
 	case domain.EventTypeAccountCreated:
-		eventJson, err = s.createAccountCreatedJson(event)
+		eventJSON, err = s.createAccountCreatedJSON(event)
 	case domain.EventTypeAccountReordered:
-		eventJson, err = s.createAccountReorderedJson(event)
+		eventJSON, err = s.createAccountReorderedJSON(event)
 	case domain.EventTypeAccountRenamed:
-		eventJson, err = s.createAccountRenamedJson(event)
+		eventJSON, err = s.createAccountRenamedJSON(event)
 	case domain.EventTypeAccountActivated:
-		eventJson, err = s.createAccountActivatedJson(event)
+		eventJSON, err = s.createAccountActivatedJSON(event)
 	case domain.EventTypeAccountCancelled:
-		eventJson, err = s.createAccountCancelledJson(event)
+		eventJSON, err = s.createAccountCancelledJSON(event)
 	case domain.EventTypeAccountDeleted:
-		eventJson, err = s.createAccountDeletedJson(event)
+		eventJSON, err = s.createAccountDeletedJSON(event)
 	default:
-		return "", errors.New(fmt.Sprintf("unkown event type %v", event.Type()))
+		return "", fmt.Errorf("unknown event type %v", event.Type())
+	}
+	if err != nil {
+		return "", err
 	}
 
-	result, err := json.Marshal(eventJson)
+	result, err := json.Marshal(eventJSON)
 	if err != nil {
-		return "", fmt.Errorf("can't serialize event - %s: %v", event, err)
+		return "", fmt.Errorf("can't serialize event - %s: %w", event, err)
 	}
 	return string(result), nil
 }
 
-func (s *eventSerializer) createAccountListCreatedJson(event commonEvent.Event) (*accountListCreatedJson, error) {
+func (s *eventSerializer) createAccountListCreatedJSON(event commondomainevent.Event) (*accountListCreatedJSON, error) {
 	_, ok := event.(*domain.AccountListCreatedEvent)
 	if !ok {
-		return nil, errorUnknownAccountEventType
+		return nil, errUnknownAccountEventType
 	}
-	return &accountListCreatedJson{baseEventJson{
+	return &accountListCreatedJSON{baseEventJSON{
 		AggregateID:   event.AggregateID().UUID,
 		AggregateName: event.AggregateName(),
 		Type:          event.Type(),
 	}}, nil
 }
 
-func (s *eventSerializer) createAccountCreatedJson(event commonEvent.Event) (*accountCreatedJson, error) {
+func (s *eventSerializer) createAccountCreatedJSON(event commondomainevent.Event) (*accountCreatedJSON, error) {
 	createdEvent, ok := event.(*domain.AccountCreatedEvent)
 	if !ok {
-		return nil, errorUnknownAccountEventType
+		return nil, errUnknownAccountEventType
 	}
-	return &accountCreatedJson{
-		baseEventJson: baseEventJson{
-			AggregateID:   createdEvent.AggregateId,
-			AggregateName: createdEvent.Name,
+	return &accountCreatedJSON{
+		baseEventJSON: baseEventJSON{
+			AggregateID:   createdEvent.EventAggregateID,
+			AggregateName: createdEvent.EventAggregateName,
 			Type:          createdEvent.EventType,
 		},
 		AccountID:      createdEvent.AccountID.UUID,
@@ -118,15 +123,15 @@ func (s *eventSerializer) createAccountCreatedJson(event commonEvent.Event) (*ac
 	}, nil
 }
 
-func (s *eventSerializer) createAccountReorderedJson(event commonEvent.Event) (*accountReorderedJson, error) {
+func (s *eventSerializer) createAccountReorderedJSON(event commondomainevent.Event) (*accountReorderedJSON, error) {
 	reorderedEvent, ok := event.(*domain.AccountReorderedEvent)
 	if !ok {
-		return nil, errorUnknownAccountEventType
+		return nil, errUnknownAccountEventType
 	}
-	return &accountReorderedJson{
-		baseEventJson: baseEventJson{
-			AggregateID:   reorderedEvent.AggregateId,
-			AggregateName: reorderedEvent.Name,
+	return &accountReorderedJSON{
+		baseEventJSON: baseEventJSON{
+			AggregateID:   reorderedEvent.EventAggregateID,
+			AggregateName: reorderedEvent.EventAggregateName,
 			Type:          reorderedEvent.EventType,
 		},
 		AccountID: reorderedEvent.AccountID.UUID,
@@ -134,15 +139,15 @@ func (s *eventSerializer) createAccountReorderedJson(event commonEvent.Event) (*
 	}, nil
 }
 
-func (s *eventSerializer) createAccountRenamedJson(event commonEvent.Event) (*accountRenamedJson, error) {
+func (s *eventSerializer) createAccountRenamedJSON(event commondomainevent.Event) (*accountRenamedJSON, error) {
 	renamedEvent, ok := event.(*domain.AccountRenamedEvent)
 	if !ok {
-		return nil, errorUnknownAccountEventType
+		return nil, errUnknownAccountEventType
 	}
-	return &accountRenamedJson{
-		baseEventJson: baseEventJson{
-			AggregateID:   renamedEvent.AggregateId,
-			AggregateName: renamedEvent.Name,
+	return &accountRenamedJSON{
+		baseEventJSON: baseEventJSON{
+			AggregateID:   renamedEvent.EventAggregateID,
+			AggregateName: renamedEvent.EventAggregateName,
 			Type:          renamedEvent.EventType,
 		},
 		AccountID: renamedEvent.AccountID.UUID,
@@ -150,45 +155,45 @@ func (s *eventSerializer) createAccountRenamedJson(event commonEvent.Event) (*ac
 	}, nil
 }
 
-func (s *eventSerializer) createAccountActivatedJson(event commonEvent.Event) (*accountActivatedJson, error) {
+func (s *eventSerializer) createAccountActivatedJSON(event commondomainevent.Event) (*accountActivatedJSON, error) {
 	activatedEvent, ok := event.(*domain.AccountActivatedEvent)
 	if !ok {
-		return nil, errorUnknownAccountEventType
+		return nil, errUnknownAccountEventType
 	}
-	return &accountActivatedJson{
-		baseEventJson: baseEventJson{
-			AggregateID:   activatedEvent.AggregateId,
-			AggregateName: activatedEvent.Name,
+	return &accountActivatedJSON{
+		baseEventJSON: baseEventJSON{
+			AggregateID:   activatedEvent.EventAggregateID,
+			AggregateName: activatedEvent.EventAggregateName,
 			Type:          activatedEvent.EventType,
 		},
 		AccountID: activatedEvent.AccountID.UUID,
 	}, nil
 }
 
-func (s *eventSerializer) createAccountCancelledJson(event commonEvent.Event) (*accountCancelledJson, error) {
+func (s *eventSerializer) createAccountCancelledJSON(event commondomainevent.Event) (*accountCancelledJSON, error) {
 	cancelledEvent, ok := event.(*domain.AccountCancelledEvent)
 	if !ok {
-		return nil, errorUnknownAccountEventType
+		return nil, errUnknownAccountEventType
 	}
-	return &accountCancelledJson{
-		baseEventJson: baseEventJson{
-			AggregateID:   cancelledEvent.AggregateId,
-			AggregateName: cancelledEvent.Name,
+	return &accountCancelledJSON{
+		baseEventJSON: baseEventJSON{
+			AggregateID:   cancelledEvent.EventAggregateID,
+			AggregateName: cancelledEvent.EventAggregateName,
 			Type:          cancelledEvent.EventType,
 		},
 		AccountID: cancelledEvent.AccountID.UUID,
 	}, nil
 }
 
-func (s *eventSerializer) createAccountDeletedJson(event commonEvent.Event) (*accountDeletedJson, error) {
+func (s *eventSerializer) createAccountDeletedJSON(event commondomainevent.Event) (*accountDeletedJSON, error) {
 	deletedEvent, ok := event.(*domain.AccountDeletedEvent)
 	if !ok {
-		return nil, errorUnknownAccountEventType
+		return nil, errUnknownAccountEventType
 	}
-	return &accountDeletedJson{
-		baseEventJson: baseEventJson{
-			AggregateID:   deletedEvent.AggregateId,
-			AggregateName: deletedEvent.Name,
+	return &accountDeletedJSON{
+		baseEventJSON: baseEventJSON{
+			AggregateID:   deletedEvent.EventAggregateID,
+			AggregateName: deletedEvent.EventAggregateName,
 			Type:          deletedEvent.EventType,
 		},
 		AccountID: deletedEvent.AccountID.UUID,

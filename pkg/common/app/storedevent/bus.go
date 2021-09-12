@@ -23,8 +23,11 @@ func (handler *UnsentEventBusHandler) ProcessUnsentEvents() error {
 	return handler.sync.CriticalSection("process_unsent_events", func() error {
 		events, err := handler.eventProvider.GetBatch()
 		for events != nil {
+			if err != nil {
+				return err
+			}
 			for _, e := range events {
-				err := handler.bus.Dispatch(e)
+				err = handler.bus.Dispatch(e)
 				if err != nil {
 					return err
 				}

@@ -1,8 +1,8 @@
 package command
 
 import (
-	"errors"
 	"fmt"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 )
 
@@ -30,6 +30,10 @@ const (
 	ResultUnknownError
 )
 
+type ErrorTranslator interface {
+	Translate(err error) Result
+}
+
 type Bus interface {
 	Publish(c Command) Result
 }
@@ -45,9 +49,9 @@ type Handler interface {
 }
 
 type bus struct {
-	registry  map[Type]Handler
-	logger    logger.Logger
-	resultMap map[error]Result
+	registry   map[Type]Handler
+	logger     logger.Logger
+	translator ErrorTranslator
 }
 
 func (b *bus) Publish(c Command) Result {
@@ -58,7 +62,7 @@ func (b *bus) Publish(c Command) Result {
 	}
 
 	err := handler.Execute(c)
-	result := b.getResultByError(err)
+	result := b.translator.Translate(err)
 
 	loggerWithFields := b.logger.WithError(err).With(logger.Fields{
 		"command": c.Type(),
@@ -73,27 +77,14 @@ func (b *bus) Publish(c Command) Result {
 	return result
 }
 
-func (b *bus) getResultByError(err error) Result {
-	if err == nil {
-		return ResultSuccess
-	}
-
-	for e, r := range b.resultMap {
-		if errors.Is(err, e) {
-			return r
-		}
-	}
-	return ResultUnknownError
-}
-
 func (b *bus) Register(h Handler) error {
 	if _, exists := b.registry[h.Type()]; exists {
-		return errors.New(fmt.Sprintf("handler is already set for %v", h.Type()))
+		return fmt.Errorf("handler is already set for %v", h.Type())
 	}
 	b.registry[h.Type()] = h
 	return nil
 }
 
-func NewBusRegistry(resultMap map[error]Result, logger logger.Logger) BusRegistry {
-	return &bus{make(map[Type]Handler), logger, resultMap}
+func NewBusRegistry(translator ErrorTranslator, loggerImpl logger.Logger) BusRegistry {
+	return &bus{make(map[Type]Handler), loggerImpl, translator}
 }

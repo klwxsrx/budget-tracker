@@ -2,31 +2,32 @@ package infrastructure
 
 import (
 	"context"
+
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/mysql"
-	commonCommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
+	commonappcommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
-	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	commonMysql "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
+	commonappstoredevent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
+	commoninfrastructuremysql "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
 )
 
 type Container interface {
-	CommandBus() commonCommand.Bus
+	CommandBus() commonappcommand.Bus
 }
 
 type container struct {
-	bus commonCommand.Bus
+	bus commonappcommand.Bus
 }
 
-func (c *container) CommandBus() commonCommand.Bus {
+func (c *container) CommandBus() commonappcommand.Bus {
 	return c.bus
 }
 
-func registerCommandHandlers(bus commonCommand.BusRegistry, unitOfWork service.UnitOfWork) commonCommand.Bus {
+func registerCommandHandlers(bus commonappcommand.BusRegistry, unitOfWork service.UnitOfWork) commonappcommand.Bus {
 	_ = bus.Register(command.NewAccountAddHandler(unitOfWork))
 	_ = bus.Register(command.NewAccountReorderHandler(unitOfWork))
 	_ = bus.Register(command.NewAccountRenameHandler(unitOfWork))
@@ -37,28 +38,28 @@ func registerCommandHandlers(bus commonCommand.BusRegistry, unitOfWork service.U
 }
 
 func NewContainer(
-	client commonMysql.TransactionalClient,
-	broker pulsar.Connection,
-	logger logger.Logger,
 	ctx context.Context,
+	client commoninfrastructuremysql.TransactionalClient,
+	broker pulsar.Connection,
+	loggerImpl logger.Logger,
 ) (Container, error) {
 	serializer := storedevent.NewSerializer()
 	deserializer := storedevent.NewDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
-	eventStore := commonMysql.NewStore(client, serializer)
-	unsentEventProvider := commonMysql.NewUnsentEventProvider(eventStore, client)
+	eventStore := commoninfrastructuremysql.NewStore(client, serializer)
+	unsentEventProvider := commoninfrastructuremysql.NewUnsentEventProvider(eventStore, client)
 	storedEventSerializer := messaging.NewStoredEventSerializer()
-	eventBus, err := pulsar.NewEventBus(broker, storedEventSerializer, ctx)
+	eventBus, err := pulsar.NewEventBus(ctx, broker, storedEventSerializer)
 	if err != nil {
 		return nil, err
 	}
 
-	sync := commonMysql.NewSynchronization(client)
-	storedEventHandler := commonStoredEvent.NewHandler(unsentEventProvider, eventBus, sync, logger, ctx)
+	sync := commoninfrastructuremysql.NewSynchronization(client)
+	storedEventHandler := commonappstoredevent.NewHandler(ctx, unsentEventProvider, eventBus, sync, loggerImpl)
 	storedEventHandlingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
 
-	busRegistry := commonCommand.NewBusRegistry(command.ResultMap, logger)
+	busRegistry := commonappcommand.NewBusRegistry(command.NewTranslator(), loggerImpl)
 	bus := registerCommandHandlers(busRegistry, storedEventHandlingUnitOfWork)
 
 	return &container{bus}, nil

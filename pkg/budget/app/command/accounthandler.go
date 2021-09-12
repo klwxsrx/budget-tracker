@@ -16,7 +16,7 @@ type AddAccountHandler struct {
 func (h *AddAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*AddAccount)
 	if !ok {
-		return errorInvalidCommandType
+		return errInvalidCommandType
 	}
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
 		amount, err := domain.NewMoneyAmount(cmd.InitialBalance, cmd.Currency)
@@ -36,7 +36,7 @@ type ReorderAccountHandler struct {
 func (h *ReorderAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*ReorderAccount)
 	if !ok {
-		return errorInvalidCommandType
+		return errInvalidCommandType
 	}
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
 		return r.AccountListService().Reorder(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID}, cmd.Position)
@@ -51,7 +51,7 @@ type RenameAccountHandler struct {
 func (h *RenameAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*RenameAccount)
 	if !ok {
-		return errorInvalidCommandType
+		return errInvalidCommandType
 	}
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
 		return r.AccountListService().Rename(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID}, cmd.Title)
@@ -66,7 +66,7 @@ type ActivateAccountHandler struct {
 func (h *ActivateAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*ActivateAccount)
 	if !ok {
-		return errorInvalidCommandType
+		return errInvalidCommandType
 	}
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
 		return r.AccountListService().Activate(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID})
@@ -81,7 +81,7 @@ type CancelAccountHandler struct {
 func (h *CancelAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*CancelAccount)
 	if !ok {
-		return errorInvalidCommandType
+		return errInvalidCommandType
 	}
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
 		return r.AccountListService().Cancel(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID})
@@ -96,7 +96,7 @@ type DeleteAccountHandler struct {
 func (h *DeleteAccountHandler) Execute(c command.Command) error {
 	cmd, ok := c.(*DeleteAccount)
 	if !ok {
-		return errorInvalidCommandType
+		return errInvalidCommandType
 	}
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
 		return r.AccountListService().Delete(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID})

@@ -2,16 +2,16 @@ package storedevent
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	domainEvent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+	commondomainevent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
 type deserializer struct{}
 
-func (d *deserializer) Deserialize(event *storedevent.StoredEvent) (domainEvent.Event, error) {
+func (d *deserializer) Deserialize(event *storedevent.StoredEvent) (commondomainevent.Event, error) {
 	switch event.Type {
 	case domain.EventTypeAccountListCreated:
 		return d.deserializeAccountListCreatedEvent(event.EventData)
@@ -28,12 +28,12 @@ func (d *deserializer) Deserialize(event *storedevent.StoredEvent) (domainEvent.
 	case domain.EventTypeAccountDeleted:
 		return d.deserializeAccountDeletedEvent(event.EventData)
 	default:
-		return nil, errors.New(fmt.Sprintf("unknown event, %v", event.Type))
+		return nil, fmt.Errorf("unknown event, %v", event.Type)
 	}
 }
 
-func (d *deserializer) deserializeAccountListCreatedEvent(eventPayload []byte) (domainEvent.Event, error) {
-	var event accountListCreatedJson
+func (d *deserializer) deserializeAccountListCreatedEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event accountListCreatedJSON
 	err := json.Unmarshal(eventPayload, &event)
 	if err != nil {
 		return nil, err
@@ -41,8 +41,8 @@ func (d *deserializer) deserializeAccountListCreatedEvent(eventPayload []byte) (
 	return domain.NewEventAccountListCreated(domain.BudgetID{UUID: event.AggregateID}), nil
 }
 
-func (d *deserializer) deserializeAccountCreatedEvent(eventPayload []byte) (domainEvent.Event, error) {
-	var event accountCreatedJson
+func (d *deserializer) deserializeAccountCreatedEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event accountCreatedJSON
 	err := json.Unmarshal(eventPayload, &event)
 	if err != nil {
 		return nil, err
@@ -56,8 +56,8 @@ func (d *deserializer) deserializeAccountCreatedEvent(eventPayload []byte) (doma
 	), nil
 }
 
-func (d *deserializer) deserializeAccountReorderedEvent(eventPayload []byte) (domainEvent.Event, error) {
-	var event accountReorderedJson
+func (d *deserializer) deserializeAccountReorderedEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event accountReorderedJSON
 	err := json.Unmarshal(eventPayload, &event)
 	if err != nil {
 		return nil, err
@@ -69,8 +69,8 @@ func (d *deserializer) deserializeAccountReorderedEvent(eventPayload []byte) (do
 	), nil
 }
 
-func (d *deserializer) deserializeAccountRenamedEvent(eventPayload []byte) (domainEvent.Event, error) {
-	var event accountRenamedJson
+func (d *deserializer) deserializeAccountRenamedEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event accountRenamedJSON
 	err := json.Unmarshal(eventPayload, &event)
 	if err != nil {
 		return nil, err
@@ -82,8 +82,8 @@ func (d *deserializer) deserializeAccountRenamedEvent(eventPayload []byte) (doma
 	), nil
 }
 
-func (d *deserializer) deserializeAccountActivatedEvent(eventPayload []byte) (domainEvent.Event, error) {
-	var event accountActivatedJson
+func (d *deserializer) deserializeAccountActivatedEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event accountActivatedJSON
 	err := json.Unmarshal(eventPayload, &event)
 	if err != nil {
 		return nil, err
@@ -94,8 +94,8 @@ func (d *deserializer) deserializeAccountActivatedEvent(eventPayload []byte) (do
 	), nil
 }
 
-func (d *deserializer) deserializeAccountCancelledEvent(eventPayload []byte) (domainEvent.Event, error) {
-	var event accountCancelledJson
+func (d *deserializer) deserializeAccountCancelledEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event accountCancelledJSON
 	err := json.Unmarshal(eventPayload, &event)
 	if err != nil {
 		return nil, err
@@ -106,8 +106,8 @@ func (d *deserializer) deserializeAccountCancelledEvent(eventPayload []byte) (do
 	), nil
 }
 
-func (d *deserializer) deserializeAccountDeletedEvent(eventPayload []byte) (domainEvent.Event, error) {
-	var event accountDeletedJson
+func (d *deserializer) deserializeAccountDeletedEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event accountDeletedJSON
 	err := json.Unmarshal(eventPayload, &event)
 	if err != nil {
 		return nil, err

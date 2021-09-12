@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/repository"
-	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent" // TODO: install golangci & fix wrong aliases
+	commonappstoredevent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
@@ -24,15 +24,16 @@ func (dr *domainRegistry) AccountListService() domain.AccountListService {
 	return dr.accountListService
 }
 
-func registerEventHandlers(dispatcher event.Dispatcher, registry DomainRegistry, store commonStoredEvent.Store) event.Dispatcher {
-	dispatcher.Subscribe(commonStoredEvent.NewStoreEventHandler(store))
+// nolint:unparam
+func registerEventHandlers(dispatcher event.Dispatcher, registry DomainRegistry, store commonappstoredevent.Store) event.Dispatcher {
+	dispatcher.Subscribe(commonappstoredevent.NewStoreEventHandler(store))
 	// TODO: add event handlers
 	return dispatcher
 }
 
 func NewDomainRegistry(
-	store commonStoredEvent.Store,
-	deserializer commonStoredEvent.Deserializer,
+	store commonappstoredevent.Store,
+	deserializer commonappstoredevent.Deserializer,
 ) DomainRegistry {
 	dispatcher := event.NewDispatcher()
 	accountRepo := repository.NewAccountRepository(dispatcher, store, deserializer)

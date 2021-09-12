@@ -2,10 +2,11 @@ package storedevent
 
 import (
 	"context"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/persistence"
 	"sync/atomic"
 	"time"
+
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/persistence"
 )
 
 const dispatchPeriod = time.Second
@@ -47,14 +48,14 @@ func (d *handler) start(ctx context.Context) {
 }
 
 func NewHandler(
+	ctx context.Context,
 	unsentEventProvider UnsentEventProvider,
 	eventBus Bus,
 	sync persistence.Synchronization,
-	logger logger.Logger,
-	ctx context.Context,
+	loggerImpl logger.Logger,
 ) Handler {
 	busHandler := &UnsentEventBusHandler{unsentEventProvider, eventBus, sync}
-	dispatcher := &handler{busHandler, logger, 1}
+	dispatcher := &handler{busHandler, loggerImpl, 1}
 	dispatcher.start(ctx)
 	return dispatcher
 }

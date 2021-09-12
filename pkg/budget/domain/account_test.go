@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"strings"
 	"testing"
 )
@@ -13,13 +14,13 @@ func TestAccountList_Add(t *testing.T) {
 	list := LoadAccountList(&AccountListState{listID, nil})
 
 	_, err := list.Add("", MoneyAmount{0, "USD"})
-	assert.EqualError(t, err, ErrorAccountInvalidTitle.Error())
+	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
 	_, err = list.Add(" \n\t", MoneyAmount{0, "USD"})
-	assert.EqualError(t, err, ErrorAccountInvalidTitle.Error())
+	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
 	_, err = list.Add(strings.Repeat("s", 101), MoneyAmount{0, "USD"})
-	assert.EqualError(t, err, ErrorAccountInvalidTitle.Error())
+	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
 	id, err := list.Add("some", MoneyAmount{-42, "USD"})
 	assert.NoError(t, err)
@@ -40,7 +41,7 @@ func TestAccountList_Add(t *testing.T) {
 	assert.Equal(t, MoneyAmount{-42, "USD"}, list.getAccounts()[0].GetInitialBalance())
 
 	_, err = list.Add("some", MoneyAmount{0, "USD"})
-	assert.EqualError(t, err, ErrorAccountDuplicateTitle.Error())
+	assert.EqualError(t, err, ErrAccountDuplicateTitle.Error())
 
 	_, err = list.Add("another", MoneyAmount{13, "RUB"})
 	assert.NoError(t, err)
@@ -74,7 +75,7 @@ func TestAccountList_Reorder(t *testing.T) {
 	}})
 
 	err := list.Reorder(AccountID{uuid.New()}, 3)
-	assert.EqualError(t, err, ErrorAccountDoesNotExist.Error())
+	assert.EqualError(t, err, ErrAccountDoesNotExist.Error())
 
 	err = list.Reorder(id1, -10)
 	assert.NoError(t, err)
@@ -158,16 +159,16 @@ func TestAccountList_Rename(t *testing.T) {
 	}})
 
 	err := list.Rename(AccountID{uuid.New()}, "test")
-	assert.EqualError(t, err, ErrorAccountDoesNotExist.Error())
+	assert.EqualError(t, err, ErrAccountDoesNotExist.Error())
 
 	err = list.Rename(itemID, " \t\n")
-	assert.EqualError(t, err, ErrorAccountInvalidTitle.Error())
+	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
 	_, err = list.Add(strings.Repeat("s", 101), MoneyAmount{0, "USD"})
-	assert.EqualError(t, err, ErrorAccountInvalidTitle.Error())
+	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
 	err = list.Rename(itemID, "another")
-	assert.EqualError(t, err, ErrorAccountDuplicateTitle.Error())
+	assert.EqualError(t, err, ErrAccountDuplicateTitle.Error())
 
 	err = list.Rename(itemID, "some")
 	assert.NoError(t, err)
@@ -200,7 +201,7 @@ func TestAccountList_Activate(t *testing.T) {
 	}})
 
 	err := list.Activate(AccountID{uuid.New()})
-	assert.EqualError(t, err, ErrorAccountDoesNotExist.Error())
+	assert.EqualError(t, err, ErrAccountDoesNotExist.Error())
 
 	err = list.Activate(item1ID)
 	assert.NoError(t, err)
@@ -228,10 +229,11 @@ func TestAccountList_Cancel(t *testing.T) {
 	list := LoadAccountList(&AccountListState{listID, []*AccountState{
 		{item1ID, AccountStatusCancelled, "some", MoneyAmount{0, "USD"}},
 		{item2ID, AccountStatusActive, "another", MoneyAmount{0, "USD"}},
+		{item2ID, AccountStatusActive, "third", MoneyAmount{0, "USD"}},
 	}})
 
 	err := list.Cancel(AccountID{uuid.New()})
-	assert.EqualError(t, err, ErrorAccountDoesNotExist.Error())
+	assert.EqualError(t, err, ErrAccountDoesNotExist.Error())
 
 	err = list.Cancel(item1ID)
 	assert.NoError(t, err)
@@ -260,7 +262,7 @@ func TestAccountList_Delete(t *testing.T) {
 	}})
 
 	err := list.Delete(AccountID{uuid.New()})
-	assert.EqualError(t, err, ErrorAccountDoesNotExist.Error())
+	assert.EqualError(t, err, ErrAccountDoesNotExist.Error())
 
 	err = list.Delete(item1ID)
 	assert.NoError(t, err)

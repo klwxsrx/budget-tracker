@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrorCurrencyInvalid = errors.New("currency is invalid")
+	ErrCurrencyInvalid = errors.New("currency is invalid")
 )
 
 type Currency string
@@ -16,7 +16,8 @@ type MoneyAmount struct {
 	Currency Currency
 }
 
-var availableCurrencies = map[Currency]struct{}{
+// nolint:gochecknoglobals
+var availableCurrencies = map[Currency]struct{}{ // TODO: delete currency
 	"RUB": {},
 	"USD": {},
 	"EUR": {},
@@ -24,7 +25,7 @@ var availableCurrencies = map[Currency]struct{}{
 
 func validateCurrency(c Currency) error {
 	if _, ok := availableCurrencies[c]; !ok {
-		return fmt.Errorf("%w: %v", ErrorCurrencyInvalid, c)
+		return fmt.Errorf("%w: %v", ErrCurrencyInvalid, c)
 	}
 	return nil
 }

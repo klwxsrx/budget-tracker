@@ -2,9 +2,9 @@ package mysql
 
 import (
 	"fmt"
+
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	commonStoredEvent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 )
 
@@ -17,7 +17,7 @@ type unitOfWork struct {
 func (uw *unitOfWork) Execute(f func(r service.DomainRegistry) error) error {
 	tx, err := uw.client.Begin()
 	if err != nil {
-		return fmt.Errorf("can't begin new transaction: %v", err)
+		return fmt.Errorf("can't begin new transaction: %w", err)
 	}
 
 	registry := service.NewDomainRegistry(uw.newStore(tx), uw.deserializer)
@@ -33,13 +33,13 @@ func (uw *unitOfWork) Critical(lock string, f func(r service.DomainRegistry) err
 	dbLock := mysql.NewLock(uw.client, lock)
 	err := dbLock.Get()
 	if err != nil {
-		return fmt.Errorf("can't create lock: %v", err)
+		return fmt.Errorf("can't create lock: %w", err)
 	}
 	defer dbLock.Release()
 	return uw.Execute(f)
 }
 
-func (uw *unitOfWork) newStore(client mysql.Client) commonStoredEvent.Store {
+func (uw *unitOfWork) newStore(client mysql.Client) storedevent.Store {
 	store := mysql.NewStore(client, uw.serializer)
 	return mysql.NewUnsentEventHandlingStore(client, store)
 }

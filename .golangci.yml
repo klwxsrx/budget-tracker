@@ -1,0 +1,63 @@
+run:
+  timeout: 1m
+  issues-exit-code: 1
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - bodyclose
+    - depguard
+    - dogsled
+    - dupl
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - gomnd
+    - gosec
+    - importas
+    - misspell
+    - nakedret
+    - nestif
+    - prealloc
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - unparam
+
+linters-settings:
+  gocritic:
+    enabled-tags:
+      - experimental
+      - opinionated
+    disabled-checks:
+      - whyNoLint
+  goimports:
+    local-prefixes: github.com/klwxsrx/budget-tracker
+  govet:
+    check-shadowing: true
+  importas:
+    alias:
+      - pkg: github.com/klwxsrx/budget-tracker/pkg/(\w+)/(\w+)/(\w+)
+        alias: $1$2$3
+      - pkg: github.com/klwxsrx/budget-tracker/pkg/(\w+)/(\w+)
+        alias: $1$2

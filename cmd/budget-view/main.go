@@ -1,19 +1,21 @@
 package main
 
 import (
-	"context"
-	appLogger "github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
-	infrastructureLogger "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/logger"
+	commonapplogger "github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	commoninfrastructurelogger "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mongo"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
-	"github.com/sirupsen/logrus"
+
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	logger := infrastructureLogger.New(initLogrus())
+	logger := commoninfrastructurelogger.New(initLogrus())
 	config, err := parseConfig()
 	if err != nil {
 		logger.WithError(err).Fatal("failed to parse config")
@@ -27,7 +29,7 @@ func main() {
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
-	client, err := getMongoClient(config, ctx, logger)
+	client, err := getMongoClient(ctx, config, logger)
 	if err != nil {
 		logger.WithError(err).Fatal("failed to setup mongo connection")
 	}
@@ -38,16 +40,18 @@ func main() {
 	listenOSKillSignals()
 }
 
-func getPulsarClient(config *config, logger appLogger.Logger) (pulsar.Connection, error) {
+func getPulsarClient(config *config, logger commonapplogger.Logger) (pulsar.Connection, error) {
 	return pulsar.NewConnection(pulsar.Config{Address: config.MessageBrokerAddress}, logger)
 }
 
-func getMongoClient(config *config, ctx context.Context, logger appLogger.Logger) (mongo.Connection, error) {
-	return mongo.NewConnection(mongo.Config{
-		User:     config.DbUser,
-		Password: config.DbPassword,
-		Address:  config.DbAddress,
-	}, ctx, logger)
+func getMongoClient(ctx context.Context, config *config, logger commonapplogger.Logger) (mongo.Connection, error) {
+	return mongo.NewConnection(ctx,
+		mongo.Config{
+			User:     config.DbUser,
+			Password: config.DbPassword,
+			Address:  config.DbAddress,
+		}, logger,
+	)
 }
 
 func initLogrus() *logrus.Logger {

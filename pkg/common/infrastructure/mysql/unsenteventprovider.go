@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"fmt"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
@@ -15,7 +16,7 @@ type unsentEventProvider struct {
 func (u *unsentEventProvider) GetBatch() ([]*storedevent.StoredEvent, error) {
 	ids, err := u.getUnsentIds()
 	if err != nil {
-		return nil, fmt.Errorf("can't get last sent id: %v", err)
+		return nil, fmt.Errorf("can't get last sent id: %w", err)
 	}
 	if len(ids) == 0 {
 		return nil, nil

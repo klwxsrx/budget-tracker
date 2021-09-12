@@ -2,7 +2,9 @@ package pulsar
 
 import (
 	"fmt"
+
 	"github.com/apache/pulsar-client-go/pulsar"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 )
@@ -47,11 +49,11 @@ func NewMessageConsumer(
 	topic string,
 	handler messaging.NamedMessageHandler,
 	con Connection,
-	logger logger.Logger,
+	loggerImpl logger.Logger,
 ) (*MessageConsumer, error) {
 	offset, err := handler.LatestMessageID()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get latest message: %v", err)
+		return nil, fmt.Errorf("failed to get latest message: %w", err)
 	}
 	initialPosition := pulsar.EarliestMessageID()
 	if offset != nil {
@@ -73,7 +75,7 @@ func NewMessageConsumer(
 	consumer := &MessageConsumer{
 		handler:  handler,
 		consumer: pulsarConsumer,
-		logger:   logger,
+		logger:   loggerImpl,
 	}
 	go consumer.start()
 	return consumer, nil

@@ -2,11 +2,13 @@ package mysql
 
 import (
 	"fmt"
-	"github.com/cenkalti/backoff"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	"time"
+
+	"github.com/cenkalti/backoff"
+	_ "github.com/go-sql-driver/mysql" // driver impl
+	"github.com/jmoiron/sqlx"
+
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 )
 
 const (
@@ -50,13 +52,17 @@ func (c *connection) Close() {
 func (c *connection) openConnection() error {
 	var err error
 	c.db, err = sqlx.Open("mysql", c.config.String()+"?parseTime=true")
+	if err != nil {
+		return err
+	}
+
 	c.db.SetMaxOpenConns(maxOpenConnections)
 	err = backoff.Retry(func() error {
 		return c.db.Ping()
 	}, newOpenConnectionBackoff())
 	if err != nil {
 		_ = c.db.Close()
-		return fmt.Errorf("failed to open mysql connection: %v", err)
+		return fmt.Errorf("failed to open mysql connection: %w", err)
 	}
 	return nil
 }
@@ -67,8 +73,8 @@ func newOpenConnectionBackoff() *backoff.ExponentialBackOff {
 	return b
 }
 
-func NewConnection(config Dsn, logger logger.Logger) (Connection, error) {
-	db := &connection{config: config, logger: logger}
+func NewConnection(config Dsn, loggerImpl logger.Logger) (Connection, error) {
+	db := &connection{config: config, logger: loggerImpl}
 	err := db.openConnection()
 	return db, err
 }

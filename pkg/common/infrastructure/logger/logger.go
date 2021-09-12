@@ -2,6 +2,7 @@ package logger
 
 import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+
 	external "github.com/sirupsen/logrus"
 )
 

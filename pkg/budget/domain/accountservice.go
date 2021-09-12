@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+
 	"github.com/google/uuid"
 )
 
@@ -11,8 +12,8 @@ type AccountListRepository interface {
 }
 
 var (
-	ErrorAccountListAlreadyExists = errors.New("account list already exists")
-	ErrorAccountListDoesNotExist  = errors.New("account list does not exists")
+	ErrAccountListAlreadyExists = errors.New("account list already exists")
+	ErrAccountListDoesNotExist  = errors.New("account list does not exists")
 )
 
 type AccountListService interface {
@@ -35,7 +36,7 @@ func (service *accountService) Create(listID BudgetID) error {
 		return err
 	}
 	if acc != nil {
-		return ErrorAccountListAlreadyExists
+		return ErrAccountListAlreadyExists
 	}
 	list := NewAccountList(listID)
 	return service.repo.Update(list)
@@ -47,7 +48,7 @@ func (service *accountService) Add(listID BudgetID, title string, initialBalance
 		return AccountID{uuid.Nil}, err
 	}
 	if acc == nil {
-		return AccountID{uuid.Nil}, ErrorAccountListDoesNotExist
+		return AccountID{uuid.Nil}, ErrAccountListDoesNotExist
 	}
 	return acc.Add(title, initialBalance)
 }
@@ -58,7 +59,7 @@ func (service *accountService) Reorder(listID BudgetID, id AccountID, position i
 		return err
 	}
 	if acc == nil {
-		return ErrorAccountListDoesNotExist
+		return ErrAccountListDoesNotExist
 	}
 	return acc.Reorder(id, position)
 }
@@ -69,7 +70,7 @@ func (service *accountService) Rename(listID BudgetID, id AccountID, title strin
 		return err
 	}
 	if acc == nil {
-		return ErrorAccountListDoesNotExist
+		return ErrAccountListDoesNotExist
 	}
 	return acc.Rename(id, title)
 }
@@ -80,7 +81,7 @@ func (service *accountService) Activate(listID BudgetID, id AccountID) error {
 		return err
 	}
 	if acc == nil {
-		return ErrorAccountListDoesNotExist
+		return ErrAccountListDoesNotExist
 	}
 	return acc.Activate(id)
 }
@@ -91,7 +92,7 @@ func (service *accountService) Cancel(listID BudgetID, id AccountID) error {
 		return err
 	}
 	if acc == nil {
-		return ErrorAccountListDoesNotExist
+		return ErrAccountListDoesNotExist
 	}
 	return acc.Cancel(id)
 }
@@ -102,7 +103,7 @@ func (service *accountService) Delete(listID BudgetID, id AccountID) error {
 		return err
 	}
 	if acc == nil {
-		return ErrorAccountListDoesNotExist
+		return ErrAccountListDoesNotExist
 	}
 	return acc.Delete(id)
 }

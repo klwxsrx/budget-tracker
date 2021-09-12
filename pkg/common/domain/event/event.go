@@ -13,17 +13,17 @@ type Event interface {
 }
 
 type Base struct {
-	AggregateId uuid.UUID
-	Name        string
-	EventType   string
+	EventAggregateID   uuid.UUID
+	EventAggregateName string
+	EventType          string
 }
 
 func (e *Base) AggregateID() AggregateID {
-	return AggregateID{e.AggregateId}
+	return AggregateID{e.EventAggregateID}
 }
 
 func (e *Base) AggregateName() string {
-	return e.Name
+	return e.EventAggregateName
 }
 
 func (e *Base) Type() string {

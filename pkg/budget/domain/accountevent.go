@@ -53,18 +53,18 @@ type AccountDeletedEvent struct {
 
 func NewEventAccountListCreated(id BudgetID) event.Event {
 	return &AccountListCreatedEvent{event.Base{
-		AggregateId: id.UUID,
-		Name:        accountListAggregateName,
-		EventType:   EventTypeAccountListCreated,
+		EventAggregateID:   id.UUID,
+		EventAggregateName: accountListAggregateName,
+		EventType:          EventTypeAccountListCreated,
 	}}
 }
 
 func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, currency Currency, initialBalance int) event.Event {
 	return &AccountCreatedEvent{
 		Base: event.Base{
-			AggregateId: id.UUID,
-			Name:        accountListAggregateName,
-			EventType:   EventTypeAccountCreated,
+			EventAggregateID:   id.UUID,
+			EventAggregateName: accountListAggregateName,
+			EventType:          EventTypeAccountCreated,
 		},
 		AccountID:      accountID,
 		Title:          title,
@@ -76,9 +76,9 @@ func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, curr
 func NewEventAccountReordered(id BudgetID, accountID AccountID, position int) event.Event {
 	return &AccountReorderedEvent{
 		Base: event.Base{
-			AggregateId: id.UUID,
-			Name:        accountListAggregateName,
-			EventType:   EventTypeAccountReordered,
+			EventAggregateID:   id.UUID,
+			EventAggregateName: accountListAggregateName,
+			EventType:          EventTypeAccountReordered,
 		},
 		AccountID: accountID,
 		Position:  position,
@@ -88,9 +88,9 @@ func NewEventAccountReordered(id BudgetID, accountID AccountID, position int) ev
 func NewEventAccountRenamed(id BudgetID, accountID AccountID, title string) event.Event {
 	return &AccountRenamedEvent{
 		Base: event.Base{
-			AggregateId: id.UUID,
-			Name:        accountListAggregateName,
-			EventType:   EventTypeAccountRenamed,
+			EventAggregateID:   id.UUID,
+			EventAggregateName: accountListAggregateName,
+			EventType:          EventTypeAccountRenamed,
 		},
 		AccountID: accountID,
 		Title:     title,
@@ -100,9 +100,9 @@ func NewEventAccountRenamed(id BudgetID, accountID AccountID, title string) even
 func NewEventAccountActivated(id BudgetID, accountID AccountID) event.Event {
 	return &AccountActivatedEvent{
 		Base: event.Base{
-			AggregateId: id.UUID,
-			Name:        accountListAggregateName,
-			EventType:   EventTypeAccountActivated,
+			EventAggregateID:   id.UUID,
+			EventAggregateName: accountListAggregateName,
+			EventType:          EventTypeAccountActivated,
 		},
 		AccountID: accountID,
 	}
@@ -111,9 +111,9 @@ func NewEventAccountActivated(id BudgetID, accountID AccountID) event.Event {
 func NewEventAccountCancelled(id BudgetID, accountID AccountID) event.Event {
 	return &AccountCancelledEvent{
 		Base: event.Base{
-			AggregateId: id.UUID,
-			Name:        accountListAggregateName,
-			EventType:   EventTypeAccountCancelled,
+			EventAggregateID:   id.UUID,
+			EventAggregateName: accountListAggregateName,
+			EventType:          EventTypeAccountCancelled,
 		},
 		AccountID: accountID,
 	}
@@ -122,9 +122,9 @@ func NewEventAccountCancelled(id BudgetID, accountID AccountID) event.Event {
 func NewEventAccountDeleted(id BudgetID, accountID AccountID) event.Event {
 	return &AccountDeletedEvent{
 		Base: event.Base{
-			AggregateId: id.UUID,
-			Name:        accountListAggregateName,
-			EventType:   EventTypeAccountDeleted,
+			EventAggregateID:   id.UUID,
+			EventAggregateName: accountListAggregateName,
+			EventType:          EventTypeAccountDeleted,
 		},
 		AccountID: accountID,
 	}

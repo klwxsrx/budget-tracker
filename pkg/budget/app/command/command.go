@@ -2,7 +2,9 @@ package command
 
 import (
 	"errors"
+
 	"github.com/google/uuid"
+
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/command"
 )
 
@@ -15,7 +17,7 @@ const (
 	typeAccountDelete   = "account.delete"
 )
 
-var errorInvalidCommandType = errors.New("invalid command type")
+var errInvalidCommandType = errors.New("invalid command type")
 
 type AddAccount struct {
 	command.Base
@@ -57,13 +59,13 @@ type DeleteAccount struct {
 	AccountID uuid.UUID
 }
 
-func NewAccountAdd(listID uuid.UUID, Title, Currency string, InitialBalance int) command.Command {
+func NewAccountAdd(listID uuid.UUID, title, currency string, initialBalance int) command.Command {
 	return &AddAccount{
 		Base:           command.Base{CommandType: typeAccountAdd},
 		ListID:         listID,
-		Title:          Title,
-		Currency:       Currency,
-		InitialBalance: InitialBalance,
+		Title:          title,
+		Currency:       currency,
+		InitialBalance: initialBalance,
 	}
 }
 
