@@ -66,7 +66,6 @@ func getRoutes() []route {
 
 type addAccountBody struct {
 	Title          string `json:"title"`
-	Currency       string `json:"currency"`
 	InitialBalance int    `json:"initialBalance"`
 }
 
@@ -79,10 +78,10 @@ func addAccountParser(r *http.Request) (commonappcommand.Command, error) {
 	if err := parseJSONFromBody(r, &body); err != nil {
 		return nil, err
 	}
-	if body.Title == "" || body.Currency == "" {
+	if body.Title == "" {
 		return nil, errInvalidParameter
 	}
-	return command.NewAccountAdd(budgetID, body.Title, body.Currency, body.InitialBalance), nil
+	return command.NewAccountAdd(budgetID, body.Title, body.InitialBalance), nil
 }
 
 func reorderAccountParser(r *http.Request) (commonappcommand.Command, error) {

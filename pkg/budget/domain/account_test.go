@@ -13,16 +13,16 @@ func TestAccountList_Add(t *testing.T) {
 	listID := BudgetID{uuid.New()}
 	list := LoadAccountList(&AccountListState{listID, nil})
 
-	_, err := list.Add("", MoneyAmount{0, "USD"})
+	_, err := list.Add("", MoneyAmount(0))
 	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
-	_, err = list.Add(" \n\t", MoneyAmount{0, "USD"})
+	_, err = list.Add(" \n\t", MoneyAmount(0))
 	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
-	_, err = list.Add(strings.Repeat("s", 101), MoneyAmount{0, "USD"})
+	_, err = list.Add(strings.Repeat("s", 101), MoneyAmount(0))
 	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
-	id, err := list.Add("some", MoneyAmount{-42, "USD"})
+	id, err := list.Add("some", MoneyAmount(-42))
 	assert.NoError(t, err)
 	assert.Len(t, list.GetChanges(), 1)
 	createdEvent, ok := list.GetChanges()[0].(*AccountCreatedEvent)
@@ -33,22 +33,21 @@ func TestAccountList_Add(t *testing.T) {
 	assert.Equal(t, id.String(), createdEvent.AccountID.String())
 	assert.Equal(t, "some", createdEvent.Title)
 	assert.Equal(t, -42, createdEvent.InitialBalance)
-	assert.Equal(t, "USD", string(createdEvent.Currency))
 	assert.Len(t, list.getAccounts(), 1)
 	assert.Equal(t, id.String(), list.getAccounts()[0].GetID().String())
 	assert.Equal(t, AccountStatusActive, list.getAccounts()[0].GetStatus())
 	assert.Equal(t, "some", list.getAccounts()[0].GetTitle())
-	assert.Equal(t, MoneyAmount{-42, "USD"}, list.getAccounts()[0].GetInitialBalance())
+	assert.Equal(t, MoneyAmount(-42), list.getAccounts()[0].GetInitialBalance())
 
-	_, err = list.Add("some", MoneyAmount{0, "USD"})
+	_, err = list.Add("some", MoneyAmount(0))
 	assert.EqualError(t, err, ErrAccountDuplicateTitle.Error())
 
-	_, err = list.Add("another", MoneyAmount{13, "RUB"})
+	_, err = list.Add("another", MoneyAmount(13))
 	assert.NoError(t, err)
 	assert.Len(t, list.GetChanges(), 2)
 	assert.Len(t, list.getAccounts(), 2)
 
-	_, err = list.Add(strings.Repeat("s", 100), MoneyAmount{0, "USD"})
+	_, err = list.Add(strings.Repeat("s", 100), MoneyAmount(0))
 	assert.NoError(t, err)
 	assert.Len(t, list.GetChanges(), 3)
 	assert.Len(t, list.getAccounts(), 3)
@@ -67,11 +66,11 @@ func TestAccountList_Reorder(t *testing.T) {
 	id4 := AccountID{uuid.New()}
 	id5 := AccountID{uuid.New()}
 	list := LoadAccountList(&AccountListState{listID, []*AccountState{
-		{id1, AccountStatusActive, "1", MoneyAmount{0, "USD"}},
-		{id2, AccountStatusActive, "2", MoneyAmount{0, "USD"}},
-		{id3, AccountStatusActive, "3", MoneyAmount{0, "USD"}},
-		{id4, AccountStatusActive, "4", MoneyAmount{0, "USD"}},
-		{id5, AccountStatusActive, "5", MoneyAmount{0, "USD"}},
+		{id1, AccountStatusActive, "1", MoneyAmount(0)},
+		{id2, AccountStatusActive, "2", MoneyAmount(0)},
+		{id3, AccountStatusActive, "3", MoneyAmount(0)},
+		{id4, AccountStatusActive, "4", MoneyAmount(0)},
+		{id5, AccountStatusActive, "5", MoneyAmount(0)},
 	}})
 
 	err := list.Reorder(AccountID{uuid.New()}, 3)
@@ -154,8 +153,8 @@ func TestAccountList_Rename(t *testing.T) {
 	listID := BudgetID{uuid.New()}
 	itemID := AccountID{uuid.New()}
 	list := LoadAccountList(&AccountListState{listID, []*AccountState{
-		{itemID, AccountStatusActive, "some", MoneyAmount{0, "USD"}},
-		{AccountID{uuid.New()}, AccountStatusActive, "another", MoneyAmount{0, "USD"}},
+		{itemID, AccountStatusActive, "some", MoneyAmount(0)},
+		{AccountID{uuid.New()}, AccountStatusActive, "another", MoneyAmount(0)},
 	}})
 
 	err := list.Rename(AccountID{uuid.New()}, "test")
@@ -164,7 +163,7 @@ func TestAccountList_Rename(t *testing.T) {
 	err = list.Rename(itemID, " \t\n")
 	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
-	_, err = list.Add(strings.Repeat("s", 101), MoneyAmount{0, "USD"})
+	_, err = list.Add(strings.Repeat("s", 101), MoneyAmount(0))
 	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
 
 	err = list.Rename(itemID, "another")
@@ -187,7 +186,7 @@ func TestAccountList_Rename(t *testing.T) {
 	assert.Equal(t, itemID.String(), renamedEvent.AccountID.String())
 	assert.Equal(t, "new", renamedEvent.Title)
 
-	_, err = list.Add(strings.Repeat("s", 100), MoneyAmount{0, "USD"})
+	_, err = list.Add(strings.Repeat("s", 100), MoneyAmount(0))
 	assert.NoError(t, err)
 }
 
@@ -196,8 +195,8 @@ func TestAccountList_Activate(t *testing.T) {
 	item1ID := AccountID{uuid.New()}
 	item2ID := AccountID{uuid.New()}
 	list := LoadAccountList(&AccountListState{listID, []*AccountState{
-		{item1ID, AccountStatusActive, "some", MoneyAmount{0, "USD"}},
-		{item2ID, AccountStatusCancelled, "another", MoneyAmount{0, "USD"}},
+		{item1ID, AccountStatusActive, "some", MoneyAmount(0)},
+		{item2ID, AccountStatusCancelled, "another", MoneyAmount(0)},
 	}})
 
 	err := list.Activate(AccountID{uuid.New()})
@@ -227,9 +226,9 @@ func TestAccountList_Cancel(t *testing.T) {
 	item1ID := AccountID{uuid.New()}
 	item2ID := AccountID{uuid.New()}
 	list := LoadAccountList(&AccountListState{listID, []*AccountState{
-		{item1ID, AccountStatusCancelled, "some", MoneyAmount{0, "USD"}},
-		{item2ID, AccountStatusActive, "another", MoneyAmount{0, "USD"}},
-		{item2ID, AccountStatusActive, "third", MoneyAmount{0, "USD"}},
+		{item1ID, AccountStatusCancelled, "some", MoneyAmount(0)},
+		{item2ID, AccountStatusActive, "another", MoneyAmount(0)},
+		{item2ID, AccountStatusActive, "third", MoneyAmount(0)},
 	}})
 
 	err := list.Cancel(AccountID{uuid.New()})
@@ -258,7 +257,7 @@ func TestAccountList_Delete(t *testing.T) {
 	listID := BudgetID{uuid.New()}
 	item1ID := AccountID{uuid.New()}
 	list := LoadAccountList(&AccountListState{listID, []*AccountState{
-		{item1ID, AccountStatusActive, "some", MoneyAmount{0, "USD"}},
+		{item1ID, AccountStatusActive, "some", MoneyAmount(0)},
 	}})
 
 	err := list.Delete(AccountID{uuid.New()})

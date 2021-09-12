@@ -26,7 +26,6 @@ func (t *translator) Translate(err error) commonappcommand.Result {
 
 func NewTranslator() commonappcommand.ErrorTranslator {
 	var resultMap = map[error]commonappcommand.Result{
-		domain.ErrCurrencyInvalid:          commonappcommand.ResultInvalidArgument,
 		domain.ErrAccountListAlreadyExists: commonappcommand.ResultDuplicateConflict,
 		domain.ErrAccountListDoesNotExist:  commonappcommand.ResultNotFound,
 		domain.ErrAccountDuplicateTitle:    commonappcommand.ResultDuplicateConflict,

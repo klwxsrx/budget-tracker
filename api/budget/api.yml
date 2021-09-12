@@ -26,13 +26,10 @@ paths:
               properties:
                 title:
                   type: string
-                currency:
-                  type: string
                 initialBalance:
                   type: integer
               required:
                 - title
-                - currency
                 - initialBalance
         required: true
       responses:

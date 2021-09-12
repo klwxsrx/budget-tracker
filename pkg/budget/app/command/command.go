@@ -23,7 +23,6 @@ type AddAccount struct {
 	command.Base
 	ListID         uuid.UUID
 	Title          string
-	Currency       string
 	InitialBalance int
 }
 
@@ -59,12 +58,11 @@ type DeleteAccount struct {
 	AccountID uuid.UUID
 }
 
-func NewAccountAdd(listID uuid.UUID, title, currency string, initialBalance int) command.Command {
+func NewAccountAdd(listID uuid.UUID, title string, initialBalance int) command.Command {
 	return &AddAccount{
 		Base:           command.Base{CommandType: typeAccountAdd},
 		ListID:         listID,
 		Title:          title,
-		Currency:       currency,
 		InitialBalance: initialBalance,
 	}
 }

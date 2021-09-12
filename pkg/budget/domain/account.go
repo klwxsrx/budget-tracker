@@ -61,8 +61,7 @@ func (list *AccountList) Add(title string, initialBalance MoneyAmount) (AccountI
 		list.state.ID,
 		accountID,
 		title,
-		initialBalance.Currency,
-		initialBalance.Amount,
+		initialBalance,
 	))
 	return accountID, err
 }

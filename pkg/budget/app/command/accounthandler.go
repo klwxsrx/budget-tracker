@@ -19,11 +19,7 @@ func (h *AddAccountHandler) Execute(c command.Command) error {
 		return errInvalidCommandType
 	}
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		amount, err := domain.NewMoneyAmount(cmd.InitialBalance, cmd.Currency)
-		if err != nil {
-			return err
-		}
-		_, err = r.AccountListService().Add(domain.BudgetID{UUID: cmd.ListID}, cmd.Title, amount)
+		_, err := r.AccountListService().Add(domain.BudgetID{UUID: cmd.ListID}, cmd.Title, domain.MoneyAmount(cmd.InitialBalance))
 		return err
 	})
 }

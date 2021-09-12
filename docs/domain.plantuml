@@ -4,7 +4,6 @@ hide empty methods
 
 class MoneyAmount {
  +Amount int
- +Currency Currency ' TODO: remove currency
 }
 
 enum AccountStatus {

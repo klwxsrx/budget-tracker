@@ -20,7 +20,6 @@ type AccountCreatedEvent struct {
 	event.Base
 	AccountID      AccountID
 	Title          string
-	Currency       Currency
 	InitialBalance int
 }
 
@@ -59,7 +58,7 @@ func NewEventAccountListCreated(id BudgetID) event.Event {
 	}}
 }
 
-func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, currency Currency, initialBalance int) event.Event {
+func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, initialBalance MoneyAmount) event.Event {
 	return &AccountCreatedEvent{
 		Base: event.Base{
 			EventAggregateID:   id.UUID,
@@ -68,8 +67,7 @@ func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, curr
 		},
 		AccountID:      accountID,
 		Title:          title,
-		Currency:       currency,
-		InitialBalance: initialBalance,
+		InitialBalance: int(initialBalance),
 	}
 }
 

@@ -28,7 +28,6 @@ type accountCreatedJSON struct {
 	baseEventJSON
 	AccountID      uuid.UUID `json:"acc_id"`
 	Title          string    `json:"title"`
-	Currency       string    `json:"curr"`
 	InitialBalance int       `json:"balance"`
 }
 
@@ -118,7 +117,6 @@ func (s *eventSerializer) createAccountCreatedJSON(event commondomainevent.Event
 		},
 		AccountID:      createdEvent.AccountID.UUID,
 		Title:          createdEvent.Title,
-		Currency:       string(createdEvent.Currency),
 		InitialBalance: createdEvent.InitialBalance,
 	}, nil
 }

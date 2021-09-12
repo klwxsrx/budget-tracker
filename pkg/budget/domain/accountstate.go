@@ -81,7 +81,7 @@ func (state *AccountListState) applyCreated(e event.Event) error {
 		ID:             createdEvent.AccountID,
 		Status:         AccountStatusActive,
 		Title:          createdEvent.Title,
-		InitialBalance: MoneyAmount{createdEvent.InitialBalance, createdEvent.Currency},
+		InitialBalance: MoneyAmount(createdEvent.InitialBalance),
 	}
 	state.accounts = append(state.accounts, account)
 	return nil

@@ -51,8 +51,7 @@ func (d *deserializer) deserializeAccountCreatedEvent(eventPayload []byte) (comm
 		domain.BudgetID{UUID: event.AggregateID},
 		domain.AccountID{UUID: event.AccountID},
 		event.Title,
-		domain.Currency(event.Currency),
-		event.InitialBalance,
+		domain.MoneyAmount(event.InitialBalance),
 	), nil
 }
 
