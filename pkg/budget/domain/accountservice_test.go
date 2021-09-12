@@ -52,10 +52,10 @@ func TestAccountService_Add(t *testing.T) {
 	err := service.Create(listID)
 	assert.NoError(t, err)
 
-	_, err = service.Add(BudgetID{uuid.New()}, "some", MoneyAmount{4200, "USD"})
+	_, err = service.Add(BudgetID{uuid.New()}, "some", MoneyAmount(4200))
 	assert.EqualError(t, err, ErrAccountListDoesNotExist.Error())
 
-	_, err = service.Add(listID, "new", MoneyAmount{1300, "USD"})
+	_, err = service.Add(listID, "new", MoneyAmount(1300))
 	assert.NoError(t, err)
 }
 
@@ -69,7 +69,7 @@ func TestAccountService_Reorder(t *testing.T) {
 	err = service.Reorder(BudgetID{uuid.New()}, AccountID{uuid.New()}, 0)
 	assert.EqualError(t, err, ErrAccountListDoesNotExist.Error())
 
-	id, err := service.Add(listID, "new", MoneyAmount{1300, "USD"})
+	id, err := service.Add(listID, "new", MoneyAmount(1300))
 	assert.NoError(t, err)
 	err = service.Reorder(listID, id, 0)
 	assert.NoError(t, err)
@@ -85,7 +85,7 @@ func TestAccountService_Rename(t *testing.T) {
 	err = service.Rename(BudgetID{uuid.New()}, AccountID{uuid.New()}, "some")
 	assert.EqualError(t, err, ErrAccountListDoesNotExist.Error())
 
-	id, err := service.Add(listID, "new", MoneyAmount{1300, "USD"})
+	id, err := service.Add(listID, "new", MoneyAmount(1300))
 	assert.NoError(t, err)
 	err = service.Rename(listID, id, "new")
 	assert.NoError(t, err)
@@ -101,7 +101,7 @@ func TestAccountService_Activate(t *testing.T) {
 	err = service.Activate(BudgetID{uuid.New()}, AccountID{uuid.New()})
 	assert.EqualError(t, err, ErrAccountListDoesNotExist.Error())
 
-	id, err := service.Add(listID, "new", MoneyAmount{1300, "USD"})
+	id, err := service.Add(listID, "new", MoneyAmount(1300))
 	assert.NoError(t, err)
 	err = service.Activate(listID, id)
 	assert.NoError(t, err)
@@ -117,7 +117,7 @@ func TestAccountService_Cancel(t *testing.T) {
 	err = service.Cancel(BudgetID{uuid.New()}, AccountID{uuid.New()})
 	assert.EqualError(t, err, ErrAccountListDoesNotExist.Error())
 
-	id, err := service.Add(listID, "new", MoneyAmount{1300, "USD"})
+	id, err := service.Add(listID, "new", MoneyAmount(1300))
 	assert.NoError(t, err)
 	err = service.Cancel(listID, id)
 	assert.NoError(t, err)
@@ -133,7 +133,7 @@ func TestAccountService_Delete(t *testing.T) {
 	err = service.Delete(BudgetID{uuid.New()}, AccountID{uuid.New()})
 	assert.EqualError(t, err, ErrAccountListDoesNotExist.Error())
 
-	id, err := service.Add(listID, "new", MoneyAmount{1300, "USD"})
+	id, err := service.Add(listID, "new", MoneyAmount(1300))
 	assert.NoError(t, err)
 	err = service.Delete(listID, id)
 	assert.NoError(t, err)
