@@ -1,0 +1,113 @@
+name: Build docker images
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  GOLANGCI_LINT_VERSION: v1.42.0
+  GO_VERSION: 1.16
+
+jobs:
+
+  go-modules:
+    name: Download Go modules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Go modules
+        uses: ./.github/actions/download-go-modules
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+  go-lint:
+    name: Lint Go code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+
+  go-test:
+    name: Run Go unit tests
+    needs: go-modules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Go modules
+        uses: ./.github/actions/download-go-modules
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Run tests
+        run: make test
+
+  go-build:
+    name: Build Go images
+    needs:
+      - go-modules
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - application: budget
+            image-name: klwxsrx/budget-tracker
+          - application: budget-view
+            image-name: klwxsrx/budget-tracker-view
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Go modules
+        uses: ./.github/actions/download-go-modules
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Run build
+        run: go build -o ./bin/${{ matrix.application }} ./cmd/${{ matrix.application }}
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Build Docker image
+        uses: docker/build-push-action@v2
+        with:
+          file: ./docker/${{ matrix.application }}/Dockerfile
+          context: .
+          tags: ${{ matrix.image-name }}:master
+          outputs: type=docker,dest=/tmp/${{ matrix.application }}-image.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.application }}-image
+          path: /tmp/${{ matrix.application }}-image.tar
+
+  push-to-dockerhub:
+    name: Push to DockerHub
+    needs:
+      - go-lint
+      - go-test
+      - go-build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - application: budget
+            image-name: klwxsrx/budget-tracker
+          - application: budget-view
+            image-name: klwxsrx/budget-tracker-view
+    steps:
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.application }}-image
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/${{ matrix.application }}-image.tar
+      - name: Login to DockerHub
+        run: docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+      - name: Push Docker image
+        run: docker push ${{ matrix.image-name }}:master

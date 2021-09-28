@@ -1,0 +1,28 @@
+name: Download Go modules
+
+description: Download and cache Go modules
+
+inputs:
+  go-version:
+    description: "for example: 1.16"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ inputs.go-version }}
+    - name: Find GOMODCACHE
+      id: find-go-modules-cache
+      run: echo "::set-output name=path::$(go env GOMODCACHE)"
+      shell: bash
+    - name: Cache Go Modules
+      uses: actions/cache@v2
+      with:
+        path: ${{ steps.find-go-modules-cache.outputs.path }}
+        key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+    - name: Download Go Modules
+      run: go mod download
+      shell: bash

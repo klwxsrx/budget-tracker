@@ -1,24 +1,7 @@
-# Download modules
-FROM golang:1.16 AS modules
+# Create user
+FROM alpine:latest AS builder
 
-COPY ./go.mod ./go.sum /
-RUN go mod download
-
-
-# Build the binary
-FROM golang:1.16 AS builder
-
-RUN useradd -u 1001 appuser
-
-COPY --from=modules /go/pkg /go/pkg
-COPY . /build
-WORKDIR /build
-
-RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=0 \
-    go build -o ./bin/budget ./cmd/budget-view
-
-RUN chmod +x ./bin/budget
-
+RUN adduser --disabled-password --uid=1001 appuser
 
 # Run the binary
 FROM scratch
@@ -26,7 +9,7 @@ FROM scratch
 COPY --from=builder /etc/passwd /etc/passwd
 USER appuser
 
-COPY --from=builder /build/bin/budget /app/bin/budget
+COPY ./bin/budget-view /app/bin/budget
 
 EXPOSE 8080
 
