@@ -1,0 +1,15 @@
+{
+  "navigation": {
+    "transactions": "Операции",
+    "settings": "Настройки"
+  },
+  "settings": {
+    "select-currency": "Выберите валюту",
+    "currency": "Валюта аккаунта"
+  },
+  "currency": {
+    "rub": "Рубль",
+    "usd": "Доллар",
+    "eur": "Евро"
+  }
+}
