@@ -9,13 +9,19 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
-type eventbus struct {
+const (
+	TopicDomainEvent = "domain_event"
+
+	propertyMessageType = "type"
+)
+
+type eventBus struct {
 	producer   pulsar.Producer
 	serializer messaging.StoredEventSerializer
 	ctx        context.Context
 }
 
-func (b *eventbus) Dispatch(event *storedevent.StoredEvent) error {
+func (b *eventBus) Publish(event *storedevent.StoredEvent) error {
 	eventMsg, err := b.serializer.Serialize(event)
 	if err != nil {
 		return err
@@ -36,5 +42,5 @@ func NewEventBus(ctx context.Context, con Connection, serializer messaging.Store
 	if err != nil {
 		return nil, err
 	}
-	return &eventbus{producer, serializer, ctx}, nil
+	return &eventBus{producer, serializer, ctx}, nil
 }

@@ -1,11 +1,9 @@
 package storedevent
 
-import (
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/persistence"
-)
+import "github.com/klwxsrx/budget-tracker/pkg/common/app/persistence"
 
 type Bus interface {
-	Dispatch(event *StoredEvent) error
+	Publish(event *StoredEvent) error
 }
 
 type UnsentEventProvider interface {
@@ -13,13 +11,21 @@ type UnsentEventProvider interface {
 	Ack(id ID) error
 }
 
-type UnsentEventBusHandler struct {
+func NewUnsentEventHandler(
+	unsentEventProvider UnsentEventProvider,
+	eventBus Bus,
+	sync persistence.Synchronization,
+) *UnsentEventHandler {
+	return &UnsentEventHandler{unsentEventProvider, eventBus, sync}
+}
+
+type UnsentEventHandler struct {
 	eventProvider UnsentEventProvider
 	bus           Bus
 	sync          persistence.Synchronization
 }
 
-func (handler *UnsentEventBusHandler) ProcessUnsentEvents() error {
+func (handler *UnsentEventHandler) ProcessUnsentEvents() error {
 	return handler.sync.CriticalSection("process_unsent_events", func() error {
 		events, err := handler.eventProvider.GetBatch()
 		for events != nil {
@@ -27,7 +33,7 @@ func (handler *UnsentEventBusHandler) ProcessUnsentEvents() error {
 				return err
 			}
 			for _, e := range events {
-				err = handler.bus.Dispatch(e)
+				err = handler.bus.Publish(e)
 				if err != nil {
 					return err
 				}

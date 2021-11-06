@@ -24,10 +24,9 @@ func (dr *domainRegistry) AccountListService() domain.AccountListService {
 	return dr.accountListService
 }
 
-// nolint:unparam
-func registerEventHandlers(dispatcher event.Dispatcher, registry DomainRegistry, store commonappstoredevent.Store) event.Dispatcher {
-	dispatcher.Subscribe(commonappstoredevent.NewStoreEventHandler(store))
-	// TODO: add event handlers
+func eventDispatcher(store commonappstoredevent.Store) event.Dispatcher {
+	dispatcher := event.NewDispatcher()
+	dispatcher.Subscribe(commonappstoredevent.NewDomainEventHandler(store))
 	return dispatcher
 }
 
@@ -35,9 +34,7 @@ func NewDomainRegistry(
 	store commonappstoredevent.Store,
 	deserializer commonappstoredevent.Deserializer,
 ) DomainRegistry {
-	dispatcher := event.NewDispatcher()
+	dispatcher := eventDispatcher(store)
 	accountRepo := repository.NewAccountRepository(dispatcher, store, deserializer)
-	registry := &domainRegistry{domain.NewAccountListService(accountRepo)}
-	registerEventHandlers(dispatcher, registry, store)
-	return registry
+	return &domainRegistry{domain.NewAccountListService(accountRepo)}
 }

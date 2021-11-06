@@ -3,7 +3,7 @@
 all: clean bin/budget bin/budget-view test lint
 
 clean:
-	rm -f $(foreach NAME, $(APP_CMD_NAMES), "bin/$(NAME)")
+	rm -rf bin/*
 
 bin/%:
 	GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build -o ./bin/$(notdir $@) ./cmd/$(notdir $@)

@@ -6,11 +6,11 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 )
 
-type storeEventHandler struct {
+type domainEventHandler struct {
 	store Store
 }
 
-func (eh *storeEventHandler) Handle(e event.Event) error {
+func (eh *domainEventHandler) Handle(e event.Event) error {
 	_, err := eh.store.Append(e)
 	if err != nil {
 		return fmt.Errorf("can't append event to store: %w", err)
@@ -18,6 +18,6 @@ func (eh *storeEventHandler) Handle(e event.Event) error {
 	return nil
 }
 
-func NewStoreEventHandler(es Store) event.Handler {
-	return &storeEventHandler{es}
+func NewDomainEventHandler(es Store) event.Handler {
+	return &domainEventHandler{es}
 }

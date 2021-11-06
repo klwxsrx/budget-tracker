@@ -89,6 +89,6 @@ func selectEvents(db Client, fromID storedevent.ID, conditions []string, args ..
 	return events, err
 }
 
-func NewStore(client Client, serializer storedevent.Serializer) storedevent.Store {
+func NewEventStore(client Client, serializer storedevent.Serializer) storedevent.Store {
 	return &store{client, serializer}
 }

@@ -24,7 +24,7 @@ func (t *translator) Translate(err error) commonappcommand.Result {
 	return commonappcommand.ResultUnknownError
 }
 
-func NewTranslator() commonappcommand.ErrorTranslator {
+func NewResultTranslator() commonappcommand.ResultTranslator {
 	var resultMap = map[error]commonappcommand.Result{
 		domain.ErrAccountListAlreadyExists: commonappcommand.ResultDuplicateConflict,
 		domain.ErrAccountListDoesNotExist:  commonappcommand.ResultNotFound,

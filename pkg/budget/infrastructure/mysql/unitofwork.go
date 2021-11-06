@@ -40,7 +40,7 @@ func (uw *unitOfWork) Critical(lock string, f func(r service.DomainRegistry) err
 }
 
 func (uw *unitOfWork) newStore(client mysql.Client) storedevent.Store {
-	store := mysql.NewStore(client, uw.serializer)
+	store := mysql.NewEventStore(client, uw.serializer)
 	return mysql.NewUnsentEventHandlingStore(client, store)
 }
 

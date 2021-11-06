@@ -47,8 +47,6 @@ func NewContainer(
 	deserializer := storedevent.NewDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
-	eventStore := commoninfrastructuremysql.NewStore(client, serializer)
-	unsentEventProvider := commoninfrastructuremysql.NewUnsentEventProvider(eventStore, client)
 	storedEventSerializer := messaging.NewStoredEventSerializer()
 	eventBus, err := pulsar.NewEventBus(ctx, broker, storedEventSerializer)
 	if err != nil {
@@ -56,11 +54,14 @@ func NewContainer(
 	}
 
 	sync := commoninfrastructuremysql.NewSynchronization(client)
-	storedEventHandler := commonappstoredevent.NewHandler(ctx, unsentEventProvider, eventBus, sync, loggerImpl)
-	storedEventHandlingUnitOfWork := storedevent.NewHandlingUnitOfWork(unitOfWork, storedEventHandler)
+	eventStore := commoninfrastructuremysql.NewEventStore(client, serializer)
+	unsentEventProvider := commoninfrastructuremysql.NewUnsentEventProvider(eventStore, client)
+	unsentEventHandler := commonappstoredevent.NewUnsentEventHandler(unsentEventProvider, eventBus, sync)
+	unsentEventDispatcher := commonappstoredevent.NewUnsentEventDispatcher(ctx, unsentEventHandler, loggerImpl)
+	dispatchingUnitOfWork := storedevent.NewDispatchingUnitOfWork(unitOfWork, unsentEventDispatcher)
 
-	busRegistry := commonappcommand.NewBusRegistry(command.NewTranslator(), loggerImpl)
-	bus := registerCommandHandlers(busRegistry, storedEventHandlingUnitOfWork)
+	busRegistry := commonappcommand.NewBusRegistry(command.NewResultTranslator(), loggerImpl)
+	bus := registerCommandHandlers(busRegistry, dispatchingUnitOfWork)
 
 	return &container{bus}, nil
 }

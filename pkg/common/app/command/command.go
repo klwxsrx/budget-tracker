@@ -30,7 +30,7 @@ const (
 	ResultUnknownError
 )
 
-type ErrorTranslator interface {
+type ResultTranslator interface {
 	Translate(err error) Result
 }
 
@@ -51,7 +51,7 @@ type Handler interface {
 type bus struct {
 	registry   map[Type]Handler
 	logger     logger.Logger
-	translator ErrorTranslator
+	translator ResultTranslator
 }
 
 func (b *bus) Publish(c Command) Result {
@@ -85,6 +85,6 @@ func (b *bus) Register(h Handler) error {
 	return nil
 }
 
-func NewBusRegistry(translator ErrorTranslator, loggerImpl logger.Logger) BusRegistry {
+func NewBusRegistry(translator ResultTranslator, loggerImpl logger.Logger) BusRegistry {
 	return &bus{make(map[Type]Handler), loggerImpl, translator}
 }
