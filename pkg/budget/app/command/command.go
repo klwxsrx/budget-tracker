@@ -9,15 +9,21 @@ import (
 )
 
 const (
-	typeAccountAdd      = "account.add"
-	typeAccountReorder  = "account.reorder"
-	typeAccountRename   = "account.rename"
-	typeAccountActivate = "account.activate"
-	typeAccountCancel   = "account.cancel"
-	typeAccountDelete   = "account.delete"
+	typeAccountCreateList = "account.create_list"
+	typeAccountAdd        = "account.add"
+	typeAccountReorder    = "account.reorder"
+	typeAccountRename     = "account.rename"
+	typeAccountActivate   = "account.activate"
+	typeAccountCancel     = "account.cancel"
+	typeAccountDelete     = "account.delete"
 )
 
 var errInvalidCommandType = errors.New("invalid command type")
+
+type CreateAccountList struct {
+	command.Base
+	ListID uuid.UUID
+}
 
 type AddAccount struct {
 	command.Base
@@ -56,6 +62,13 @@ type DeleteAccount struct {
 	command.Base
 	ListID    uuid.UUID
 	AccountID uuid.UUID
+}
+
+func NewAccountCreateList(listID uuid.UUID) command.Command {
+	return &CreateAccountList{
+		Base:   command.Base{CommandType: typeAccountCreateList},
+		ListID: listID,
+	}
 }
 
 func NewAccountAdd(listID uuid.UUID, title string, initialBalance int) command.Command {

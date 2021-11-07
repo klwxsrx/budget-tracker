@@ -2,10 +2,13 @@ package storedevent
 
 import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+
+	"sync"
 )
 
 type UnsentEventDispatcher interface {
 	Dispatch()
+	Start()
 	Stop()
 }
 
@@ -13,6 +16,7 @@ type unsentEventDispatcher struct {
 	handler             *UnsentEventHandler
 	logger              logger.Logger
 	dispatchRequestChan chan struct{}
+	starter             sync.Once
 	stopChan            chan struct{}
 }
 
@@ -23,25 +27,30 @@ func (d *unsentEventDispatcher) Dispatch() {
 	}
 }
 
-func (d *unsentEventDispatcher) Stop() {
+func (d *unsentEventDispatcher) Start() {
+	d.starter.Do(func() {
+		go d.run()
+		d.Dispatch()
+	})
+}
+
+func (d *unsentEventDispatcher) Stop() { // TODO: stop before start
 	d.stopChan <- struct{}{}
 }
 
 func (d *unsentEventDispatcher) run() {
-	go func() {
-		for {
-			select {
-			case <-d.dispatchRequestChan:
-				err := d.handler.ProcessUnsentEvents()
-				if err != nil {
-					d.logger.WithError(err).Error("failed to process unsent events")
-					d.Dispatch()
-				}
-			case <-d.stopChan:
-				return
+	for {
+		select {
+		case <-d.dispatchRequestChan:
+			err := d.handler.ProcessUnsentEvents()
+			if err != nil {
+				d.logger.WithError(err).Error("failed to process unsent events")
+				d.Dispatch()
 			}
+		case <-d.stopChan:
+			return
 		}
-	}()
+	}
 }
 
 func NewUnsentEventDispatcher(
@@ -52,9 +61,8 @@ func NewUnsentEventDispatcher(
 		unsentEventHandler,
 		loggerImpl,
 		make(chan struct{}, 1),
+		sync.Once{},
 		make(chan struct{}),
 	}
-	dispatcher.run()
-	dispatcher.Dispatch()
 	return dispatcher
 }

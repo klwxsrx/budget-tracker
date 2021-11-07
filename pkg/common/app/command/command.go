@@ -35,7 +35,7 @@ type ResultTranslator interface {
 }
 
 type Bus interface {
-	Publish(c Command) Result
+	Publish(c Command) (Result, error)
 }
 
 type BusRegistry interface {
@@ -54,11 +54,12 @@ type bus struct {
 	translator ResultTranslator
 }
 
-func (b *bus) Publish(c Command) Result {
+func (b *bus) Publish(c Command) (Result, error) {
 	handler, ok := b.registry[c.Type()]
 	if !ok {
-		b.logger.Error(fmt.Sprintf("cannot find handler for %v", c.Type()))
-		return ResultUnknownError
+		err := fmt.Errorf("cannot find handler for %v", c.Type())
+		b.logger.Error(err.Error())
+		return ResultUnknownError, err
 	}
 
 	err := handler.Execute(c)
@@ -74,7 +75,7 @@ func (b *bus) Publish(c Command) Result {
 	} else {
 		loggerWithFields.Info("command handled")
 	}
-	return result
+	return result, err
 }
 
 func (b *bus) Register(h Handler) error {

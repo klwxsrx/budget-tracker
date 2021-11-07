@@ -24,7 +24,7 @@ type ProducerConfig struct {
 }
 
 type ConsumerConfig struct {
-	Topic            string
+	TopicsPattern    string
 	SubscriptionName string
 }
 
@@ -46,7 +46,7 @@ func (c *connection) CreateProducer(config *ProducerConfig) (pulsar.Producer, er
 
 func (c *connection) Subscribe(config *ConsumerConfig) (pulsar.Consumer, error) {
 	consumerConfig := pulsar.ConsumerOptions{
-		Topic:            config.Topic,
+		TopicsPattern:    config.TopicsPattern,
 		SubscriptionName: config.SubscriptionName,
 		Type:             pulsar.Failover,
 	}

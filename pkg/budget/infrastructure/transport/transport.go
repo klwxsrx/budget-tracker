@@ -193,7 +193,8 @@ func getHandlerFunc(bus commonappcommand.Bus, parser commandParser) http.Handler
 		default:
 		}
 
-		switch bus.Publish(cmd) {
+		result, _ := bus.Publish(cmd)
+		switch result {
 		case commonappcommand.ResultSuccess:
 			w.WriteHeader(http.StatusNoContent)
 		case commonappcommand.ResultInvalidArgument:

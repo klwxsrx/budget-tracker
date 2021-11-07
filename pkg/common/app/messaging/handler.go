@@ -1,6 +1,8 @@
 package messaging
 
-import "time"
+import (
+	"time"
+)
 
 type MessageID []byte
 
@@ -12,11 +14,38 @@ type Message struct {
 }
 
 type MessageHandler interface {
-	Handle(e *Message) error
+	Handle(msg Message) error
 }
 
 type NamedMessageHandler interface {
 	MessageHandler
 	Name() string
-	LatestMessageID() (*MessageID, error)
+}
+
+type CompositeTypedMessageHandler struct {
+	name     string
+	handlers map[string]MessageHandler
+}
+
+func (h *CompositeTypedMessageHandler) Handle(msg Message) error {
+	handler, ok := h.handlers[msg.Type]
+	if !ok {
+		return nil
+	}
+	return handler.Handle(msg)
+}
+
+func (h *CompositeTypedMessageHandler) Name() string {
+	return h.name
+}
+
+func (h *CompositeTypedMessageHandler) Subscribe(messageType string, handler MessageHandler) {
+	h.handlers[messageType] = handler
+}
+
+func NewCompositeTypedMessageHandler(name string) *CompositeTypedMessageHandler {
+	return &CompositeTypedMessageHandler{
+		name,
+		make(map[string]MessageHandler),
+	}
 }

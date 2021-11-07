@@ -8,6 +8,21 @@ import (
 
 const updateAccountLockName = "update_account_lock_"
 
+type CreateAccountListHandler struct {
+	command.Base
+	unitOfWork service.UnitOfWork
+}
+
+func (h *CreateAccountListHandler) Execute(c command.Command) error {
+	cmd, ok := c.(*CreateAccountList)
+	if !ok {
+		return errInvalidCommandType
+	}
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
+		return r.AccountListService().Create(domain.BudgetID{UUID: cmd.ListID})
+	})
+}
+
 type AddAccountHandler struct {
 	command.Base
 	unitOfWork service.UnitOfWork
@@ -97,6 +112,13 @@ func (h *DeleteAccountHandler) Execute(c command.Command) error {
 	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
 		return r.AccountListService().Delete(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID})
 	})
+}
+
+func NewAccountCreateListHandler(unitOfWork service.UnitOfWork) command.Handler {
+	return &CreateAccountListHandler{
+		Base:       command.Base{CommandType: typeAccountCreateList},
+		unitOfWork: unitOfWork,
+	}
 }
 
 func NewAccountAddHandler(unitOfWork service.UnitOfWork) command.Handler {

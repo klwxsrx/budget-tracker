@@ -34,7 +34,7 @@ func (r *accountListRepository) FindByID(id domain.BudgetID) (*domain.AccountLis
 		return nil, nil
 	}
 	for _, storedEvent := range storedEvents {
-		event, err := r.deserializer.Deserialize(storedEvent)
+		event, err := r.deserializer.Deserialize(storedEvent.Type, storedEvent.EventData)
 		if err != nil {
 			return nil, fmt.Errorf("failed to deserialize events: %w", err)
 		}

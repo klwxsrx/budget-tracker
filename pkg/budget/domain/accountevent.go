@@ -3,13 +3,13 @@ package domain
 import "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
 
 const (
-	EventTypeAccountListCreated = "list_created"
-	EventTypeAccountCreated     = "created"
-	EventTypeAccountReordered   = "reordered"
-	EventTypeAccountRenamed     = "renamed"
-	EventTypeAccountActivated   = "activated"
-	EventTypeAccountCancelled   = "cancelled"
-	EventTypeAccountDeleted     = "deleted"
+	EventTypeAccountListCreated = accountListAggregateName + ".created"
+	EventTypeAccountCreated     = accountListAggregateName + ".account_created"
+	EventTypeAccountReordered   = accountListAggregateName + ".account_reordered"
+	EventTypeAccountRenamed     = accountListAggregateName + ".account_renamed"
+	EventTypeAccountActivated   = accountListAggregateName + ".account_activated"
+	EventTypeAccountCancelled   = accountListAggregateName + ".account_cancelled"
+	EventTypeAccountDeleted     = accountListAggregateName + ".account_deleted"
 )
 
 type AccountListCreatedEvent struct {

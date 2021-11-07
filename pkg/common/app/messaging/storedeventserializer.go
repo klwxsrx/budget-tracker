@@ -24,7 +24,7 @@ type storedEventSerializer struct{}
 func (s *storedEventSerializer) Serialize(event *storedevent.StoredEvent) ([]byte, error) {
 	jsonObj := storedEventMessage{
 		ID:   event.ID.UUID,
-		Type: fmt.Sprintf("%v.%v", event.AggregateName, event.Type),
+		Type: event.Type,
 		Data: event.EventData,
 	}
 	result, err := json.Marshal(jsonObj)

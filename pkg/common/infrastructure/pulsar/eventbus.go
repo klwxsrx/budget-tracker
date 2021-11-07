@@ -11,8 +11,12 @@ import (
 )
 
 const (
-	propertyMessageType       = "type"
-	eventBusTopicNameTemplate = "%v_domain_event"
+	EventTopicsPattern = ".+" + eventTopicNamePostfix
+
+	eventTopicNamePostfix  = "_domain_event"
+	eventTopicNameTemplate = "%v" + eventTopicNamePostfix
+
+	propertyEventType = "type"
 )
 
 type eventBus struct {
@@ -28,7 +32,7 @@ func (b *eventBus) Publish(event *storedevent.StoredEvent) error {
 	sequenceID := int64(event.SurrogateID)
 	msg := &pulsar.ProducerMessage{
 		Payload:    eventMsg,
-		Properties: map[string]string{propertyMessageType: event.Type},
+		Properties: map[string]string{propertyEventType: event.Type},
 		EventTime:  event.CreatedAt,
 		SequenceID: &sequenceID,
 	}
@@ -37,11 +41,11 @@ func (b *eventBus) Publish(event *storedevent.StoredEvent) error {
 }
 
 func NewEventBus(
-	con Connection,
+	connection Connection,
 	moduleName string,
 	serializer messaging.StoredEventSerializer,
 ) (storedevent.Bus, error) {
-	producer, err := con.CreateProducer(&ProducerConfig{Topic: fmt.Sprintf(eventBusTopicNameTemplate, moduleName)})
+	producer, err := connection.CreateProducer(&ProducerConfig{Topic: fmt.Sprintf(eventTopicNameTemplate, moduleName)})
 	if err != nil {
 		return nil, err
 	}

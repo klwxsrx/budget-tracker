@@ -20,6 +20,12 @@ type baseEventJSON struct {
 	Type          string    `json:"type"`
 }
 
+type budgetCreatedJSON struct {
+	baseEventJSON
+	Title    string `json:"title"`
+	Currency string `json:"currency"`
+}
+
 type accountListCreatedJSON struct {
 	baseEventJSON
 }
@@ -64,6 +70,8 @@ func (s *eventSerializer) Serialize(event commondomainevent.Event) (string, erro
 	var err error
 	var eventJSON interface{}
 	switch event.Type() {
+	case domain.EventTypeBudgetCreated:
+		eventJSON, err = s.createBudgetCreatedJSON(event)
 	case domain.EventTypeAccountListCreated:
 		eventJSON, err = s.createAccountListCreatedJSON(event)
 	case domain.EventTypeAccountCreated:
@@ -90,6 +98,22 @@ func (s *eventSerializer) Serialize(event commondomainevent.Event) (string, erro
 		return "", fmt.Errorf("can't serialize event - %s: %w", event, err)
 	}
 	return string(result), nil
+}
+
+func (s *eventSerializer) createBudgetCreatedJSON(event commondomainevent.Event) (*budgetCreatedJSON, error) {
+	createdEvent, ok := event.(*domain.BudgetCreatedEvent)
+	if !ok {
+		return nil, errUnknownAccountEventType
+	}
+	return &budgetCreatedJSON{
+		baseEventJSON: baseEventJSON{
+			AggregateID:   event.AggregateID().UUID,
+			AggregateName: event.AggregateName(),
+			Type:          event.Type(),
+		},
+		Title:    createdEvent.Title,
+		Currency: createdEvent.Currency,
+	}, nil
 }
 
 func (s *eventSerializer) createAccountListCreatedJSON(event commondomainevent.Event) (*accountListCreatedJSON, error) {

@@ -9,67 +9,73 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 )
 
-type messageID []byte
-
-func (id messageID) Serialize() []byte {
-	return id
-}
-
 type MessageConsumer struct {
-	handler  messaging.NamedMessageHandler
+	handler  messaging.MessageHandler
 	consumer pulsar.Consumer
 	logger   logger.Logger
+	stopChan chan struct{}
+}
+
+func (c *MessageConsumer) Stop() {
+	c.stopChan <- struct{}{}
 }
 
 func (c *MessageConsumer) run() {
-	for msg := range c.consumer.Chan() {
-		typ, ok := msg.Properties()[propertyMessageType]
-		if !ok {
-			c.logger.Error(fmt.Sprintf("failed to get message type for %v", msg.ID().Serialize()))
-			c.consumer.Ack(msg)
-			continue
+	for {
+		select {
+		case msg, ok := <-c.consumer.Chan():
+			if !ok {
+				return
+			}
+			c.processMessage(msg)
+		case <-c.stopChan:
+			return
 		}
-
-		err := c.handler.Handle(&messaging.Message{
-			ID:        msg.ID().Serialize(),
-			Type:      typ,
-			Data:      msg.Payload(),
-			EventTime: msg.EventTime(),
-		})
-		if err != nil {
-			c.logger.WithError(err).Error(fmt.Sprintf("failed to handle message %v", msg.ID().Serialize()))
-			c.consumer.Nack(msg)
-			continue
-		}
-		c.consumer.Ack(msg)
 	}
+}
+func (c *MessageConsumer) processMessage(msg pulsar.ConsumerMessage) {
+	typ, ok := msg.Properties()[propertyEventType]
+	if !ok {
+		c.logger.Error(fmt.Sprintf("failed to get message type for %v", msg.ID().Serialize()))
+		c.consumer.Ack(msg)
+		return
+	}
+
+	err := c.handler.Handle(messaging.Message{
+		ID:        msg.ID().Serialize(),
+		Type:      typ,
+		Data:      msg.Payload(),
+		EventTime: msg.EventTime(),
+	})
+	if err != nil {
+		c.logger.WithError(err).Error(fmt.Sprintf("failed to handle message %v", msg.ID().Serialize()))
+		c.consumer.Nack(msg)
+		return
+	}
+	c.consumer.Ack(msg)
+	c.logger.Info(fmt.Sprintf("message with type %v and id %v successfully handled", typ, msg.ID().Serialize()))
 }
 
 func NewMessageConsumer(
-	topic string,
+	topicsPattern string,
 	handler messaging.NamedMessageHandler,
-	con Connection,
+	resetSubscription bool,
+	connection Connection,
 	loggerImpl logger.Logger,
 ) (*MessageConsumer, error) {
-	offset, err := handler.LatestMessageID()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get latest message: %w", err)
-	}
-	initialPosition := pulsar.EarliestMessageID()
-	if offset != nil {
-		initialPosition = messageID(*offset)
-	}
-
-	pulsarConsumer, err := con.Subscribe(&ConsumerConfig{
-		Topic:            topic,
+	pulsarConsumer, err := connection.Subscribe(&ConsumerConfig{
+		TopicsPattern:    topicsPattern,
 		SubscriptionName: handler.Name(),
 	})
 	if err != nil {
 		return nil, err
 	}
-	err = pulsarConsumer.Seek(initialPosition)
-	if err != nil {
-		return nil, err
+
+	if resetSubscription {
+		err = pulsarConsumer.Seek(pulsar.EarliestMessageID())
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	consumer := &MessageConsumer{

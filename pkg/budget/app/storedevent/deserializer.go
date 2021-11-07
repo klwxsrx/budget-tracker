@@ -11,25 +11,36 @@ import (
 
 type deserializer struct{}
 
-func (d *deserializer) Deserialize(event *storedevent.StoredEvent) (commondomainevent.Event, error) {
-	switch event.Type {
+func (d *deserializer) Deserialize(eventType string, eventData []byte) (commondomainevent.Event, error) {
+	switch eventType {
+	case domain.EventTypeBudgetCreated:
+		return d.deserializeBudgetCreatedEvent(eventData)
 	case domain.EventTypeAccountListCreated:
-		return d.deserializeAccountListCreatedEvent(event.EventData)
+		return d.deserializeAccountListCreatedEvent(eventData)
 	case domain.EventTypeAccountCreated:
-		return d.deserializeAccountCreatedEvent(event.EventData)
+		return d.deserializeAccountCreatedEvent(eventData)
 	case domain.EventTypeAccountReordered:
-		return d.deserializeAccountReorderedEvent(event.EventData)
+		return d.deserializeAccountReorderedEvent(eventData)
 	case domain.EventTypeAccountRenamed:
-		return d.deserializeAccountRenamedEvent(event.EventData)
+		return d.deserializeAccountRenamedEvent(eventData)
 	case domain.EventTypeAccountActivated:
-		return d.deserializeAccountActivatedEvent(event.EventData)
+		return d.deserializeAccountActivatedEvent(eventData)
 	case domain.EventTypeAccountCancelled:
-		return d.deserializeAccountCancelledEvent(event.EventData)
+		return d.deserializeAccountCancelledEvent(eventData)
 	case domain.EventTypeAccountDeleted:
-		return d.deserializeAccountDeletedEvent(event.EventData)
+		return d.deserializeAccountDeletedEvent(eventData)
 	default:
-		return nil, fmt.Errorf("unknown event, %v", event.Type)
+		return nil, fmt.Errorf("unknown event, %v", eventType)
 	}
+}
+
+func (d *deserializer) deserializeBudgetCreatedEvent(eventPayload []byte) (commondomainevent.Event, error) {
+	var event budgetCreatedJSON
+	err := json.Unmarshal(eventPayload, &event)
+	if err != nil {
+		return nil, err
+	}
+	return domain.NewEventBudgetCreated(domain.BudgetID{UUID: event.AggregateID}, event.Title, event.Currency), nil
 }
 
 func (d *deserializer) deserializeAccountListCreatedEvent(eventPayload []byte) (commondomainevent.Event, error) {

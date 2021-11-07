@@ -2,8 +2,10 @@ package infrastructure
 
 import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
+	"github.com/klwxsrx/budget-tracker/pkg/budget/app/event"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
+	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/mysql"
 	commonappcommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
@@ -14,7 +16,8 @@ import (
 )
 
 const (
-	moduleName = "budget"
+	moduleName                  = "budget"
+	integrationEventHandlerName = moduleName + "_integration_event_handler"
 )
 
 type Container interface {
@@ -36,6 +39,7 @@ func (c *container) Stop() {
 }
 
 func registerCommandHandlers(bus commonappcommand.BusRegistry, unitOfWork service.UnitOfWork) commonappcommand.Bus {
+	_ = bus.Register(command.NewAccountCreateListHandler(unitOfWork))
 	_ = bus.Register(command.NewAccountAddHandler(unitOfWork))
 	_ = bus.Register(command.NewAccountReorderHandler(unitOfWork))
 	_ = bus.Register(command.NewAccountRenameHandler(unitOfWork))
@@ -45,24 +49,34 @@ func registerCommandHandlers(bus commonappcommand.BusRegistry, unitOfWork servic
 	return bus
 }
 
+func integrationEventMessageHandler(bus commonappcommand.Bus) messaging.NamedMessageHandler {
+	deserializer := storedevent.NewDeserializer()
+	handler := messaging.NewCompositeTypedMessageHandler(integrationEventHandlerName)
+	handler.Subscribe(
+		domain.EventTypeBudgetCreated,
+		messaging.NewDomainEventMessageHandler(event.NewBudgetCreatedEventHandler(bus), deserializer),
+	)
+	return handler
+}
+
 func NewContainer(
-	client commoninfrastructuremysql.TransactionalClient,
-	broker pulsar.Connection,
+	mysqlClient commoninfrastructuremysql.TransactionalClient,
+	pulsarConn pulsar.Connection,
 	loggerImpl logger.Logger,
 ) (Container, error) {
 	serializer := storedevent.NewSerializer()
 	deserializer := storedevent.NewDeserializer()
-	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
+	unitOfWork := mysql.NewUnitOfWork(mysqlClient, serializer, deserializer)
 
 	storedEventSerializer := messaging.NewStoredEventSerializer()
-	eventBus, err := pulsar.NewEventBus(broker, moduleName, storedEventSerializer)
+	eventBus, err := pulsar.NewEventBus(pulsarConn, moduleName, storedEventSerializer)
 	if err != nil {
 		return nil, err
 	}
 
-	sync := commoninfrastructuremysql.NewSynchronization(client)
-	eventStore := commoninfrastructuremysql.NewEventStore(client, serializer)
-	unsentEventProvider := commoninfrastructuremysql.NewUnsentEventProvider(eventStore, client)
+	sync := commoninfrastructuremysql.NewSynchronization(mysqlClient)
+	eventStore := commoninfrastructuremysql.NewEventStore(mysqlClient, serializer)
+	unsentEventProvider := commoninfrastructuremysql.NewUnsentEventProvider(eventStore, mysqlClient)
 	unsentEventHandler := commonappstoredevent.NewUnsentEventHandler(unsentEventProvider, eventBus, sync)
 	unsentEventDispatcher := commonappstoredevent.NewUnsentEventDispatcher(unsentEventHandler, loggerImpl)
 	dispatchingUnitOfWork := storedevent.NewDispatchingUnitOfWork(unitOfWork, unsentEventDispatcher)
@@ -70,5 +84,21 @@ func NewContainer(
 	busRegistry := commonappcommand.NewBusRegistry(command.NewResultTranslator(), loggerImpl)
 	bus := registerCommandHandlers(busRegistry, dispatchingUnitOfWork)
 
-	return &container{bus, unsentEventDispatcher.Stop}, nil
+	integrationEventMessageConsumer, err := pulsar.NewMessageConsumer(
+		pulsar.EventTopicsPattern,
+		integrationEventMessageHandler(bus),
+		false,
+		pulsarConn,
+		loggerImpl,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	unsentEventDispatcher.Start()
+	stopFunc := func() {
+		unsentEventDispatcher.Stop()
+		integrationEventMessageConsumer.Stop()
+	}
+	return &container{bus, stopFunc}, nil
 }

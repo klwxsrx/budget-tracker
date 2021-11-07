@@ -7,5 +7,5 @@ type Serializer interface {
 }
 
 type Deserializer interface {
-	Deserialize(event *StoredEvent) (commondomainevent.Event, error)
+	Deserialize(eventType string, eventData []byte) (commondomainevent.Event, error)
 }
