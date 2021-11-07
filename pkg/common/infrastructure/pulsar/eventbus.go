@@ -18,7 +18,6 @@ const (
 type eventBus struct {
 	producer   pulsar.Producer
 	serializer messaging.StoredEventSerializer
-	ctx        context.Context
 }
 
 func (b *eventBus) Publish(event *storedevent.StoredEvent) error {
@@ -33,12 +32,11 @@ func (b *eventBus) Publish(event *storedevent.StoredEvent) error {
 		EventTime:  event.CreatedAt,
 		SequenceID: &sequenceID,
 	}
-	_, err = b.producer.Send(b.ctx, msg)
+	_, err = b.producer.Send(context.Background(), msg)
 	return err
 }
 
 func NewEventBus(
-	ctx context.Context,
 	con Connection,
 	moduleName string,
 	serializer messaging.StoredEventSerializer,
@@ -47,5 +45,5 @@ func NewEventBus(
 	if err != nil {
 		return nil, err
 	}
-	return &eventBus{producer, serializer, ctx}, nil
+	return &eventBus{producer, serializer}, nil
 }

@@ -1,8 +1,6 @@
 package infrastructure
 
 import (
-	"context"
-
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
@@ -21,14 +19,20 @@ const (
 
 type Container interface {
 	CommandBus() commonappcommand.Bus
+	Stop()
 }
 
 type container struct {
-	bus commonappcommand.Bus
+	bus      commonappcommand.Bus
+	stopFunc func()
 }
 
 func (c *container) CommandBus() commonappcommand.Bus {
 	return c.bus
+}
+
+func (c *container) Stop() {
+	c.stopFunc()
 }
 
 func registerCommandHandlers(bus commonappcommand.BusRegistry, unitOfWork service.UnitOfWork) commonappcommand.Bus {
@@ -42,7 +46,6 @@ func registerCommandHandlers(bus commonappcommand.BusRegistry, unitOfWork servic
 }
 
 func NewContainer(
-	ctx context.Context,
 	client commoninfrastructuremysql.TransactionalClient,
 	broker pulsar.Connection,
 	loggerImpl logger.Logger,
@@ -52,7 +55,7 @@ func NewContainer(
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
 	storedEventSerializer := messaging.NewStoredEventSerializer()
-	eventBus, err := pulsar.NewEventBus(ctx, broker, moduleName, storedEventSerializer)
+	eventBus, err := pulsar.NewEventBus(broker, moduleName, storedEventSerializer)
 	if err != nil {
 		return nil, err
 	}
@@ -61,11 +64,11 @@ func NewContainer(
 	eventStore := commoninfrastructuremysql.NewEventStore(client, serializer)
 	unsentEventProvider := commoninfrastructuremysql.NewUnsentEventProvider(eventStore, client)
 	unsentEventHandler := commonappstoredevent.NewUnsentEventHandler(unsentEventProvider, eventBus, sync)
-	unsentEventDispatcher := commonappstoredevent.NewUnsentEventDispatcher(ctx, unsentEventHandler, loggerImpl)
+	unsentEventDispatcher := commonappstoredevent.NewUnsentEventDispatcher(unsentEventHandler, loggerImpl)
 	dispatchingUnitOfWork := storedevent.NewDispatchingUnitOfWork(unitOfWork, unsentEventDispatcher)
 
 	busRegistry := commonappcommand.NewBusRegistry(command.NewResultTranslator(), loggerImpl)
 	bus := registerCommandHandlers(busRegistry, dispatchingUnitOfWork)
 
-	return &container{bus}, nil
+	return &container{bus, unsentEventDispatcher.Stop}, nil
 }

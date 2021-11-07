@@ -37,13 +37,11 @@ func main() {
 	}
 	defer broker.Close()
 
-	ctx, ctxCancel := context.WithCancel(context.Background())
-	defer ctxCancel()
-
-	container, err := infrastructure.NewContainer(ctx, client, broker, logger)
+	container, err := infrastructure.NewContainer(client, broker, logger)
 	if err != nil {
 		logger.WithError(err).Fatal(err.Error())
 	}
+	defer container.Stop()
 
 	server := startServer(container.CommandBus(), logger)
 	logger.Info("app is ready")

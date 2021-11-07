@@ -8,7 +8,7 @@ services:
     container_name: budget-app
     hostname: budget-app
     ports:
-      - 127.0.0.1:8080:8080
+      - "127.0.0.1:8080:8080"
     environment:
       MESSAGE_BROKER_ADDRESS: "budget-pulsar:6650"
       DATABASE_NAME: budget
@@ -26,7 +26,7 @@ services:
     container_name: budget-view-app
     hostname: budget-view-app
     ports:
-      - 127.0.0.1:8081:8080
+      - "127.0.0.1:8081:8080"
     environment:
       MESSAGE_BROKER_ADDRESS: "budget-pulsar:6650"
       DATABASE_ADDRESS: "budget-mongo:27017"
@@ -42,7 +42,7 @@ services:
     volumes:
       - budget-mysql-data:/var/lib/mysql:rw
     ports:
-      - 127.0.0.1:3306:3306
+      - "127.0.0.1:3306:3306"
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: budget
@@ -59,7 +59,7 @@ services:
     volumes:
       - budget-mongo-data:/data/db:rw
     ports:
-      - 127.0.0.1:27017:27017
+      - "127.0.0.1:27017:27017"
     environment:
       MONGO_INITDB_DATABASE: budget-view
       MONGO_INITDB_ROOT_USERNAME: budget-view
@@ -75,7 +75,7 @@ services:
     volumes:
       - budget-pulsar-data:/pulsar/data:rw
     ports:
-      - 127.0.0.1:6650:6650
+      - "127.0.0.1:6650:6650"
     entrypoint: [ "bin/pulsar", "standalone" ]
 volumes:
   budget-mysql-data:
