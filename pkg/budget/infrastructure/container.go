@@ -15,6 +15,10 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
 )
 
+const (
+	moduleName = "budget"
+)
+
 type Container interface {
 	CommandBus() commonappcommand.Bus
 }
@@ -48,7 +52,7 @@ func NewContainer(
 	unitOfWork := mysql.NewUnitOfWork(client, serializer, deserializer)
 
 	storedEventSerializer := messaging.NewStoredEventSerializer()
-	eventBus, err := pulsar.NewEventBus(ctx, broker, storedEventSerializer)
+	eventBus, err := pulsar.NewEventBus(ctx, broker, moduleName, storedEventSerializer)
 	if err != nil {
 		return nil, err
 	}

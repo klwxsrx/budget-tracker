@@ -48,6 +48,7 @@ func (c *connection) Subscribe(config *ConsumerConfig) (pulsar.Consumer, error) 
 	consumerConfig := pulsar.ConsumerOptions{
 		Topic:            config.Topic,
 		SubscriptionName: config.SubscriptionName,
+		Type:             pulsar.Failover,
 	}
 	return c.client.Subscribe(consumerConfig)
 }

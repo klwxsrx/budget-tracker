@@ -21,7 +21,7 @@ type MessageConsumer struct {
 	logger   logger.Logger
 }
 
-func (c *MessageConsumer) start() {
+func (c *MessageConsumer) run() {
 	for msg := range c.consumer.Chan() {
 		typ, ok := msg.Properties()[propertyMessageType]
 		if !ok {
@@ -77,6 +77,6 @@ func NewMessageConsumer(
 		consumer: pulsarConsumer,
 		logger:   loggerImpl,
 	}
-	go consumer.start()
+	go consumer.run()
 	return consumer, nil
 }

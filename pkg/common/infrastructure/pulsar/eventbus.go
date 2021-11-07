@@ -2,6 +2,7 @@ package pulsar
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsar"
 
@@ -10,9 +11,8 @@ import (
 )
 
 const (
-	TopicDomainEvent = "domain_event"
-
-	propertyMessageType = "type"
+	propertyMessageType       = "type"
+	eventBusTopicNameTemplate = "%v_domain_event"
 )
 
 type eventBus struct {
@@ -37,8 +37,13 @@ func (b *eventBus) Publish(event *storedevent.StoredEvent) error {
 	return err
 }
 
-func NewEventBus(ctx context.Context, con Connection, serializer messaging.StoredEventSerializer) (storedevent.Bus, error) {
-	producer, err := con.CreateProducer(&ProducerConfig{Topic: TopicDomainEvent})
+func NewEventBus(
+	ctx context.Context,
+	con Connection,
+	moduleName string,
+	serializer messaging.StoredEventSerializer,
+) (storedevent.Bus, error) {
+	producer, err := con.CreateProducer(&ProducerConfig{Topic: fmt.Sprintf(eventBusTopicNameTemplate, moduleName)})
 	if err != nil {
 		return nil, err
 	}
