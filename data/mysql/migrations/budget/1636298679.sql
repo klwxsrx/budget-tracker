@@ -1,4 +1,4 @@
-# Creates test budget cause I don't wanna write code for budget creation :) TODO: fix migration code to work with it
+# Creates test budget cause I don't wanna write code for budget creation :)
 
 SET @event_id = UUID();
 SET @budget_id = UUID();

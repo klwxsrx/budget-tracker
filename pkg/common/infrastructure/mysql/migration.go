@@ -19,6 +19,8 @@ const (
 	migrationFileRegexString = `^(\d+).sql$`
 	migrationIDVariable      = "%migration_id%"
 	migrationFileNamePattern = migrationIDVariable + ".sql"
+
+	querySeparator = ";\n"
 )
 
 type Migration struct {
@@ -160,11 +162,19 @@ func performMigration(client Client, sql string, migrationID int) error {
 	if err != nil {
 		return err
 	}
-	_, err = client.Exec(sql)
-	if err != nil {
-		return err
+
+	queries := splitToQueries(sql)
+	for _, query := range queries {
+		_, err = client.Exec(query)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func splitToQueries(sql string) []string {
+	return strings.Split(sql, querySeparator)
 }
 
 func createMigrationRecord(client Client, migrationID int) error {

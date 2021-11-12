@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	connectionTimeout    = time.Minute
-	disconnectionTimeout = time.Minute
+	disconnectionTimeout = 30 * time.Second
 )
 
 type Config struct {
-	User     string
-	Password string
-	Address  string
+	User              string
+	Password          string
+	Address           string
+	ConnectionTimeout time.Duration
 }
 
 type Connection interface {
@@ -56,7 +56,7 @@ func NewConnection(ctx context.Context, config Config, loggerImpl logger.Logger)
 		return nil, fmt.Errorf("failed to create mongo client: %w", err)
 	}
 
-	ctx, cancelFunc := context.WithTimeout(ctx, connectionTimeout)
+	ctx, cancelFunc := context.WithTimeout(ctx, config.ConnectionTimeout)
 	defer cancelFunc()
 	err = client.Connect(ctx)
 	if err != nil {

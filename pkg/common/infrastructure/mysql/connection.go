@@ -12,9 +12,13 @@ import (
 )
 
 const (
-	maxConnectionTime  = time.Minute
 	maxOpenConnections = 10
 )
+
+type Config struct {
+	DSN               Dsn
+	ConnectionTimeout time.Duration
+}
 
 type Dsn struct {
 	User     string
@@ -33,7 +37,7 @@ type Connection interface {
 }
 
 type connection struct {
-	config Dsn
+	config Config
 	db     *sqlx.DB
 	logger logger.Logger
 }
@@ -51,7 +55,7 @@ func (c *connection) Close() {
 
 func (c *connection) openConnection() error {
 	var err error
-	c.db, err = sqlx.Open("mysql", c.config.String()+"?parseTime=true")
+	c.db, err = sqlx.Open("mysql", c.config.DSN.String()+"?parseTime=true")
 	if err != nil {
 		return err
 	}
@@ -59,7 +63,7 @@ func (c *connection) openConnection() error {
 	c.db.SetMaxOpenConns(maxOpenConnections)
 	err = backoff.Retry(func() error {
 		return c.db.Ping()
-	}, newOpenConnectionBackoff())
+	}, newOpenConnectionBackoff(c.config.ConnectionTimeout))
 	if err != nil {
 		_ = c.db.Close()
 		return fmt.Errorf("failed to open mysql connection: %w", err)
@@ -67,13 +71,13 @@ func (c *connection) openConnection() error {
 	return nil
 }
 
-func newOpenConnectionBackoff() *backoff.ExponentialBackOff {
+func newOpenConnectionBackoff(connTimeout time.Duration) *backoff.ExponentialBackOff {
 	b := backoff.NewExponentialBackOff()
-	b.MaxElapsedTime = maxConnectionTime
+	b.MaxElapsedTime = connTimeout
 	return b
 }
 
-func NewConnection(config Dsn, loggerImpl logger.Logger) (Connection, error) {
+func NewConnection(config Config, loggerImpl logger.Logger) (Connection, error) {
 	db := &connection{config: config, logger: loggerImpl}
 	err := db.openConnection()
 	return db, err

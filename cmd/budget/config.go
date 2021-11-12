@@ -3,15 +3,34 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 )
 
 type config struct {
-	DbName               string
-	DbAddress            string
-	DbUser               string
-	DbPassword           string
-	DbMigrationsDir      string
-	MessageBrokerAddress string
+	DBName                         string
+	DBAddress                      string
+	DBUser                         string
+	DBPassword                     string
+	DBConnectionTimeout            time.Duration
+	DBMigrationsDir                string // TODO: embed
+	MessageBrokerAddress           string
+	MessageBrokerConnectionTimeout time.Duration
+}
+
+func parseEnvInt(key string, err error) (int, error) {
+	if err != nil {
+		return 0, err
+	}
+	str, ok := os.LookupEnv(key)
+	if !ok {
+		return 0, fmt.Errorf("undefined environment variable %v", key)
+	}
+	integer, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, fmt.Errorf("failed to convert environment variable %v to int, value: %v", key, str)
+	}
+	return integer, nil
 }
 
 func parseEnvString(key string, err error) (string, error) {
@@ -31,8 +50,10 @@ func parseConfig() (*config, error) {
 	dbAddress, err := parseEnvString("DATABASE_ADDRESS", err)
 	dbUser, err := parseEnvString("DATABASE_USER", err)
 	dbPassword, err := parseEnvString("DATABASE_PASSWORD", err)
+	dbConnTimeout, err := parseEnvInt("DATABASE_CONNECTION_TIMEOUT", err)
 	dbMigrationsDir, err := parseEnvString("DATABASE_MIGRATIONS_DIR", err)
 	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
+	messageBrokerConnTimeout, err := parseEnvInt("MESSAGE_BROKER_CONNECTION_TIMEOUT", err)
 
 	if err != nil {
 		return nil, err
@@ -43,7 +64,9 @@ func parseConfig() (*config, error) {
 		dbAddress,
 		dbUser,
 		dbPassword,
+		time.Duration(dbConnTimeout) * time.Second,
 		dbMigrationsDir,
 		messageBrokerAddress,
+		time.Duration(messageBrokerConnTimeout) * time.Second,
 	}, nil
 }

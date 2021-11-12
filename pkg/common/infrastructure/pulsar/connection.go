@@ -10,13 +10,9 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 )
 
-const (
-	connectionTimeout     = time.Minute
-	maxTestConnectionTime = time.Minute
-)
-
 type Config struct {
-	Address string
+	Address           string
+	ConnectionTimeout time.Duration
 }
 
 type ProducerConfig struct {
@@ -57,9 +53,9 @@ func (c *connection) Close() {
 	c.client.Close()
 }
 
-func testCreateProducer(client pulsar.Client) error {
+func testCreateProducer(client pulsar.Client, testConnectionTimeout time.Duration) error {
 	exponentialBackOff := backoff.NewExponentialBackOff()
-	exponentialBackOff.MaxElapsedTime = maxTestConnectionTime
+	exponentialBackOff.MaxElapsedTime = testConnectionTimeout
 
 	err := backoff.Retry(func() error {
 		p, err := client.CreateProducer(pulsar.ProducerOptions{
@@ -80,14 +76,14 @@ func testCreateProducer(client pulsar.Client) error {
 func NewConnection(config Config, loggerImpl logger.Logger) (Connection, error) {
 	c, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:               fmt.Sprintf("pulsar://%v", config.Address),
-		ConnectionTimeout: connectionTimeout,
+		ConnectionTimeout: config.ConnectionTimeout,
 		Logger:            &loggerAdapter{loggerImpl},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to broker: %w", err)
 	}
 
-	err = testCreateProducer(c)
+	err = testCreateProducer(c, config.ConnectionTimeout)
 	if err != nil {
 		return nil, err
 	}

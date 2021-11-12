@@ -16,8 +16,9 @@ type unsentEventDispatcher struct {
 	handler             *UnsentEventHandler
 	logger              logger.Logger
 	dispatchRequestChan chan struct{}
-	starter             sync.Once
 	stopChan            chan struct{}
+	sync.Mutex
+	isStarted bool
 }
 
 func (d *unsentEventDispatcher) Dispatch() {
@@ -28,14 +29,28 @@ func (d *unsentEventDispatcher) Dispatch() {
 }
 
 func (d *unsentEventDispatcher) Start() {
-	d.starter.Do(func() {
-		go d.run()
-		d.Dispatch()
-	})
+	d.Lock()
+	defer d.Unlock()
+
+	if d.isStarted {
+		return
+	}
+
+	go d.run()
+	d.Dispatch()
+	d.isStarted = true
 }
 
-func (d *unsentEventDispatcher) Stop() { // TODO: stop before start
+func (d *unsentEventDispatcher) Stop() {
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.isStarted {
+		return
+	}
+
 	d.stopChan <- struct{}{}
+	d.isStarted = false
 }
 
 func (d *unsentEventDispatcher) run() {
@@ -61,8 +76,9 @@ func NewUnsentEventDispatcher(
 		unsentEventHandler,
 		loggerImpl,
 		make(chan struct{}, 1),
-		sync.Once{},
 		make(chan struct{}),
+		sync.Mutex{},
+		false,
 	}
 	return dispatcher
 }

@@ -59,15 +59,21 @@ func initLogrus() *logrus.Logger {
 }
 
 func getPulsarClient(config *config, logger commonapplogger.Logger) (pulsar.Connection, error) {
-	return pulsar.NewConnection(pulsar.Config{Address: config.MessageBrokerAddress}, logger)
+	return pulsar.NewConnection(pulsar.Config{
+		Address:           config.MessageBrokerAddress,
+		ConnectionTimeout: config.MessageBrokerConnectionTimeout,
+	}, logger)
 }
 
 func getReadyDatabaseClient(config *config, logger commonapplogger.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
-	db, err := mysql.NewConnection(mysql.Dsn{
-		User:     config.DbUser,
-		Password: config.DbPassword,
-		Address:  config.DbAddress,
-		Database: config.DbName,
+	db, err := mysql.NewConnection(mysql.Config{
+		DSN: mysql.Dsn{
+			User:     config.DBUser,
+			Password: config.DBPassword,
+			Address:  config.DBAddress,
+			Database: config.DBName,
+		},
+		ConnectionTimeout: config.DBConnectionTimeout,
 	}, logger)
 	if err != nil {
 		return nil, nil, err
@@ -77,7 +83,7 @@ func getReadyDatabaseClient(config *config, logger commonapplogger.Logger) (mysq
 		db.Close()
 		return nil, nil, err
 	}
-	migration, err := mysql.NewMigration(client, logger, config.DbMigrationsDir)
+	migration, err := mysql.NewMigration(client, logger, config.DBMigrationsDir)
 	if err != nil {
 		db.Close()
 		return nil, nil, err

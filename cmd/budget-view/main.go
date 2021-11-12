@@ -41,15 +41,19 @@ func main() {
 }
 
 func getPulsarClient(config *config, logger commonapplogger.Logger) (pulsar.Connection, error) {
-	return pulsar.NewConnection(pulsar.Config{Address: config.MessageBrokerAddress}, logger)
+	return pulsar.NewConnection(pulsar.Config{
+		Address:           config.MessageBrokerAddress,
+		ConnectionTimeout: config.MessageBrokerConnectionTimeout,
+	}, logger)
 }
 
 func getMongoClient(ctx context.Context, config *config, logger commonapplogger.Logger) (mongo.Connection, error) {
 	return mongo.NewConnection(ctx,
 		mongo.Config{
-			User:     config.DbUser,
-			Password: config.DbPassword,
-			Address:  config.DbAddress,
+			User:              config.DBUser,
+			Password:          config.DBPassword,
+			Address:           config.DBAddress,
+			ConnectionTimeout: config.DBConnectionTimeout,
 		}, logger,
 	)
 }
