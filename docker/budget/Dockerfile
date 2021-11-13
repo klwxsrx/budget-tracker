@@ -11,9 +11,6 @@ USER appuser
 
 COPY ./bin/budget /app/bin/budget
 
-COPY ./data/mysql/migrations/budget /app/migrations
-ENV DATABASE_MIGRATIONS_DIR=/app/migrations
-
 EXPOSE 8080
 
 CMD ["/app/bin/budget"]

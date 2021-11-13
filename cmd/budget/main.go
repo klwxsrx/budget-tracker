@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/klwxsrx/budget-tracker/data/mysql/migrations/budget"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/transport"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/command"
@@ -12,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"context"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,7 +27,7 @@ func main() {
 		logger.WithError(err).Fatal("failed to parse config")
 	}
 
-	db, client, err := getReadyDatabaseClient(config, logger)
+	db, client, err := getReadyDatabaseClient(config, budget.MysqlMigrations, logger)
 	if err != nil {
 		logger.WithError(err).Fatal("failed to setup db connection")
 	}
@@ -65,7 +67,7 @@ func getPulsarClient(config *config, logger commonapplogger.Logger) (pulsar.Conn
 	}, logger)
 }
 
-func getReadyDatabaseClient(config *config, logger commonapplogger.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
+func getReadyDatabaseClient(config *config, migrations fs.ReadDirFS, logger commonapplogger.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
 	db, err := mysql.NewConnection(mysql.Config{
 		DSN: mysql.Dsn{
 			User:     config.DBUser,
@@ -83,7 +85,7 @@ func getReadyDatabaseClient(config *config, logger commonapplogger.Logger) (mysq
 		db.Close()
 		return nil, nil, err
 	}
-	migration, err := mysql.NewMigration(client, logger, config.DBMigrationsDir)
+	migration, err := mysql.NewMigration(client, logger, migrations)
 	if err != nil {
 		db.Close()
 		return nil, nil, err

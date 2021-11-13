@@ -3,8 +3,7 @@ package mysql
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
+	"io/fs"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,16 +16,15 @@ const (
 	migrationTableName = "migration"
 
 	migrationFileRegexString = `^(\d+).sql$`
-	migrationIDVariable      = "%migration_id%"
-	migrationFileNamePattern = migrationIDVariable + ".sql"
+	migrationFileNamePattern = "%v.sql"
 
 	querySeparator = ";\n"
 )
 
 type Migration struct {
-	client                 TransactionalClient
-	logger                 logger.Logger
-	migrationDirectoryPath string
+	client     TransactionalClient
+	logger     logger.Logger
+	migrations fs.ReadDirFS
 }
 
 // nolint:gochecknoglobals
@@ -45,7 +43,7 @@ func (m *Migration) Migrate() error {
 		return err
 	}
 
-	return m.performMigrations(m.migrationDirectoryPath)
+	return m.performMigrations(m.migrations)
 }
 
 func (m *Migration) createMigrationTableIfNotExists() error {
@@ -57,13 +55,13 @@ func (m *Migration) createMigrationTableIfNotExists() error {
 	return err
 }
 
-func (m *Migration) performMigrations(migrationDirectoryPath string) error {
+func (m *Migration) performMigrations(migrations fs.ReadDirFS) error {
 	performedMigrationIDs, err := getPerformedMigrationIDs(m.client)
 	if err != nil {
 		return err
 	}
 
-	fileMigrationIDs, err := getFileMigrationIDs(migrationDirectoryPath)
+	fileMigrationIDs, err := getFileMigrationIDs(migrations)
 	if err != nil {
 		return err
 	}
@@ -74,7 +72,7 @@ func (m *Migration) performMigrations(migrationDirectoryPath string) error {
 		}
 
 		m.logger.Info(fmt.Sprintf("execute migration #%v", migrationID))
-		migrationSQL, err := getMigrationSQL(migrationDirectoryPath, migrationID)
+		migrationSQL, err := getMigrationSQL(migrations, migrationID)
 		if err != nil {
 			m.logger.WithError(err).Error(fmt.Sprintf("failed to obtain migration #%d sql", migrationID))
 			return err
@@ -110,17 +108,17 @@ func getPerformedMigrationIDs(client Client) (map[int]bool, error) {
 	return result, nil
 }
 
-func getFileMigrationIDs(migrationDirectoryPath string) ([]int, error) {
-	files, err := ioutil.ReadDir(migrationDirectoryPath)
+func getFileMigrationIDs(migrations fs.ReadDirFS) ([]int, error) {
+	entries, err := migrations.ReadDir(".")
 	if err != nil {
 		return nil, err
 	}
-	result := make([]int, 0, len(files))
-	for _, file := range files {
-		if file.IsDir() {
+	result := make([]int, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() {
 			continue
 		}
-		migrationID, err := getMigrationIDFromFileName(file.Name())
+		migrationID, err := getMigrationIDFromFileName(entry.Name())
 		if err != nil {
 			continue
 		}
@@ -141,9 +139,8 @@ func getMigrationIDFromFileName(fileName string) (int, error) {
 	return migrationID, nil
 }
 
-func getMigrationSQL(migrationDirectoryPath string, migrationID int) (string, error) {
-	migrationFilePath := filepath.Join(migrationDirectoryPath, getMigrationFileNameFromMigrationID(migrationID))
-	content, err := ioutil.ReadFile(migrationFilePath)
+func getMigrationSQL(migrations fs.ReadDirFS, migrationID int) (string, error) {
+	content, err := fs.ReadFile(migrations, getMigrationFileNameFromMigrationID(migrationID))
 	if err != nil {
 		return "", err
 	}
@@ -151,7 +148,7 @@ func getMigrationSQL(migrationDirectoryPath string, migrationID int) (string, er
 }
 
 func getMigrationFileNameFromMigrationID(migrationID int) string {
-	return strings.Replace(migrationFileNamePattern, migrationIDVariable, strconv.Itoa(migrationID), 1)
+	return fmt.Sprintf(migrationFileNamePattern, strconv.Itoa(migrationID))
 }
 
 func performMigration(client Client, sql string, migrationID int) error {
@@ -182,9 +179,9 @@ func createMigrationRecord(client Client, migrationID int) error {
 	return err
 }
 
-func NewMigration(client TransactionalClient, loggerImpl logger.Logger, migrationDirectoryPath string) (*Migration, error) {
+func NewMigration(client TransactionalClient, loggerImpl logger.Logger, migrations fs.ReadDirFS) (*Migration, error) {
 	if migrationFileRegexError != nil {
 		return nil, migrationFileRegexError
 	}
-	return &Migration{client, loggerImpl, migrationDirectoryPath}, nil
+	return &Migration{client, loggerImpl, migrations}, nil
 }

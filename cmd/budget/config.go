@@ -13,7 +13,6 @@ type config struct {
 	DBUser                         string
 	DBPassword                     string
 	DBConnectionTimeout            time.Duration
-	DBMigrationsDir                string // TODO: embed
 	MessageBrokerAddress           string
 	MessageBrokerConnectionTimeout time.Duration
 }
@@ -51,7 +50,6 @@ func parseConfig() (*config, error) {
 	dbUser, err := parseEnvString("DATABASE_USER", err)
 	dbPassword, err := parseEnvString("DATABASE_PASSWORD", err)
 	dbConnTimeout, err := parseEnvInt("DATABASE_CONNECTION_TIMEOUT", err)
-	dbMigrationsDir, err := parseEnvString("DATABASE_MIGRATIONS_DIR", err)
 	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
 	messageBrokerConnTimeout, err := parseEnvInt("MESSAGE_BROKER_CONNECTION_TIMEOUT", err)
 
@@ -65,7 +63,6 @@ func parseConfig() (*config, error) {
 		dbUser,
 		dbPassword,
 		time.Duration(dbConnTimeout) * time.Second,
-		dbMigrationsDir,
 		messageBrokerAddress,
 		time.Duration(messageBrokerConnTimeout) * time.Second,
 	}, nil
