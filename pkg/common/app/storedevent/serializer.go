@@ -1,11 +1,11 @@
 package storedevent
 
-import commondomainevent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+import "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 
 type Serializer interface {
-	Serialize(event commondomainevent.Event) (string, error)
+	Serialize(event domain.Event) (string, error)
 }
 
 type Deserializer interface {
-	Deserialize(eventType string, eventData []byte) (commondomainevent.Event, error)
+	Deserialize(eventType string, eventData []byte) (domain.Event, error)
 }

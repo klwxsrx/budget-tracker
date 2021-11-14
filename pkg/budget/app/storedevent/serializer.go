@@ -9,7 +9,7 @@ import (
 
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	commondomainevent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+	commondomain "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
 var errUnknownAccountEventType = errors.New("unknown account event")
@@ -66,7 +66,7 @@ type accountDeletedJSON struct {
 
 type eventSerializer struct{}
 
-func (s *eventSerializer) Serialize(event commondomainevent.Event) (string, error) {
+func (s *eventSerializer) Serialize(event commondomain.Event) (string, error) {
 	var err error
 	var eventJSON interface{}
 	switch event.Type() {
@@ -100,7 +100,7 @@ func (s *eventSerializer) Serialize(event commondomainevent.Event) (string, erro
 	return string(result), nil
 }
 
-func (s *eventSerializer) createBudgetCreatedJSON(event commondomainevent.Event) (*budgetCreatedJSON, error) {
+func (s *eventSerializer) createBudgetCreatedJSON(event commondomain.Event) (*budgetCreatedJSON, error) {
 	createdEvent, ok := event.(*domain.BudgetCreatedEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType
@@ -116,7 +116,7 @@ func (s *eventSerializer) createBudgetCreatedJSON(event commondomainevent.Event)
 	}, nil
 }
 
-func (s *eventSerializer) createAccountListCreatedJSON(event commondomainevent.Event) (*accountListCreatedJSON, error) {
+func (s *eventSerializer) createAccountListCreatedJSON(event commondomain.Event) (*accountListCreatedJSON, error) {
 	_, ok := event.(*domain.AccountListCreatedEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType
@@ -128,7 +128,7 @@ func (s *eventSerializer) createAccountListCreatedJSON(event commondomainevent.E
 	}}, nil
 }
 
-func (s *eventSerializer) createAccountCreatedJSON(event commondomainevent.Event) (*accountCreatedJSON, error) {
+func (s *eventSerializer) createAccountCreatedJSON(event commondomain.Event) (*accountCreatedJSON, error) {
 	createdEvent, ok := event.(*domain.AccountCreatedEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType
@@ -145,7 +145,7 @@ func (s *eventSerializer) createAccountCreatedJSON(event commondomainevent.Event
 	}, nil
 }
 
-func (s *eventSerializer) createAccountReorderedJSON(event commondomainevent.Event) (*accountReorderedJSON, error) {
+func (s *eventSerializer) createAccountReorderedJSON(event commondomain.Event) (*accountReorderedJSON, error) {
 	reorderedEvent, ok := event.(*domain.AccountReorderedEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType
@@ -161,7 +161,7 @@ func (s *eventSerializer) createAccountReorderedJSON(event commondomainevent.Eve
 	}, nil
 }
 
-func (s *eventSerializer) createAccountRenamedJSON(event commondomainevent.Event) (*accountRenamedJSON, error) {
+func (s *eventSerializer) createAccountRenamedJSON(event commondomain.Event) (*accountRenamedJSON, error) {
 	renamedEvent, ok := event.(*domain.AccountRenamedEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType
@@ -177,7 +177,7 @@ func (s *eventSerializer) createAccountRenamedJSON(event commondomainevent.Event
 	}, nil
 }
 
-func (s *eventSerializer) createAccountActivatedJSON(event commondomainevent.Event) (*accountActivatedJSON, error) {
+func (s *eventSerializer) createAccountActivatedJSON(event commondomain.Event) (*accountActivatedJSON, error) {
 	activatedEvent, ok := event.(*domain.AccountActivatedEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType
@@ -192,7 +192,7 @@ func (s *eventSerializer) createAccountActivatedJSON(event commondomainevent.Eve
 	}, nil
 }
 
-func (s *eventSerializer) createAccountCancelledJSON(event commondomainevent.Event) (*accountCancelledJSON, error) {
+func (s *eventSerializer) createAccountCancelledJSON(event commondomain.Event) (*accountCancelledJSON, error) {
 	cancelledEvent, ok := event.(*domain.AccountCancelledEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType
@@ -207,7 +207,7 @@ func (s *eventSerializer) createAccountCancelledJSON(event commondomainevent.Eve
 	}, nil
 }
 
-func (s *eventSerializer) createAccountDeletedJSON(event commondomainevent.Event) (*accountDeletedJSON, error) {
+func (s *eventSerializer) createAccountDeletedJSON(event commondomain.Event) (*accountDeletedJSON, error) {
 	deletedEvent, ok := event.(*domain.AccountDeletedEvent)
 	if !ok {
 		return nil, errUnknownAccountEventType

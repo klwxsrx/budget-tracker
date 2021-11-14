@@ -1,6 +1,6 @@
 package domain
 
-import "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+import "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 
 const (
 	EventTypeAccountListCreated = accountListAggregateName + ".created"
@@ -13,54 +13,54 @@ const (
 )
 
 type AccountListCreatedEvent struct {
-	event.Base
+	domain.BaseEvent
 }
 
 type AccountCreatedEvent struct {
-	event.Base
+	domain.BaseEvent
 	AccountID      AccountID
 	Title          string
 	InitialBalance int
 }
 
 type AccountReorderedEvent struct {
-	event.Base
+	domain.BaseEvent
 	AccountID AccountID
 	Position  int
 }
 
 type AccountRenamedEvent struct {
-	event.Base
+	domain.BaseEvent
 	AccountID AccountID
 	Title     string
 }
 
 type AccountActivatedEvent struct {
-	event.Base
+	domain.BaseEvent
 	AccountID AccountID
 }
 
 type AccountCancelledEvent struct {
-	event.Base
+	domain.BaseEvent
 	AccountID AccountID
 }
 
 type AccountDeletedEvent struct {
-	event.Base
+	domain.BaseEvent
 	AccountID AccountID
 }
 
-func NewEventAccountListCreated(id BudgetID) event.Event {
-	return &AccountListCreatedEvent{event.Base{
+func NewEventAccountListCreated(id BudgetID) domain.Event {
+	return &AccountListCreatedEvent{domain.BaseEvent{
 		EventAggregateID:   id.UUID,
 		EventAggregateName: accountListAggregateName,
 		EventType:          EventTypeAccountListCreated,
 	}}
 }
 
-func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, initialBalance MoneyAmount) event.Event {
+func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, initialBalance MoneyAmount) domain.Event {
 	return &AccountCreatedEvent{
-		Base: event.Base{
+		BaseEvent: domain.BaseEvent{
 			EventAggregateID:   id.UUID,
 			EventAggregateName: accountListAggregateName,
 			EventType:          EventTypeAccountCreated,
@@ -71,9 +71,9 @@ func NewEventAccountCreated(id BudgetID, accountID AccountID, title string, init
 	}
 }
 
-func NewEventAccountReordered(id BudgetID, accountID AccountID, position int) event.Event {
+func NewEventAccountReordered(id BudgetID, accountID AccountID, position int) domain.Event {
 	return &AccountReorderedEvent{
-		Base: event.Base{
+		BaseEvent: domain.BaseEvent{
 			EventAggregateID:   id.UUID,
 			EventAggregateName: accountListAggregateName,
 			EventType:          EventTypeAccountReordered,
@@ -83,9 +83,9 @@ func NewEventAccountReordered(id BudgetID, accountID AccountID, position int) ev
 	}
 }
 
-func NewEventAccountRenamed(id BudgetID, accountID AccountID, title string) event.Event {
+func NewEventAccountRenamed(id BudgetID, accountID AccountID, title string) domain.Event {
 	return &AccountRenamedEvent{
-		Base: event.Base{
+		BaseEvent: domain.BaseEvent{
 			EventAggregateID:   id.UUID,
 			EventAggregateName: accountListAggregateName,
 			EventType:          EventTypeAccountRenamed,
@@ -95,9 +95,9 @@ func NewEventAccountRenamed(id BudgetID, accountID AccountID, title string) even
 	}
 }
 
-func NewEventAccountActivated(id BudgetID, accountID AccountID) event.Event {
+func NewEventAccountActivated(id BudgetID, accountID AccountID) domain.Event {
 	return &AccountActivatedEvent{
-		Base: event.Base{
+		BaseEvent: domain.BaseEvent{
 			EventAggregateID:   id.UUID,
 			EventAggregateName: accountListAggregateName,
 			EventType:          EventTypeAccountActivated,
@@ -106,9 +106,9 @@ func NewEventAccountActivated(id BudgetID, accountID AccountID) event.Event {
 	}
 }
 
-func NewEventAccountCancelled(id BudgetID, accountID AccountID) event.Event {
+func NewEventAccountCancelled(id BudgetID, accountID AccountID) domain.Event {
 	return &AccountCancelledEvent{
-		Base: event.Base{
+		BaseEvent: domain.BaseEvent{
 			EventAggregateID:   id.UUID,
 			EventAggregateName: accountListAggregateName,
 			EventType:          EventTypeAccountCancelled,
@@ -117,9 +117,9 @@ func NewEventAccountCancelled(id BudgetID, accountID AccountID) event.Event {
 	}
 }
 
-func NewEventAccountDeleted(id BudgetID, accountID AccountID) event.Event {
+func NewEventAccountDeleted(id BudgetID, accountID AccountID) domain.Event {
 	return &AccountDeletedEvent{
-		Base: event.Base{
+		BaseEvent: domain.BaseEvent{
 			EventAggregateID:   id.UUID,
 			EventAggregateName: accountListAggregateName,
 			EventType:          EventTypeAccountDeleted,

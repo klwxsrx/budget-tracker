@@ -1,4 +1,4 @@
-package event
+package domain
 
 import "github.com/google/uuid"
 
@@ -12,20 +12,20 @@ type Event interface {
 	Type() string
 }
 
-type Base struct {
+type BaseEvent struct {
 	EventAggregateID   uuid.UUID
 	EventAggregateName string
 	EventType          string
 }
 
-func (e *Base) AggregateID() AggregateID {
+func (e *BaseEvent) AggregateID() AggregateID {
 	return AggregateID{e.EventAggregateID}
 }
 
-func (e *Base) AggregateName() string {
+func (e *BaseEvent) AggregateName() string {
 	return e.EventAggregateName
 }
 
-func (e *Base) Type() string {
+func (e *BaseEvent) Type() string {
 	return e.EventType
 }

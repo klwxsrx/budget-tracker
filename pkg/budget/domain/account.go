@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
 const (
@@ -40,7 +40,7 @@ type Account interface {
 
 type AccountList struct {
 	state   *AccountListState
-	changes []event.Event
+	changes []domain.Event
 }
 
 func (list *AccountList) GetID() BudgetID {
@@ -132,7 +132,7 @@ func (list *AccountList) Delete(id AccountID) error {
 	return list.applyChange(NewEventAccountDeleted(list.state.ID, id))
 }
 
-func (list *AccountList) GetChanges() []event.Event {
+func (list *AccountList) GetChanges() []domain.Event {
 	return list.changes
 }
 
@@ -170,7 +170,7 @@ func (list *AccountList) assertAccountWithTitleNotExist(title string) error {
 	return nil
 }
 
-func (list *AccountList) applyChange(e event.Event) error {
+func (list *AccountList) applyChange(e domain.Event) error {
 	err := list.state.Apply(e)
 	if err != nil {
 		return err

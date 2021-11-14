@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
 var errUnknownAccountEventType = errors.New("unknown account event")
@@ -37,7 +37,11 @@ type AccountListState struct {
 	accounts []*AccountState
 }
 
-func (state *AccountListState) Apply(e event.Event) error {
+func (state *AccountListState) AggregateName() string {
+	return accountListAggregateName
+}
+
+func (state *AccountListState) Apply(e domain.Event) error {
 	var err error
 	switch e.Type() {
 	case EventTypeAccountListCreated:
@@ -63,7 +67,7 @@ func (state *AccountListState) Apply(e event.Event) error {
 	return err
 }
 
-func (state *AccountListState) applyListCreated(e event.Event) error {
+func (state *AccountListState) applyListCreated(e domain.Event) error {
 	createdEvent, ok := e.(*AccountListCreatedEvent)
 	if !ok {
 		return errUnknownAccountEventType
@@ -72,7 +76,7 @@ func (state *AccountListState) applyListCreated(e event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyCreated(e event.Event) error {
+func (state *AccountListState) applyCreated(e domain.Event) error {
 	createdEvent, ok := e.(*AccountCreatedEvent)
 	if !ok {
 		return errUnknownAccountEventType
@@ -87,7 +91,7 @@ func (state *AccountListState) applyCreated(e event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyReordered(e event.Event) error {
+func (state *AccountListState) applyReordered(e domain.Event) error {
 	reorderedEvent, ok := e.(*AccountReorderedEvent)
 	if !ok {
 		return errUnknownAccountEventType
@@ -108,7 +112,7 @@ func (state *AccountListState) applyReordered(e event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyRenamed(e event.Event) error {
+func (state *AccountListState) applyRenamed(e domain.Event) error {
 	renamedEvent, ok := e.(*AccountRenamedEvent)
 	if !ok {
 		return errUnknownAccountEventType
@@ -121,7 +125,7 @@ func (state *AccountListState) applyRenamed(e event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyActivated(e event.Event) error {
+func (state *AccountListState) applyActivated(e domain.Event) error {
 	activatedEvent, ok := e.(*AccountActivatedEvent)
 	if !ok {
 		return errUnknownAccountEventType
@@ -134,7 +138,7 @@ func (state *AccountListState) applyActivated(e event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyCancelled(e event.Event) error {
+func (state *AccountListState) applyCancelled(e domain.Event) error {
 	cancelledEvent, ok := e.(*AccountCancelledEvent)
 	if !ok {
 		return errUnknownAccountEventType
@@ -147,7 +151,7 @@ func (state *AccountListState) applyCancelled(e event.Event) error {
 	return nil
 }
 
-func (state *AccountListState) applyDeleted(e event.Event) error {
+func (state *AccountListState) applyDeleted(e domain.Event) error {
 	deletedEvent, ok := e.(*AccountDeletedEvent)
 	if !ok {
 		return errUnknownAccountEventType

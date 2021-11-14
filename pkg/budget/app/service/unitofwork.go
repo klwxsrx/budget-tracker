@@ -1,10 +1,9 @@
 package service
 
 import (
+	"github.com/klwxsrx/budget-tracker/pkg/budget/app/repository"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/repository"
-	commonappstoredevent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	"github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
 type UnitOfWork interface {
@@ -24,17 +23,10 @@ func (dr *domainRegistry) AccountListService() domain.AccountListService {
 	return dr.accountListService
 }
 
-func eventDispatcher(store commonappstoredevent.Store) event.Dispatcher {
-	dispatcher := event.NewDispatcher()
-	dispatcher.Subscribe(commonappstoredevent.NewDomainEventHandler(store))
-	return dispatcher
-}
-
 func NewDomainRegistry(
-	store commonappstoredevent.Store,
-	deserializer commonappstoredevent.Deserializer,
+	store storedevent.Store,
+	deserializer storedevent.Deserializer,
 ) DomainRegistry {
-	dispatcher := eventDispatcher(store)
-	accountRepo := repository.NewAccountRepository(dispatcher, store, deserializer)
+	accountRepo := repository.NewAccountRepository(store, deserializer)
 	return &domainRegistry{domain.NewAccountListService(accountRepo)}
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-	commondomainevent "github.com/klwxsrx/budget-tracker/pkg/common/domain/event"
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
 type store struct {
@@ -27,15 +27,11 @@ func (s *store) GetByIDs(ids []storedevent.ID) ([]*storedevent.StoredEvent, erro
 	return selectEvents(s.db, storedevent.ID{UUID: uuid.Nil}, []string{"id IN (" + strings.Join(idsStr, ",") + ")"})
 }
 
-func (s *store) GetByAggregateID(id commondomainevent.AggregateID, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
-	return selectEvents(s.db, fromID, []string{"aggregate_id = UUID_TO_BIN(?)"}, id.String())
+func (s *store) GetByAggregate(id domain.AggregateID, name string, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
+	return selectEvents(s.db, fromID, []string{"aggregate_id = UUID_TO_BIN(?)", "aggregate_name = ?"}, id.String(), name)
 }
 
-func (s *store) GetByAggregateName(name string, fromID storedevent.ID) ([]*storedevent.StoredEvent, error) {
-	return selectEvents(s.db, fromID, []string{"aggregate_name = ?"}, name)
-}
-
-func (s *store) Append(e commondomainevent.Event) (storedevent.ID, error) {
+func (s *store) Append(e domain.Event) (storedevent.ID, error) {
 	id := uuid.New()
 	eventData, err := s.serializer.Serialize(e)
 	if err != nil {
