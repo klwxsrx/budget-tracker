@@ -23,11 +23,11 @@ func parseEnvInt(key string, err error) (int, error) {
 	}
 	str, ok := os.LookupEnv(key)
 	if !ok {
-		return 0, fmt.Errorf("undefined environment variable %v", key)
+		return 0, fmt.Errorf("undefined environment variable %s", key)
 	}
 	integer, err := strconv.Atoi(str)
 	if err != nil {
-		return 0, fmt.Errorf("failed to convert environment variable %v to int, value: %v", key, str)
+		return 0, fmt.Errorf("failed to convert environment variable %s to int, value: %s", key, str)
 	}
 	return integer, nil
 }
@@ -38,7 +38,7 @@ func parseEnvString(key string, err error) (string, error) {
 	}
 	str, ok := os.LookupEnv(key)
 	if !ok {
-		return "", fmt.Errorf("undefined environment variable %v", key)
+		return "", fmt.Errorf("undefined environment variable %s", key)
 	}
 	return str, nil
 }

@@ -87,7 +87,7 @@ func (s *eventSerializer) Serialize(event commondomain.Event) (string, error) {
 	case domain.EventTypeAccountDeleted:
 		eventJSON, err = s.createAccountDeletedJSON(event)
 	default:
-		return "", fmt.Errorf("unknown event type %v", event.Type())
+		return "", fmt.Errorf("unknown event type %s", event.Type())
 	}
 	if err != nil {
 		return "", err

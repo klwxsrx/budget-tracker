@@ -81,7 +81,7 @@ func NewContainer(
 	unsentEventDispatcher := commonappstoredevent.NewUnsentEventDispatcher(unsentEventHandler, loggerImpl)
 	dispatchingUnitOfWork := storedevent.NewDispatchingUnitOfWork(unitOfWork, unsentEventDispatcher)
 
-	busRegistry := commonappcommand.NewBusRegistry(command.NewResultTranslator(), loggerImpl)
+	busRegistry := commonappcommand.NewBusRegistry(loggerImpl)
 	bus := registerCommandHandlers(busRegistry, dispatchingUnitOfWork)
 
 	integrationEventMessageConsumer, err := pulsar.NewMessageConsumer(

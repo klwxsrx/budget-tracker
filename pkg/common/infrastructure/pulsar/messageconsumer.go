@@ -48,12 +48,12 @@ func (c *MessageConsumer) processMessage(msg pulsar.ConsumerMessage) {
 		EventTime: msg.EventTime(),
 	})
 	if err != nil {
-		c.logger.WithError(err).Error(fmt.Sprintf("failed to handle message %v", msg.ID().Serialize()))
+		c.logger.WithError(err).Error(fmt.Sprintf("failed to handle message %s", msg.Payload()))
 		c.consumer.Nack(msg)
 		return
 	}
 	c.consumer.Ack(msg)
-	c.logger.Info(fmt.Sprintf("message with type %v and id %v successfully handled", typ, msg.ID().Serialize()))
+	c.logger.Info(fmt.Sprintf("message with type %s and id %v successfully handled", typ, msg.ID().Serialize()))
 }
 
 func NewMessageConsumer(

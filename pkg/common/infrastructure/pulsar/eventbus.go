@@ -14,7 +14,7 @@ const (
 	EventTopicsPattern = ".+" + eventTopicNamePostfix
 
 	eventTopicNamePostfix  = "_domain_event"
-	eventTopicNameTemplate = "%v" + eventTopicNamePostfix
+	eventTopicNameTemplate = "%s" + eventTopicNamePostfix
 
 	propertyEventType = "type"
 )

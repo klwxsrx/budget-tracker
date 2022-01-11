@@ -193,20 +193,10 @@ func getHandlerFunc(bus commonappcommand.Bus, parser commandParser) http.Handler
 		default:
 		}
 
-		result, _ := bus.Publish(cmd)
-		switch result {
-		case commonappcommand.ResultSuccess:
-			w.WriteHeader(http.StatusNoContent)
-		case commonappcommand.ResultInvalidArgument:
-			w.WriteHeader(http.StatusBadRequest)
-		case commonappcommand.ResultNotFound:
-			w.WriteHeader(http.StatusNotFound)
-		case commonappcommand.ResultDuplicateConflict:
-			w.WriteHeader(http.StatusConflict)
-		case commonappcommand.ResultUnknownError:
-		default:
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		err = bus.Publish(cmd)
+
+		httpCode := translateError(err)
+		w.WriteHeader(httpCode)
 	}
 }
 

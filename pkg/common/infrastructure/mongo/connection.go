@@ -48,7 +48,7 @@ func (c *connection) Close() {
 }
 
 func NewConnection(ctx context.Context, config Config, loggerImpl logger.Logger) (Connection, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%v", config.Address)).SetAuth(options.Credential{
+	client, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s", config.Address)).SetAuth(options.Credential{
 		Username: config.User,
 		Password: config.Password,
 	}))

@@ -7,7 +7,7 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
-var errUnknownAccountEventType = errors.New("unknown account event")
+var errUnknownAccountEventType = errors.New("unknown account event type")
 
 type AccountState struct {
 	ID             AccountID
@@ -59,10 +59,10 @@ func (state *AccountListState) Apply(e domain.Event) error {
 	case EventTypeAccountDeleted:
 		err = state.applyDeleted(e)
 	default:
-		err = errUnknownAccountEventType
+		err = fmt.Errorf("%w: %s", errUnknownAccountEventType, e.Type())
 	}
 	if err != nil {
-		return fmt.Errorf("%w %v", err, e.Type())
+		return fmt.Errorf("%w %s", err, e.Type())
 	}
 	return err
 }

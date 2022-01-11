@@ -28,7 +28,7 @@ type Dsn struct {
 }
 
 func (d Dsn) String() string {
-	return fmt.Sprintf("%v:%v@(%v)/%v", d.User, d.Password, d.Address, d.Database)
+	return fmt.Sprintf("%s:%s@(%s)/%s", d.User, d.Password, d.Address, d.Database)
 }
 
 type Connection interface {

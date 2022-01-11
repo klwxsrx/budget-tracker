@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/google/uuid"
@@ -15,9 +14,9 @@ const (
 )
 
 var (
-	ErrAccountDoesNotExist   = errors.New("account does not exist")
-	ErrAccountInvalidTitle   = errors.New("invalid title")
-	ErrAccountDuplicateTitle = errors.New("account with this title already exist")
+	ErrAccountDoesNotExist   = domain.NewError("account does not exist")
+	ErrAccountInvalidTitle   = domain.NewError("invalid title")
+	ErrAccountDuplicateTitle = domain.NewError("account with this title already exist")
 )
 
 type AccountID struct {

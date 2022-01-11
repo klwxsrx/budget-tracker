@@ -1,6 +1,8 @@
 package event
 
 import (
+	"errors"
+
 	budgetappcommand "github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/command"
@@ -19,11 +21,9 @@ func (handler *budgetCreatedEventHandler) Handle(event commondomain.Event) error
 	}
 
 	cmd := budgetappcommand.NewAccountCreateList(budgetCreated.EventAggregateID)
-	result, err := handler.bus.Publish(cmd)
-	switch result {
-	case command.ResultSuccess, command.ResultDuplicateConflict:
+	err := handler.bus.Publish(cmd)
+	if errors.Is(err, domain.ErrAccountListAlreadyExists) {
 		return nil
-	case command.ResultInvalidArgument, command.ResultNotFound, command.ResultUnknownError:
 	}
 	return err
 }

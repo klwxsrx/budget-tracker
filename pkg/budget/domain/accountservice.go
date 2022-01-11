@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"errors"
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 
 	"github.com/google/uuid"
 )
@@ -12,8 +12,8 @@ type AccountListRepository interface {
 }
 
 var (
-	ErrAccountListAlreadyExists = errors.New("account list already exists")
-	ErrAccountListDoesNotExist  = errors.New("account list does not exists")
+	ErrAccountListAlreadyExists = domain.NewError("account list already exists")
+	ErrAccountListDoesNotExist  = domain.NewError("account list does not exists")
 )
 
 type AccountListService interface {

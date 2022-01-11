@@ -1,9 +1,11 @@
 package command
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
 type Type string
@@ -20,22 +22,8 @@ func (b *Base) Type() Type {
 	return Type(b.CommandType)
 }
 
-type Result int
-
-const (
-	ResultSuccess Result = iota
-	ResultInvalidArgument
-	ResultNotFound
-	ResultDuplicateConflict
-	ResultUnknownError
-)
-
-type ResultTranslator interface {
-	Translate(err error) Result
-}
-
 type Bus interface {
-	Publish(c Command) (Result, error)
+	Publish(c Command) error
 }
 
 type BusRegistry interface {
@@ -49,33 +37,31 @@ type Handler interface {
 }
 
 type bus struct {
-	registry   map[Type]Handler
-	logger     logger.Logger
-	translator ResultTranslator
+	registry map[Type]Handler
+	logger   logger.Logger
 }
 
-func (b *bus) Publish(c Command) (Result, error) {
+func (b *bus) Publish(c Command) error {
 	handler, ok := b.registry[c.Type()]
 	if !ok {
 		err := fmt.Errorf("cannot find handler for %v", c.Type())
 		b.logger.Error(err.Error())
-		return ResultUnknownError, err
+		return err
 	}
 
 	err := handler.Execute(c)
-	result := b.translator.Translate(err)
-
 	loggerWithFields := b.logger.WithError(err).With(logger.Fields{
 		"command": c.Type(),
-		"data":    c,
-		"result":  result,
 	})
-	if result == ResultUnknownError {
-		loggerWithFields.Error("command handled with error")
-	} else {
+
+	if err == nil || errors.Is(err, domain.Error) {
 		loggerWithFields.Info("command handled")
+	} else {
+		loggerWithFields.With(logger.Fields{
+			"data": c,
+		}).Error("command handled with error")
 	}
-	return result, err
+	return err
 }
 
 func (b *bus) Register(h Handler) error {
@@ -86,6 +72,6 @@ func (b *bus) Register(h Handler) error {
 	return nil
 }
 
-func NewBusRegistry(translator ResultTranslator, loggerImpl logger.Logger) BusRegistry {
-	return &bus{make(map[Type]Handler), loggerImpl, translator}
+func NewBusRegistry(loggerImpl logger.Logger) BusRegistry {
+	return &bus{make(map[Type]Handler), loggerImpl}
 }

@@ -30,7 +30,7 @@ func (d *deserializer) Deserialize(eventType string, eventData []byte) (commondo
 	case domain.EventTypeAccountDeleted:
 		return d.deserializeAccountDeletedEvent(eventData)
 	default:
-		return nil, fmt.Errorf("unknown event, %v", eventType)
+		return nil, fmt.Errorf("unknown event, %s", eventType)
 	}
 }
 

@@ -34,7 +34,7 @@ func (repo *aggregateRepository) loadChanges(id commondomain.AggregateID, state 
 		return fmt.Errorf("failed to get events: %w", err)
 	}
 	if len(storedEvents) == 0 {
-		return errAggregateNotFound
+		return fmt.Errorf("%w, id: %v", errAggregateNotFound, id)
 	}
 	for _, storedEvent := range storedEvents {
 		event, err := repo.deserializer.Deserialize(storedEvent.Type, storedEvent.EventData)

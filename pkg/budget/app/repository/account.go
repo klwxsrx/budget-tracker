@@ -20,7 +20,7 @@ func (r *accountListRepository) FindByID(id domain.BudgetID) (*domain.AccountLis
 	state := &domain.AccountListState{}
 	err := r.loadChanges(commondomain.AggregateID(id), state)
 	if errors.Is(err, errAggregateNotFound) {
-		return nil, err
+		return nil, nil
 	}
 	if err != nil {
 		return nil, err

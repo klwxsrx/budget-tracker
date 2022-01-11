@@ -56,7 +56,7 @@ func selectEvents(db Client, fromID storedevent.ID, conditions []string, args ..
 		var id int64
 		err := db.Get(&id, "SELECT surrogate_id FROM event WHERE id = UUID_TO_BIN(?)", fromID.UUID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get id by event %v: %w", fromID.String(), err)
+			return nil, fmt.Errorf("failed to get id by event %s: %w", fromID.String(), err)
 		}
 
 		conditions = append(conditions, "surrogate_id > ?")
