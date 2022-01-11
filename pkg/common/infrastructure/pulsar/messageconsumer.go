@@ -9,6 +9,8 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 )
 
+const propertyMessageType = "type"
+
 type MessageConsumer struct {
 	handler  messaging.MessageHandler
 	consumer pulsar.Consumer
@@ -34,7 +36,7 @@ func (c *MessageConsumer) run() {
 	}
 }
 func (c *MessageConsumer) processMessage(msg pulsar.ConsumerMessage) {
-	typ, ok := msg.Properties()[propertyEventType]
+	typ, ok := msg.Properties()[propertyMessageType]
 	if !ok {
 		c.logger.Error(fmt.Sprintf("failed to get message type for %v", msg.ID().Serialize()))
 		c.consumer.Ack(msg)

@@ -16,7 +16,6 @@ type SurrogateID int64
 
 type StoredEvent struct {
 	ID            ID                 `db:"id"`
-	SurrogateID   SurrogateID        `db:"surrogate_id"`
 	AggregateID   domain.AggregateID `db:"aggregate_id"`
 	AggregateName string             `db:"aggregate_name"`
 	Type          string             `db:"event_type"`

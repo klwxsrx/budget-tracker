@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Budget View Service
+paths:
+  /budget-view/budget/list:
+    get:
+      tags:
+        - Budget
+      summary: List all budgets
+      operationId: listBudgets
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Budget'
+          description: 'Success result'
+  /budget-view/account/{budgetID}/list:
+    get:
+      tags:
+        - Account
+      summary: List accounts for the budget
+      operationId: listAccounts
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+          description: 'Success result'
+components:
+  schemas:
+    Budget:
+      type: object
+      required:
+        - id
+        - title
+        - currency
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        currency:
+          type: string
+          enum:
+            - rub
+            - usd
+            - eur
+    Account:
+      type: object
+      required:
+        - id
+        - title
+        - status
+        - initialBalance
+        - currentBalance
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+            - active
+            - cancelled
+        initialBalance:
+          type: integer
+        currentBalance:
+          type: integer

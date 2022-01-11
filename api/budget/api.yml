@@ -2,15 +2,13 @@ openapi: 3.0.0
 info:
   version: 1.0.0
   title: Budget Service
-tags:
-  - name: Account
 paths:
   /budget/account/{budgetID}:
     post:
       tags:
         - Account
       summary: Add a new account to specific list
-      operationId: add
+      operationId: addAccount
       parameters:
         - name: budgetID
           in: path
@@ -44,7 +42,7 @@ paths:
       tags:
         - Account
       summary: Change an order for an account to specific list
-      operationId: reorder
+      operationId: reorderAccount
       parameters:
         - name: budgetID
           in: path
@@ -75,7 +73,7 @@ paths:
       tags:
         - Account
       summary: Change a title for an account to specific list
-      operationId: rename
+      operationId: renameAccount
       parameters:
         - name: budgetID
           in: path
@@ -114,7 +112,7 @@ paths:
       tags:
         - Account
       summary: Change a status for an account to specific list
-      operationId: changeStatus
+      operationId: changeAccountStatus
       parameters:
         - name: budgetID
           in: path
@@ -150,7 +148,7 @@ paths:
       tags:
         - Account
       summary: Delete an account to specific list
-      operationId: delete
+      operationId: deleteAccount
       parameters:
         - name: budgetID
           in: path

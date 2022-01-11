@@ -68,8 +68,7 @@ func NewContainer(
 	deserializer := storedevent.NewDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(mysqlClient, serializer, deserializer)
 
-	storedEventSerializer := messaging.NewStoredEventSerializer()
-	eventBus, err := pulsar.NewEventBus(pulsarConn, moduleName, storedEventSerializer)
+	eventBus, err := pulsar.NewEventBus(pulsarConn, moduleName)
 	if err != nil {
 		return nil, err
 	}

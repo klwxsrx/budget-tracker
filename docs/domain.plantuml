@@ -2,9 +2,13 @@
 hide empty fields
 hide empty methods
 
-class MoneyAmount {
- +Amount int
+entity Budget {
+ -id BudgetID
+ -title string
+ -currency string
 }
+
+
 
 enum AccountStatus {
  Active
@@ -38,39 +42,26 @@ entity AccountList {
 AccountList *-- Account
 
 
-
 ' TODO: implement model below
-enum PayerStatus {
- VISIBLE
- HIDDEN
-}
-
-entity Payer {
- -id PayerID
- -status PayerStatus
+entity IncomeCategory {
+ -id IncomeCategoryID
  -title string
 }
 
-Payer ..> PayerStatus
-
-entity PayerList {
+entity IncomeCategoryList {
  -id BudgetID
- -payers Payer[]
- +AddPayer(title string)
- +RenamePayer(id PayerID, title string)
- +ShowPayer(id PayerID)
- +HidePayer(id PayerID)
- +DeletePayer(id PayerID)
+ -categories IncomeCategory[]
+ +Add(title string)
+ +Rename(id PayerID, title string)
+ +Delete(id PayerID)
 }
 
-PayerList *-- Payer
-
+IncomeCategoryList *-- IncomeCategory
 
 
 entity Category {
  -id CategoryID
  -title string
- -currency Currency
  +rename(name string)
 }
 
@@ -90,13 +81,12 @@ CategoryGroup *-- Category
 entity CategoryList {
  -id BudgetID
  -categories []CategoryGroup
- -defaultCategories map[Currency]Category
- -hiddenCategory CategoryGroup
+ -hiddenCategories CategoryGroup
  +AddGroup(title string)
  +RenameGroup(id CategoryGroupID, title string)
  +ReorderGroup(id CategoryGroupID, uint position)
  +DeleteGroup(id CategoryGroupID)
- +AddCategory(title string, status CategoryStatus, groupID CategoryGroupID, currency Currency)
+ +AddCategory(title string, status CategoryStatus, groupID CategoryGroupID)
  +RenameCategory(id CategoryID, title string)
  +MoveCategory(id CategoryID, groupID CategoryGroupID, uint position)
  +MoveCategories(from CategoryGroupID, to CategoryGroupID)
@@ -110,12 +100,11 @@ CategoryList *-- CategoryGroup
 
 entity Transaction {
  -id TransactionID
- -payer PayerID
+ -incomeCategory IncomeCategoryID
  -accountFrom AccountID
  -accountTo AccountID
  -category CategoryID
- -out MoneyAmount
- -in MoneyAmount
+ -amount MoneyAmount
  -createdAt Time
 }
 
@@ -129,8 +118,5 @@ entity TransactionList {
 }
 
 TransactionList *-- Transaction
-TransactionList ..> Payer
-TransactionList ..> Account
-TransactionList ..> Category
 
 @enduml

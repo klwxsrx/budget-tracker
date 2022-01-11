@@ -69,7 +69,6 @@ func selectEvents(db Client, fromID storedevent.ID, conditions []string, args ..
 	}
 
 	query := "SELECT " +
-		"surrogate_id, " +
 		"BIN_TO_UUID(id) AS id, " +
 		"BIN_TO_UUID(aggregate_id) AS aggregate_id, " +
 		"aggregate_name, " +
