@@ -201,7 +201,7 @@ func getHandlerFunc(bus commonappcommand.Bus, parser commandParser) http.Handler
 }
 
 func NewHTTPHandler(bus commonappcommand.Bus, loggerImpl logger.Logger) http.Handler {
-	r := mux.NewRouter()
+	r := mux.NewRouter().PathPrefix("/budget").Subrouter()
 	for _, route := range getRoutes() {
 		r.
 			Methods(route.Method).

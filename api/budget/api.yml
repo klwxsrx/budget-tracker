@@ -3,12 +3,12 @@ info:
   version: 1.0.0
   title: Budget Service
 tags:
-  - name: AccountList
+  - name: Account
 paths:
-  /account/{budgetID}:
+  /budget/account/{budgetID}:
     post:
       tags:
-        - AccountList
+        - Account
       summary: Add a new account to specific list
       operationId: add
       parameters:
@@ -39,10 +39,10 @@ paths:
           description: 'Returns when invalid parameters were specified'
         409:
           description: 'Returns when the title is duplicated'
-  /account/{budgetID}/{accountID}/order/{position}:
+  /budget/account/{budgetID}/{accountID}/order/{position}:
     put:
       tags:
-        - AccountList
+        - Account
       summary: Change an order for an account to specific list
       operationId: reorder
       parameters:
@@ -70,10 +70,10 @@ paths:
           description: 'Returns when invalid parameters were specified'
         404:
           description: 'Returns when the account is not exist or deleted'
-  /account/{budgetID}/{accountID}/title:
+  /budget/account/{budgetID}/{accountID}/title:
     put:
       tags:
-        - AccountList
+        - Account
       summary: Change a title for an account to specific list
       operationId: rename
       parameters:
@@ -109,10 +109,10 @@ paths:
           description: 'Returns when the account is not exist or deleted'
         409:
           description: 'Returns when the title is duplicated'
-  /account/{budgetID}/{accountID}/status/{status}:
+  /budget/account/{budgetID}/{accountID}/status/{status}:
     put:
       tags:
-        - AccountList
+        - Account
       summary: Change a status for an account to specific list
       operationId: changeStatus
       parameters:
@@ -145,10 +145,10 @@ paths:
           description: 'Returns when the status cannot be changed to specified'
         404:
           description: 'Returns when the account is not exist or deleted'
-  /account/{budgetID}/{accountID}:
+  /budget/account/{budgetID}/{accountID}:
     delete:
       tags:
-        - AccountList
+        - Account
       summary: Delete an account to specific list
       operationId: delete
       parameters:
