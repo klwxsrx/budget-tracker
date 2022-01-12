@@ -6,7 +6,7 @@ on:
 
 env:
   GOLANGCI_LINT_VERSION: v1.42.0
-  GO_VERSION: 1.16
+  GO_VERSION: 1.17
 
 jobs:
 
@@ -66,7 +66,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: Run build
-        run: go build -o ./bin/${{ matrix.application }} ./cmd/${{ matrix.application }}
+        run: make bin/${{ matrix.application }}
       - name: Setup Docker
         uses: docker/setup-buildx-action@v1
       - name: Build Docker image
