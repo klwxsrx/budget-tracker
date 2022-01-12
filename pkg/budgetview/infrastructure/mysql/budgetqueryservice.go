@@ -1,6 +1,8 @@
 package mysql
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
@@ -60,7 +62,9 @@ func NewBudgetQueryService(client mysql.Client) query.BudgetQueryService {
 }
 
 type sqlxBudget struct {
-	ID       commoninfrastructureuuid.BinaryUUID `db:"id"`
-	Title    string                              `db:"title"`
-	Currency string                              `db:"currency"`
+	ID        commoninfrastructureuuid.BinaryUUID `db:"id"`
+	Title     string                              `db:"title"`
+	Currency  string                              `db:"currency"`
+	CreatedAt time.Time                           `db:"created_at"`
+	UpdatedAt time.Time                           `db:"updated_at"`
 }

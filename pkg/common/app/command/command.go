@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
@@ -38,7 +38,7 @@ type Handler interface {
 
 type bus struct {
 	registry map[Type]Handler
-	logger   logger.Logger
+	logger   log.Logger
 }
 
 func (b *bus) Publish(c Command) error {
@@ -50,14 +50,14 @@ func (b *bus) Publish(c Command) error {
 	}
 
 	err := handler.Execute(c)
-	loggerWithFields := b.logger.WithError(err).With(logger.Fields{
+	loggerWithFields := b.logger.WithError(err).With(log.Fields{
 		"command": c.Type(),
 	})
 
 	if err == nil || errors.Is(err, domain.Error) {
 		loggerWithFields.Info("command handled")
 	} else {
-		loggerWithFields.With(logger.Fields{
+		loggerWithFields.With(log.Fields{
 			"data": c,
 		}).Error("command handled with error")
 	}
@@ -72,6 +72,6 @@ func (b *bus) Register(h Handler) error {
 	return nil
 }
 
-func NewBusRegistry(loggerImpl logger.Logger) BusRegistry {
-	return &bus{make(map[Type]Handler), loggerImpl}
+func NewBusRegistry(logger log.Logger) BusRegistry {
+	return &bus{make(map[Type]Handler), logger}
 }

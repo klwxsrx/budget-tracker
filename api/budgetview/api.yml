@@ -66,6 +66,7 @@ components:
         - status
         - initialBalance
         - currentBalance
+        - position
       properties:
         id:
           type: string
@@ -83,4 +84,6 @@ components:
         initialBalance:
           type: integer
         currentBalance:
+          type: integer
+        position:
           type: integer

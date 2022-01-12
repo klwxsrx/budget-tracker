@@ -8,7 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql" // driver impl
 	"github.com/jmoiron/sqlx"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 )
 
 const (
@@ -39,7 +39,7 @@ type Connection interface {
 type connection struct {
 	config Config
 	db     *sqlx.DB
-	logger logger.Logger
+	logger log.Logger
 }
 
 func (c *connection) Client() (TransactionalClient, error) {
@@ -77,8 +77,8 @@ func newOpenConnectionBackoff(connTimeout time.Duration) *backoff.ExponentialBac
 	return b
 }
 
-func NewConnection(config Config, loggerImpl logger.Logger) (Connection, error) {
-	db := &connection{config: config, logger: loggerImpl}
+func NewConnection(config Config, logger log.Logger) (Connection, error) {
+	db := &connection{config: config, logger: logger}
 	err := db.openConnection()
 	return db, err
 }

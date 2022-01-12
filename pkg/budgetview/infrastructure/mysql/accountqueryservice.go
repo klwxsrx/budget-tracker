@@ -1,6 +1,8 @@
 package mysql
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/query"
@@ -13,8 +15,10 @@ type accountQueryService struct {
 }
 
 func (s *accountQueryService) ListAccounts(budgetID uuid.UUID) ([]query.Account, error) {
+	const sql = "SELECT * FROM account WHERE budget_id = ? ORDER BY position ASC"
+
 	var accounts []sqlxAccount
-	err := s.client.Select(&accounts, "SELECT * FROM account WHERE budget_id = ?", commoninfrastructureuuid.BinaryUUID(budgetID))
+	err := s.client.Select(&accounts, sql, commoninfrastructureuuid.BinaryUUID(budgetID))
 	if err != nil {
 		return nil, err
 	}
@@ -28,6 +32,7 @@ func (s *accountQueryService) ListAccounts(budgetID uuid.UUID) ([]query.Account,
 			Status:         account.Status,
 			InitialBalance: account.InitialBalance,
 			CurrentBalance: account.CurrentBalance,
+			Position:       account.Position,
 		})
 	}
 	return result, nil
@@ -44,4 +49,7 @@ type sqlxAccount struct {
 	Status         int                                 `db:"status"`
 	InitialBalance int                                 `db:"initial_balance"`
 	CurrentBalance int                                 `db:"current_balance"`
+	Position       int                                 `db:"position"`
+	CreatedAt      time.Time                           `db:"created_at"`
+	UpdatedAt      time.Time                           `db:"updated_at"`
 }

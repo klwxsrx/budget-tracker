@@ -5,23 +5,23 @@ import (
 
 	pulsarlog "github.com/apache/pulsar-client-go/pulsar/log"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 )
 
 type loggerAdapter struct {
-	logger logger.Logger
+	logger log.Logger
 }
 
 func (l *loggerAdapter) SubLogger(fields pulsarlog.Fields) pulsarlog.Logger {
-	return &loggerAdapter{l.logger.With(logger.Fields(fields))}
+	return &loggerAdapter{l.logger.With(log.Fields(fields))}
 }
 
 func (l *loggerAdapter) WithFields(fields pulsarlog.Fields) pulsarlog.Entry {
-	return &loggerAdapter{l.logger.With(logger.Fields(fields))}
+	return &loggerAdapter{l.logger.With(log.Fields(fields))}
 }
 
 func (l *loggerAdapter) WithField(name string, value interface{}) pulsarlog.Entry {
-	return &loggerAdapter{l.logger.With(logger.Fields{name: value})}
+	return &loggerAdapter{l.logger.With(log.Fields{name: value})}
 }
 
 func (l *loggerAdapter) WithError(err error) pulsarlog.Entry {

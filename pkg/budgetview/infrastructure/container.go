@@ -4,7 +4,7 @@ import (
 	budgetviewapplogger "github.com/klwxsrx/budget-tracker/pkg/budgetview/app/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/query"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/mysql"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	commoninfrastructuremysql "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
 )
@@ -35,16 +35,16 @@ func (c *container) Stop() {
 func NewContainer(
 	mysqlClient commoninfrastructuremysql.TransactionalClient,
 	pulsarConn pulsar.Connection,
-	loggerImpl logger.Logger,
+	logger log.Logger,
 ) (Container, error) {
 	return &container{
 		accountQueryService: budgetviewapplogger.NewAccountQueryServiceDecorator(
 			mysql.NewAccountQueryService(mysqlClient),
-			loggerImpl,
+			logger,
 		),
 		budgetQueryService: budgetviewapplogger.NewBudgetQueryServiceDecorator(
 			mysql.NewBudgetQueryService(mysqlClient),
-			loggerImpl,
+			logger,
 		),
 	}, nil
 }

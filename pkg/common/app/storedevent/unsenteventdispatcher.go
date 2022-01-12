@@ -1,7 +1,7 @@
 package storedevent
 
 import (
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 
 	"sync"
 )
@@ -14,7 +14,7 @@ type UnsentEventDispatcher interface {
 
 type unsentEventDispatcher struct {
 	handler             *UnsentEventHandler
-	logger              logger.Logger
+	logger              log.Logger
 	dispatchRequestChan chan struct{}
 	stopChan            chan struct{}
 	sync.Mutex
@@ -70,11 +70,11 @@ func (d *unsentEventDispatcher) run() {
 
 func NewUnsentEventDispatcher(
 	unsentEventHandler *UnsentEventHandler,
-	loggerImpl logger.Logger,
+	logger log.Logger,
 ) UnsentEventDispatcher {
 	dispatcher := &unsentEventDispatcher{
 		unsentEventHandler,
-		loggerImpl,
+		logger,
 		make(chan struct{}, 1),
 		make(chan struct{}),
 		sync.Mutex{},

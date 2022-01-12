@@ -9,7 +9,7 @@ import (
 
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/model"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/transport"
 )
 
@@ -73,6 +73,7 @@ type AccountJSON struct {
 	Status         string    `json:"status"`
 	InitialBalance int       `json:"initialBalance"`
 	CurrentBalance int       `json:"currentBalance"`
+	Position       int       `json:"position"`
 }
 
 func listAccountsHandler(
@@ -157,7 +158,7 @@ func addLivenessCheckRoute(router *mux.Router) {
 		})
 }
 
-func NewHTTPHandler(container infrastructure.Container, loggerImpl logger.Logger) http.Handler {
+func NewHTTPHandler(container infrastructure.Container, logger log.Logger) http.Handler {
 	router := mux.NewRouter()
 	addLivenessCheckRoute(router)
 
@@ -169,6 +170,6 @@ func NewHTTPHandler(container infrastructure.Container, loggerImpl logger.Logger
 			Name(route.Name).
 			HandlerFunc(getHandlerFunc(container, route.Handler))
 	}
-	router.Use(transport.GetLoggingMiddleware(loggerImpl))
+	router.Use(transport.GetLoggingMiddleware(logger))
 	return router
 }

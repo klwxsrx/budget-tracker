@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 
 	"io/ioutil"
 	"net/http"
@@ -21,7 +21,7 @@ func newLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 	return &loggingResponseWriter{w, http.StatusOK}
 }
 
-func GetLoggingMiddleware(l logger.Logger) func(next http.Handler) http.Handler {
+func GetLoggingMiddleware(l log.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			lrw := newLoggingResponseWriter(w)
@@ -31,7 +31,7 @@ func GetLoggingMiddleware(l logger.Logger) func(next http.Handler) http.Handler 
 			if err != nil {
 				body = nil
 			}
-			loggerWithFields := l.With(logger.Fields{
+			loggerWithFields := l.With(log.Fields{
 				"method":       r.Method,
 				"url":          r.RequestURI,
 				"body":         string(body),

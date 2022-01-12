@@ -8,7 +8,7 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/mysql"
 	commonappcommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	commonappstoredevent "github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	commoninfrastructuremysql "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
@@ -62,7 +62,7 @@ func integrationEventMessageHandler(bus commonappcommand.Bus) messaging.NamedMes
 func NewContainer(
 	mysqlClient commoninfrastructuremysql.TransactionalClient,
 	pulsarConn pulsar.Connection,
-	loggerImpl logger.Logger,
+	logger log.Logger,
 ) (Container, error) {
 	serializer := storedevent.NewSerializer()
 	deserializer := storedevent.NewDeserializer()
@@ -77,10 +77,10 @@ func NewContainer(
 	eventStore := commoninfrastructuremysql.NewEventStore(mysqlClient, serializer)
 	unsentEventProvider := commoninfrastructuremysql.NewUnsentEventProvider(eventStore, mysqlClient)
 	unsentEventHandler := commonappstoredevent.NewUnsentEventHandler(unsentEventProvider, eventBus, sync)
-	unsentEventDispatcher := commonappstoredevent.NewUnsentEventDispatcher(unsentEventHandler, loggerImpl)
+	unsentEventDispatcher := commonappstoredevent.NewUnsentEventDispatcher(unsentEventHandler, logger)
 	dispatchingUnitOfWork := storedevent.NewDispatchingUnitOfWork(unitOfWork, unsentEventDispatcher)
 
-	busRegistry := commonappcommand.NewBusRegistry(loggerImpl)
+	busRegistry := commonappcommand.NewBusRegistry(logger)
 	bus := registerCommandHandlers(busRegistry, dispatchingUnitOfWork)
 
 	integrationEventMessageConsumer, err := pulsar.NewMessageConsumer(
@@ -88,7 +88,7 @@ func NewContainer(
 		integrationEventMessageHandler(bus),
 		false,
 		pulsarConn,
-		loggerImpl,
+		logger,
 	)
 	if err != nil {
 		return nil, err

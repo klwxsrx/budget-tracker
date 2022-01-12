@@ -5,7 +5,7 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 )
 
@@ -14,7 +14,7 @@ const propertyMessageType = "type"
 type MessageConsumer struct {
 	handler  messaging.MessageHandler
 	consumer pulsar.Consumer
-	logger   logger.Logger
+	logger   log.Logger
 	stopChan chan struct{}
 }
 
@@ -63,7 +63,7 @@ func NewMessageConsumer(
 	handler messaging.NamedMessageHandler,
 	resetSubscription bool,
 	connection Connection,
-	loggerImpl logger.Logger,
+	logger log.Logger,
 ) (*MessageConsumer, error) {
 	pulsarConsumer, err := connection.Subscribe(&ConsumerConfig{
 		TopicsPattern:    topicsPattern,
@@ -83,7 +83,7 @@ func NewMessageConsumer(
 	consumer := &MessageConsumer{
 		handler:  handler,
 		consumer: pulsarConsumer,
-		logger:   loggerImpl,
+		logger:   logger,
 	}
 	go consumer.run()
 	return consumer, nil

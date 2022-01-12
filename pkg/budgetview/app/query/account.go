@@ -16,6 +16,7 @@ type Account struct {
 	Status         int
 	InitialBalance int
 	CurrentBalance int
+	Position       int
 }
 
 type AccountQueryService interface {

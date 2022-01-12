@@ -1,16 +1,16 @@
 package logger
 
 import (
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 
-	external "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"os"
 )
 
-type externalLogger interface {
-	WithFields(fields external.Fields) *external.Entry
-	WithError(err error) *external.Entry
+type logrusLogger interface {
+	WithFields(fields logrus.Fields) *logrus.Entry
+	WithError(err error) *logrus.Entry
 	Debug(args ...interface{})
 	Error(args ...interface{})
 	Warning(args ...interface{})
@@ -19,15 +19,15 @@ type externalLogger interface {
 }
 
 type impl struct {
-	logger externalLogger
+	logger logrusLogger
 }
 
-func (i *impl) With(fields logger.Fields) logger.Logger {
-	return fromExternal(i.logger.WithFields(external.Fields(fields)))
+func (i *impl) With(fields log.Fields) log.Logger {
+	return fromLogrus(i.logger.WithFields(logrus.Fields(fields)))
 }
 
-func (i *impl) WithError(err error) logger.Logger {
-	return fromExternal(i.logger.WithError(err))
+func (i *impl) WithError(err error) log.Logger {
+	return fromLogrus(i.logger.WithError(err))
 }
 
 func (i *impl) Debug(args ...interface{}) {
@@ -50,17 +50,15 @@ func (i *impl) Fatal(args ...interface{}) {
 	i.logger.Fatal(args)
 }
 
-func fromExternal(l externalLogger) logger.Logger {
+func fromLogrus(l logrusLogger) log.Logger {
 	return &impl{l}
 }
 
-func New() logger.Logger {
-	l := external.New()
-	l.SetFormatter(&external.JSONFormatter{
-		DisableHTMLEscape: true,
-	})
-	l.SetOutput(os.Stdout)
-	l.SetLevel(external.InfoLevel)
+func New() log.Logger {
+	logrusLogger := logrus.New()
+	logrusLogger.SetFormatter(&logrus.JSONFormatter{})
+	logrusLogger.SetOutput(os.Stdout)
+	logrusLogger.SetLevel(logrus.InfoLevel)
 
-	return fromExternal(l)
+	return fromLogrus(logrusLogger)
 }

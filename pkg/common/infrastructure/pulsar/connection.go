@@ -7,7 +7,7 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/cenkalti/backoff"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 )
 
 type Config struct {
@@ -73,11 +73,11 @@ func testCreateProducer(client pulsar.Client, testConnectionTimeout time.Duratio
 	return nil
 }
 
-func NewConnection(config Config, loggerImpl logger.Logger) (Connection, error) {
+func NewConnection(config Config, logger log.Logger) (Connection, error) {
 	c, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:               fmt.Sprintf("pulsar://%v", config.Address),
 		ConnectionTimeout: config.ConnectionTimeout,
-		Logger:            &loggerAdapter{loggerImpl},
+		Logger:            &loggerAdapter{logger},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to broker: %w", err)

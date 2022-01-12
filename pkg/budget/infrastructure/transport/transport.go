@@ -12,7 +12,7 @@ import (
 
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	commonappcommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/transport"
 )
 
@@ -210,7 +210,7 @@ func addLivenessCheckRoute(router *mux.Router) {
 		})
 }
 
-func NewHTTPHandler(bus commonappcommand.Bus, loggerImpl logger.Logger) http.Handler {
+func NewHTTPHandler(bus commonappcommand.Bus, logger log.Logger) http.Handler {
 	router := mux.NewRouter()
 	addLivenessCheckRoute(router)
 
@@ -222,6 +222,6 @@ func NewHTTPHandler(bus commonappcommand.Bus, loggerImpl logger.Logger) http.Han
 			Name(route.Name).
 			HandlerFunc(getHandlerFunc(bus, route.Parser))
 	}
-	router.Use(transport.GetLoggingMiddleware(loggerImpl))
+	router.Use(transport.GetLoggingMiddleware(logger))
 	return router
 }

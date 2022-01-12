@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS `account`
     title           VARCHAR(1000),
     initial_balance INT,
     current_balance INT,
+    position        INT,
+    created_at      DATETIME,
+    updated_at      DATETIME,
     PRIMARY KEY (id),
     FOREIGN KEY (budget_id) REFERENCES budget (id) ON DELETE CASCADE
 ) ENGINE = InnoDB

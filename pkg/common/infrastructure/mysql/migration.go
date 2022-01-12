@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 
 type Migration struct {
 	client     TransactionalClient
-	logger     logger.Logger
+	logger     log.Logger
 	migrations fs.ReadDirFS
 }
 
@@ -179,9 +179,9 @@ func createMigrationRecord(client Client, migrationID int) error {
 	return err
 }
 
-func NewMigration(client TransactionalClient, loggerImpl logger.Logger, migrations fs.ReadDirFS) (*Migration, error) {
+func NewMigration(client TransactionalClient, logger log.Logger, migrations fs.ReadDirFS) (*Migration, error) {
 	if migrationFileRegexError != nil {
 		return nil, migrationFileRegexError
 	}
-	return &Migration{client, loggerImpl, migrations}, nil
+	return &Migration{client, logger, migrations}, nil
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/klwxsrx/budget-tracker/data/mysql/migrations/budgetview"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/transport"
-	commonapplogger "github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	commonapplog "github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	commoninfrastructurelogger "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
@@ -49,14 +49,14 @@ func main() {
 	_ = server.Shutdown(context.Background())
 }
 
-func getPulsarClient(config *config, logger commonapplogger.Logger) (pulsar.Connection, error) {
+func getPulsarClient(config *config, logger commonapplog.Logger) (pulsar.Connection, error) {
 	return pulsar.NewConnection(pulsar.Config{
 		Address:           config.MessageBrokerAddress,
 		ConnectionTimeout: config.MessageBrokerConnectionTimeout,
 	}, logger)
 }
 
-func getReadyDatabaseClient(config *config, migrations fs.ReadDirFS, logger commonapplogger.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
+func getReadyDatabaseClient(config *config, migrations fs.ReadDirFS, logger commonapplog.Logger) (mysql.Connection, mysql.TransactionalClient, error) {
 	db, err := mysql.NewConnection(mysql.Config{
 		DSN: mysql.Dsn{
 			User:     config.DBUser,
@@ -87,7 +87,7 @@ func getReadyDatabaseClient(config *config, migrations fs.ReadDirFS, logger comm
 	return db, client, nil
 }
 
-func startServer(container infrastructure.Container, logger commonapplogger.Logger) *http.Server {
+func startServer(container infrastructure.Container, logger commonapplog.Logger) *http.Server {
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: transport.NewHTTPHandler(container, logger),
