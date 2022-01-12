@@ -21,7 +21,7 @@ func newLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 	return &loggingResponseWriter{w, http.StatusOK}
 }
 
-func getLoggingMiddleware(l logger.Logger) func(next http.Handler) http.Handler {
+func GetLoggingMiddleware(l logger.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			lrw := newLoggingResponseWriter(w)

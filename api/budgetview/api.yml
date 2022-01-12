@@ -33,6 +33,10 @@ paths:
                 items:
                   $ref: '#/components/schemas/Account'
           description: 'Success result'
+        400:
+          description: "Invalid budget id"
+        404:
+          description: "Budget not found"
 components:
   schemas:
     Budget:
@@ -57,12 +61,16 @@ components:
       type: object
       required:
         - id
+        - budgetID
         - title
         - status
         - initialBalance
         - currentBalance
       properties:
         id:
+          type: string
+          format: uuid
+        budgetID:
           type: string
           format: uuid
         title:

@@ -9,7 +9,7 @@ FROM scratch
 COPY --from=builder /etc/passwd /etc/passwd
 USER appuser
 
-COPY ./bin/budget-view /app/bin/budget
+COPY ./bin/budgetview /app/bin/budget
 
 EXPOSE 8080
 

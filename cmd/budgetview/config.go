@@ -8,12 +8,13 @@ import (
 )
 
 type config struct {
-	MessageBrokerAddress           string
-	MessageBrokerConnectionTimeout time.Duration
+	DBName                         string
 	DBAddress                      string
 	DBUser                         string
 	DBPassword                     string
 	DBConnectionTimeout            time.Duration
+	MessageBrokerAddress           string
+	MessageBrokerConnectionTimeout time.Duration
 }
 
 func parseEnvInt(key string, err error) (int, error) {
@@ -44,23 +45,25 @@ func parseEnvString(key string, err error) (string, error) {
 
 func parseConfig() (*config, error) {
 	var err error
-	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
-	messageBrokerConnTimeout, err := parseEnvInt("MESSAGE_BROKER_CONNECTION_TIMEOUT", err)
+	dbName, err := parseEnvString("DATABASE_NAME", err)
 	dbAddress, err := parseEnvString("DATABASE_ADDRESS", err)
 	dbUser, err := parseEnvString("DATABASE_USER", err)
 	dbPassword, err := parseEnvString("DATABASE_PASSWORD", err)
 	dbConnTimeout, err := parseEnvInt("DATABASE_CONNECTION_TIMEOUT", err)
+	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
+	messageBrokerConnTimeout, err := parseEnvInt("MESSAGE_BROKER_CONNECTION_TIMEOUT", err)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &config{
-		messageBrokerAddress,
-		time.Duration(messageBrokerConnTimeout) * time.Second,
+		dbName,
 		dbAddress,
 		dbUser,
 		dbPassword,
 		time.Duration(dbConnTimeout) * time.Second,
+		messageBrokerAddress,
+		time.Duration(messageBrokerConnTimeout) * time.Second,
 	}, nil
 }

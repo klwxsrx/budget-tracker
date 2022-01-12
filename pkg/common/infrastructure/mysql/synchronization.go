@@ -14,7 +14,7 @@ func (s *synchronization) CriticalSection(name string, f func() error) error {
 	l := NewLock(s.client, name)
 	err := l.Get()
 	if err != nil {
-		return fmt.Errorf("can't create lock: %w", err)
+		return fmt.Errorf("can't create db lock %s: %w", name, err)
 	}
 	defer l.Release()
 	return f()

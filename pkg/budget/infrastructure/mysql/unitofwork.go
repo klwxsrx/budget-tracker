@@ -33,7 +33,7 @@ func (uw *unitOfWork) Critical(lock string, f func(r service.DomainRegistry) err
 	dbLock := mysql.NewLock(uw.client, lock)
 	err := dbLock.Get()
 	if err != nil {
-		return fmt.Errorf("can't create lock: %w", err)
+		return fmt.Errorf("can't create lock %v: %w", lock, err)
 	}
 	defer dbLock.Release()
 	return uw.Execute(f)

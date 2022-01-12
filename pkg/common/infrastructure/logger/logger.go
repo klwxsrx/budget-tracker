@@ -4,6 +4,8 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 
 	external "github.com/sirupsen/logrus"
+
+	"os"
 )
 
 type externalLogger interface {
@@ -21,11 +23,11 @@ type impl struct {
 }
 
 func (i *impl) With(fields logger.Fields) logger.Logger {
-	return New(i.logger.WithFields(external.Fields(fields)))
+	return fromExternal(i.logger.WithFields(external.Fields(fields)))
 }
 
 func (i *impl) WithError(err error) logger.Logger {
-	return New(i.logger.WithError(err))
+	return fromExternal(i.logger.WithError(err))
 }
 
 func (i *impl) Debug(args ...interface{}) {
@@ -48,6 +50,17 @@ func (i *impl) Fatal(args ...interface{}) {
 	i.logger.Fatal(args)
 }
 
-func New(l externalLogger) logger.Logger {
+func fromExternal(l externalLogger) logger.Logger {
 	return &impl{l}
+}
+
+func New() logger.Logger {
+	l := external.New()
+	l.SetFormatter(&external.JSONFormatter{
+		DisableHTMLEscape: true,
+	})
+	l.SetOutput(os.Stdout)
+	l.SetLevel(external.InfoLevel)
+
+	return fromExternal(l)
 }

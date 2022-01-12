@@ -13,6 +13,7 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	commonappcommand "github.com/klwxsrx/budget-tracker/pkg/common/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
+	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/transport"
 )
 
 var (
@@ -33,31 +34,31 @@ func getRoutes() []route {
 	return []route{
 		{
 			"AddAccount",
-			"POST",
+			http.MethodPost,
 			"/account/{budgetID}",
 			addAccountParser,
 		},
 		{
 			"ReorderAccount",
-			"PUT",
+			http.MethodPut,
 			"/account/{budgetID}/{accountID}/order/{position}",
 			reorderAccountParser,
 		},
 		{
 			"RenameAccount",
-			"PUT",
+			http.MethodPut,
 			"/account/{budgetID}/{accountID}/title",
 			renameAccountParser,
 		},
 		{
 			"ChangeAccountStatus",
-			"PUT",
+			http.MethodPut,
 			"/account/{budgetID}/{accountID}/status/{status}",
 			changeAccountStatusParser,
 		},
 		{
 			"DeleteAccount",
-			"DELETE",
+			http.MethodDelete,
 			"/account/{budgetID}/{accountID}",
 			deleteAccountParser,
 		},
@@ -200,15 +201,27 @@ func getHandlerFunc(bus commonappcommand.Bus, parser commandParser) http.Handler
 	}
 }
 
+func addLivenessCheckRoute(router *mux.Router) {
+	router.
+		Methods(http.MethodGet).
+		Path("/internal/status/live").
+		HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("ok"))
+		})
+}
+
 func NewHTTPHandler(bus commonappcommand.Bus, loggerImpl logger.Logger) http.Handler {
-	r := mux.NewRouter().PathPrefix("/budget").Subrouter()
+	router := mux.NewRouter()
+	addLivenessCheckRoute(router)
+
+	api := router.PathPrefix("/budget").Subrouter()
 	for _, route := range getRoutes() {
-		r.
+		api.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			HandlerFunc(getHandlerFunc(bus, route.Parser))
 	}
-	r.Use(getLoggingMiddleware(loggerImpl))
-	return r
+	router.Use(transport.GetLoggingMiddleware(loggerImpl))
+	return router
 }

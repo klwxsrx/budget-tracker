@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS `unsent_event`
 (
     id BINARY(16) NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (id) REFERENCES event(id) ON DELETE CASCADE
+    FOREIGN KEY (id) REFERENCES event (id) ON DELETE CASCADE
 ) ENGINE = InnoDB
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci

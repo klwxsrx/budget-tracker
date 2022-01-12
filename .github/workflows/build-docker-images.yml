@@ -56,7 +56,7 @@ jobs:
         include:
           - application: budget
             image-name: klwxsrx/budget-tracker
-          - application: budget-view
+          - application: budgetview
             image-name: klwxsrx/budget-tracker-view
     steps:
       - name: Checkout
@@ -94,7 +94,7 @@ jobs:
         include:
           - application: budget
             image-name: klwxsrx/budget-tracker
-          - application: budget-view
+          - application: budgetview
             image-name: klwxsrx/budget-tracker-view
     steps:
       - name: Setup Docker

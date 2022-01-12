@@ -1,6 +1,6 @@
 .PHONY: clean test lint
 
-all: clean bin/budget bin/budget-view test lint
+all: clean bin/budget bin/budgetview test lint
 
 clean:
 	rm -rf bin/*

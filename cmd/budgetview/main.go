@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/klwxsrx/budget-tracker/data/mysql/migrations/budget"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure"
-	"github.com/klwxsrx/budget-tracker/pkg/budget/infrastructure/transport"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/command"
+	"github.com/klwxsrx/budget-tracker/data/mysql/migrations/budgetview"
+	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure"
+	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/transport"
 	commonapplogger "github.com/klwxsrx/budget-tracker/pkg/common/app/logger"
 	commoninfrastructurelogger "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
@@ -25,7 +24,7 @@ func main() {
 		logger.WithError(err).Fatal("failed to parse config")
 	}
 
-	db, client, err := getReadyDatabaseClient(config, budget.MysqlMigrations, logger)
+	db, client, err := getReadyDatabaseClient(config, budgetview.MysqlMigrations, logger)
 	if err != nil {
 		logger.WithError(err).Fatal("failed to setup db connection")
 	}
@@ -43,7 +42,7 @@ func main() {
 	}
 	defer container.Stop()
 
-	server := startServer(container.CommandBus(), logger)
+	server := startServer(container, logger)
 	logger.Info("app is ready")
 
 	listenOSKillSignals()
@@ -88,10 +87,10 @@ func getReadyDatabaseClient(config *config, migrations fs.ReadDirFS, logger comm
 	return db, client, nil
 }
 
-func startServer(bus command.Bus, logger commonapplogger.Logger) *http.Server {
+func startServer(container infrastructure.Container, logger commonapplogger.Logger) *http.Server {
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: transport.NewHTTPHandler(bus, logger),
+		Handler: transport.NewHTTPHandler(container, logger),
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {

@@ -7,13 +7,11 @@ services:
     image: klwxsrx/budget-tracker
     container_name: budget-app
     hostname: budget-app
-    ports:
-      - "127.0.0.1:8080:8080"
     environment:
       MESSAGE_BROKER_ADDRESS: "budget-pulsar:6650"
       MESSAGE_BROKER_CONNECTION_TIMEOUT: 300 # connection may be too slow for the first time due to initialization
-      DATABASE_NAME: budget
       DATABASE_ADDRESS: "budget-mysql:3306"
+      DATABASE_NAME: budget
       DATABASE_USER: budget
       DATABASE_PASSWORD: 1234
       DATABASE_CONNECTION_TIMEOUT: 300
@@ -23,21 +21,20 @@ services:
   budget-view-app:
     build:
       context: .
-      dockerfile: ./docker/budget-view/Dockerfile
+      dockerfile: ./docker/budgetview/Dockerfile
     image: klwxsrx/budget-tracker-view
     container_name: budget-view-app
     hostname: budget-view-app
-    ports:
-      - "127.0.0.1:8081:8080"
     environment:
       MESSAGE_BROKER_ADDRESS: "budget-pulsar:6650"
       MESSAGE_BROKER_CONNECTION_TIMEOUT: 300
-      DATABASE_ADDRESS: "budget-mongo:27017"
-      DATABASE_USER: budget-view
+      DATABASE_ADDRESS: "budget-view-mysql:3306"
+      DATABASE_NAME: budget_view
+      DATABASE_USER: budget_view
       DATABASE_PASSWORD: 1234
       DATABASE_CONNECTION_TIMEOUT: 300
     depends_on:
-      - budget-mongo
+      - budget-view-mysql
       - budget-pulsar
   budget-mysql:
     image: mysql:8.0
@@ -45,8 +42,6 @@ services:
     hostname: budget-mysql
     volumes:
       - budget-mysql-data:/var/lib/mysql:rw
-    ports:
-      - "127.0.0.1:3306:3306"
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: budget
@@ -56,32 +51,30 @@ services:
       test: mysql -h127.0.0.1 -ubudget -p1234 -e 'SELECT 1'
       interval: 10s
       timeout: 1s
-  budget-mongo:
-    image: mongo:4.4
-    container_name: budget-mongo
-    hostname: budget-mongo
+  budget-view-mysql:
+    image: mysql:8.0
+    container_name: budget-view-mysql
+    hostname: budget-view-mysql
     volumes:
-      - budget-mongo-data:/data/db:rw
-    ports:
-      - "127.0.0.1:27017:27017"
+      - budget-view-mysql-data:/var/lib/mysql:rw
     environment:
-      MONGO_INITDB_DATABASE: budget-view
-      MONGO_INITDB_ROOT_USERNAME: budget-view
-      MONGO_INITDB_ROOT_PASSWORD: 1234
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: budget_view
+      MYSQL_USER: budget_view
+      MYSQL_PASSWORD: 1234
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/budget-view --quiet
+      test: mysql -h127.0.0.1 -ubudget_view -p1234 -e 'SELECT 1'
       interval: 10s
       timeout: 1s
   budget-pulsar:
-    image: apachepulsar/pulsar:2.7.0
+    image: apachepulsar/pulsar:2.9.1
     container_name: budget-pulsar
     hostname: budget-pulsar
     volumes:
       - budget-pulsar-data:/pulsar/data:rw
-    ports:
-      - "127.0.0.1:6650:6650"
     entrypoint: [ "bin/pulsar", "standalone" ]
+    restart: unless-stopped
 volumes:
   budget-mysql-data:
-  budget-mongo-data:
+  budget-view-mysql-data:
   budget-pulsar-data:

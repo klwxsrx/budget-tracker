@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  budget-app:
+    ports:
+      - "127.0.0.1:8080:8080"
+  budget-view-app:
+    ports:
+      - "127.0.0.1:8081:8080"
+  budget-mysql:
+    ports:
+      - "127.0.0.1:3306:3306"
+  budget-view-mysql:
+    ports:
+      - "127.0.0.1:3307:3306"
+  budget-pulsar:
+    ports:
+      - "127.0.0.1:8082:8080"
+      - "127.0.0.1:6650:6650"
