@@ -10,8 +10,8 @@ import (
 )
 
 func TestAccountList_Add(t *testing.T) {
-	listID := BudgetID{uuid.New()}
-	list := LoadAccountList(&AccountListState{listID, nil})
+	budgetID := BudgetID{uuid.New()}
+	list := LoadAccountList(&AccountListState{budgetID, nil})
 
 	_, err := list.Add("", MoneyAmount(0))
 	assert.EqualError(t, err, ErrAccountInvalidTitle.Error())
@@ -27,7 +27,7 @@ func TestAccountList_Add(t *testing.T) {
 	assert.Len(t, list.GetChanges(), 1)
 	createdEvent, ok := list.GetChanges()[0].(*AccountCreatedEvent)
 	require.True(t, ok)
-	assert.Equal(t, listID.String(), createdEvent.AggregateID().String())
+	assert.Equal(t, budgetID.String(), createdEvent.AggregateID().String())
 	assert.Equal(t, accountListAggregateName, createdEvent.AggregateName())
 	assert.Equal(t, EventTypeAccountCreated, createdEvent.Type())
 	assert.Equal(t, id.String(), createdEvent.AccountID.String())
@@ -59,13 +59,13 @@ func TestAccountList_Reorder(t *testing.T) {
 			assert.Equal(t, titles[i], acc.GetTitle())
 		}
 	}
-	listID := BudgetID{uuid.New()}
+	budgetID := BudgetID{uuid.New()}
 	id1 := AccountID{uuid.New()}
 	id2 := AccountID{uuid.New()}
 	id3 := AccountID{uuid.New()}
 	id4 := AccountID{uuid.New()}
 	id5 := AccountID{uuid.New()}
-	list := LoadAccountList(&AccountListState{listID, []*AccountState{
+	list := LoadAccountList(&AccountListState{budgetID, []*AccountState{
 		{id1, AccountStatusActive, "1", MoneyAmount(0)},
 		{id2, AccountStatusActive, "2", MoneyAmount(0)},
 		{id3, AccountStatusActive, "3", MoneyAmount(0)},
@@ -107,7 +107,7 @@ func TestAccountList_Reorder(t *testing.T) {
 	assert.Len(t, list.GetChanges(), 1)
 	reorderedEvent, ok := list.GetChanges()[0].(*AccountReorderedEvent)
 	require.True(t, ok)
-	assert.Equal(t, listID.String(), reorderedEvent.AggregateID().String())
+	assert.Equal(t, budgetID.String(), reorderedEvent.AggregateID().String())
 	assert.Equal(t, accountListAggregateName, reorderedEvent.AggregateName())
 	assert.Equal(t, EventTypeAccountReordered, reorderedEvent.Type())
 	assert.Equal(t, id1.String(), reorderedEvent.AccountID.String())
@@ -150,9 +150,9 @@ func TestAccountList_Reorder(t *testing.T) {
 }
 
 func TestAccountList_Rename(t *testing.T) {
-	listID := BudgetID{uuid.New()}
+	budgetID := BudgetID{uuid.New()}
 	itemID := AccountID{uuid.New()}
-	list := LoadAccountList(&AccountListState{listID, []*AccountState{
+	list := LoadAccountList(&AccountListState{budgetID, []*AccountState{
 		{itemID, AccountStatusActive, "some", MoneyAmount(0)},
 		{AccountID{uuid.New()}, AccountStatusActive, "another", MoneyAmount(0)},
 	}})
@@ -180,7 +180,7 @@ func TestAccountList_Rename(t *testing.T) {
 	assert.Equal(t, "new", list.getAccounts()[0].GetTitle())
 	renamedEvent, ok := list.GetChanges()[0].(*AccountRenamedEvent)
 	require.True(t, ok)
-	assert.Equal(t, listID.String(), renamedEvent.AggregateID().String())
+	assert.Equal(t, budgetID.String(), renamedEvent.AggregateID().String())
 	assert.Equal(t, accountListAggregateName, renamedEvent.AggregateName())
 	assert.Equal(t, EventTypeAccountRenamed, renamedEvent.Type())
 	assert.Equal(t, itemID.String(), renamedEvent.AccountID.String())
@@ -191,10 +191,10 @@ func TestAccountList_Rename(t *testing.T) {
 }
 
 func TestAccountList_Activate(t *testing.T) {
-	listID := BudgetID{uuid.New()}
+	budgetID := BudgetID{uuid.New()}
 	item1ID := AccountID{uuid.New()}
 	item2ID := AccountID{uuid.New()}
-	list := LoadAccountList(&AccountListState{listID, []*AccountState{
+	list := LoadAccountList(&AccountListState{budgetID, []*AccountState{
 		{item1ID, AccountStatusActive, "some", MoneyAmount(0)},
 		{item2ID, AccountStatusCancelled, "another", MoneyAmount(0)},
 	}})
@@ -211,7 +211,7 @@ func TestAccountList_Activate(t *testing.T) {
 	assert.Len(t, list.GetChanges(), 1)
 	event, ok := list.GetChanges()[0].(*AccountActivatedEvent)
 	require.True(t, ok)
-	assert.Equal(t, listID.String(), event.AggregateID().String())
+	assert.Equal(t, budgetID.String(), event.AggregateID().String())
 	assert.Equal(t, accountListAggregateName, event.AggregateName())
 	assert.Equal(t, EventTypeAccountActivated, event.Type())
 	assert.Equal(t, item2ID.String(), event.AccountID.String())
@@ -222,10 +222,10 @@ func TestAccountList_Activate(t *testing.T) {
 }
 
 func TestAccountList_Cancel(t *testing.T) {
-	listID := BudgetID{uuid.New()}
+	budgetID := BudgetID{uuid.New()}
 	item1ID := AccountID{uuid.New()}
 	item2ID := AccountID{uuid.New()}
-	list := LoadAccountList(&AccountListState{listID, []*AccountState{
+	list := LoadAccountList(&AccountListState{budgetID, []*AccountState{
 		{item1ID, AccountStatusCancelled, "some", MoneyAmount(0)},
 		{item2ID, AccountStatusActive, "another", MoneyAmount(0)},
 		{item2ID, AccountStatusActive, "third", MoneyAmount(0)},
@@ -243,7 +243,7 @@ func TestAccountList_Cancel(t *testing.T) {
 	assert.Len(t, list.GetChanges(), 1)
 	event, ok := list.GetChanges()[0].(*AccountCancelledEvent)
 	require.True(t, ok)
-	assert.Equal(t, listID.String(), event.AggregateID().String())
+	assert.Equal(t, budgetID.String(), event.AggregateID().String())
 	assert.Equal(t, accountListAggregateName, event.AggregateName())
 	assert.Equal(t, EventTypeAccountCancelled, event.Type())
 	assert.Equal(t, item2ID.String(), event.AccountID.String())
@@ -254,9 +254,9 @@ func TestAccountList_Cancel(t *testing.T) {
 }
 
 func TestAccountList_Delete(t *testing.T) {
-	listID := BudgetID{uuid.New()}
+	budgetID := BudgetID{uuid.New()}
 	item1ID := AccountID{uuid.New()}
-	list := LoadAccountList(&AccountListState{listID, []*AccountState{
+	list := LoadAccountList(&AccountListState{budgetID, []*AccountState{
 		{item1ID, AccountStatusActive, "some", MoneyAmount(0)},
 	}})
 
@@ -269,7 +269,7 @@ func TestAccountList_Delete(t *testing.T) {
 	assert.Len(t, list.GetChanges(), 1)
 	event, ok := list.GetChanges()[0].(*AccountDeletedEvent)
 	require.True(t, ok)
-	assert.Equal(t, listID.String(), event.AggregateID().String())
+	assert.Equal(t, budgetID.String(), event.AggregateID().String())
 	assert.Equal(t, accountListAggregateName, event.AggregateName())
 	assert.Equal(t, EventTypeAccountDeleted, event.Type())
 	assert.Equal(t, item1ID.String(), event.AccountID.String())

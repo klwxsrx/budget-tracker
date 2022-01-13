@@ -3,10 +3,16 @@ package infrastructure
 import (
 	budgetviewapplogger "github.com/klwxsrx/budget-tracker/pkg/budgetview/app/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/query"
+	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	commoninfrastructuremysql "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
+)
+
+const (
+	eventHandlerName = "budget_view_event_handler"
 )
 
 type Container interface {
@@ -16,8 +22,9 @@ type Container interface {
 }
 
 type container struct {
-	accountQueryService query.AccountQueryService
-	budgetQueryService  query.BudgetQueryService
+	eventMessageConsumer *pulsar.MessageConsumer
+	accountQueryService  query.AccountQueryService
+	budgetQueryService   query.BudgetQueryService
 }
 
 func (c *container) AccountQueryService() query.AccountQueryService {
@@ -29,7 +36,12 @@ func (c *container) BudgetQueryService() query.BudgetQueryService {
 }
 
 func (c *container) Stop() {
-	// TODO: stop
+	c.eventMessageConsumer.Stop()
+}
+
+func eventMessageHandler(unitOfWork service.UnitOfWork) messaging.MessageHandler { // nolint:unparam
+	handler := messaging.NewCompositeTypedMessageHandler()
+	return handler
 }
 
 func NewContainer(
@@ -37,7 +49,22 @@ func NewContainer(
 	pulsarConn pulsar.Connection,
 	logger log.Logger,
 ) (Container, error) {
+	unitOfWork := mysql.NewUnitOfWork(mysqlClient)
+
+	eventMessageConsumer, err := pulsar.NewMessageConsumer(
+		pulsar.EventTopicsPattern,
+		eventHandlerName,
+		false,
+		eventMessageHandler(unitOfWork),
+		pulsarConn,
+		logger,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &container{
+		eventMessageConsumer: eventMessageConsumer,
 		accountQueryService: budgetviewapplogger.NewAccountQueryServiceDecorator(
 			mysql.NewAccountQueryService(mysqlClient),
 			logger,

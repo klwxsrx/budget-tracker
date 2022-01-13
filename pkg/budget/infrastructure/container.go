@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	moduleName                  = "budget"
-	integrationEventHandlerName = moduleName + "_integration_event_handler"
+	moduleName       = "budget"
+	eventHandlerName = moduleName + "_event_handler"
 )
 
 type Container interface {
@@ -50,7 +50,7 @@ func registerCommandHandlers(bus commonappcommand.BusRegistry, unitOfWork servic
 	return bus
 }
 
-func integrationEventMessageHandler(bus commonappcommand.Bus) messaging.MessageHandler {
+func eventMessageHandler(bus commonappcommand.Bus) messaging.MessageHandler {
 	deserializer := budgetappmessaging.NewDomainEventDeserializer()
 	handler := messaging.NewCompositeTypedMessageHandler()
 	handler.Subscribe(
@@ -84,11 +84,11 @@ func NewContainer(
 	busRegistry := commonappcommand.NewBusRegistry(logger)
 	bus := registerCommandHandlers(busRegistry, dispatchingUnitOfWork)
 
-	integrationEventMessageConsumer, err := pulsar.NewMessageConsumer(
+	eventMessageConsumer, err := pulsar.NewMessageConsumer(
 		pulsar.EventTopicsPattern,
-		integrationEventHandlerName,
+		eventHandlerName,
 		false,
-		integrationEventMessageHandler(bus),
+		eventMessageHandler(bus),
 		pulsarConn,
 		logger,
 	)
@@ -99,7 +99,7 @@ func NewContainer(
 	unsentEventDispatcher.Start()
 	stopFunc := func() {
 		unsentEventDispatcher.Stop()
-		integrationEventMessageConsumer.Stop()
+		eventMessageConsumer.Stop()
 	}
 	return &container{bus, stopFunc}, nil
 }

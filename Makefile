@@ -1,6 +1,6 @@
 .PHONY: clean test lint
 
-all: clean bin/budget bin/budgetview test lint
+all: clean bin/budget bin/budgetview test lint check-arch
 
 clean:
 	rm -rf bin/*
@@ -13,3 +13,6 @@ test:
 
 lint:
 	golangci-lint run
+
+check-arch:
+	go-cleanarch -ignore-package=github.com/klwxsrx/budget-tracker/pkg/common

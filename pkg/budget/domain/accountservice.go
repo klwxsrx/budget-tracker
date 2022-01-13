@@ -17,33 +17,33 @@ var (
 )
 
 type AccountListService interface {
-	Create(listID BudgetID) error
-	Add(listID BudgetID, title string, initialBalance MoneyAmount) (AccountID, error)
-	Reorder(listID BudgetID, id AccountID, position int) error
-	Rename(listID BudgetID, id AccountID, title string) error
-	Activate(listID BudgetID, id AccountID) error
-	Cancel(ListID BudgetID, id AccountID) error
-	Delete(ListID BudgetID, id AccountID) error
+	Create(budgetID BudgetID) error
+	Add(budgetID BudgetID, title string, initialBalance MoneyAmount) (AccountID, error)
+	Reorder(budgetID BudgetID, id AccountID, position int) error
+	Rename(budgetID BudgetID, id AccountID, title string) error
+	Activate(budgetID BudgetID, id AccountID) error
+	Cancel(budgetID BudgetID, id AccountID) error
+	Delete(budgetID BudgetID, id AccountID) error
 }
 
 type accountService struct {
 	repo AccountListRepository
 }
 
-func (service *accountService) Create(listID BudgetID) error {
-	acc, err := service.repo.FindByID(listID)
+func (service *accountService) Create(budgetID BudgetID) error {
+	acc, err := service.repo.FindByID(budgetID)
 	if err != nil {
 		return err
 	}
 	if acc != nil {
 		return ErrAccountListAlreadyExists
 	}
-	list := NewAccountList(listID)
+	list := NewAccountList(budgetID)
 	return service.repo.Update(list)
 }
 
-func (service *accountService) Add(listID BudgetID, title string, initialBalance MoneyAmount) (AccountID, error) {
-	acc, err := service.repo.FindByID(listID)
+func (service *accountService) Add(budgetID BudgetID, title string, initialBalance MoneyAmount) (AccountID, error) {
+	acc, err := service.repo.FindByID(budgetID)
 	if err != nil {
 		return AccountID{uuid.Nil}, err
 	}
@@ -53,8 +53,8 @@ func (service *accountService) Add(listID BudgetID, title string, initialBalance
 	return acc.Add(title, initialBalance)
 }
 
-func (service *accountService) Reorder(listID BudgetID, id AccountID, position int) error {
-	acc, err := service.repo.FindByID(listID)
+func (service *accountService) Reorder(budgetID BudgetID, id AccountID, position int) error {
+	acc, err := service.repo.FindByID(budgetID)
 	if err != nil {
 		return err
 	}
@@ -64,8 +64,8 @@ func (service *accountService) Reorder(listID BudgetID, id AccountID, position i
 	return acc.Reorder(id, position)
 }
 
-func (service *accountService) Rename(listID BudgetID, id AccountID, title string) error {
-	acc, err := service.repo.FindByID(listID)
+func (service *accountService) Rename(budgetID BudgetID, id AccountID, title string) error {
+	acc, err := service.repo.FindByID(budgetID)
 	if err != nil {
 		return err
 	}
@@ -75,8 +75,8 @@ func (service *accountService) Rename(listID BudgetID, id AccountID, title strin
 	return acc.Rename(id, title)
 }
 
-func (service *accountService) Activate(listID BudgetID, id AccountID) error {
-	acc, err := service.repo.FindByID(listID)
+func (service *accountService) Activate(budgetID BudgetID, id AccountID) error {
+	acc, err := service.repo.FindByID(budgetID)
 	if err != nil {
 		return err
 	}
@@ -86,8 +86,8 @@ func (service *accountService) Activate(listID BudgetID, id AccountID) error {
 	return acc.Activate(id)
 }
 
-func (service *accountService) Cancel(listID BudgetID, id AccountID) error {
-	acc, err := service.repo.FindByID(listID)
+func (service *accountService) Cancel(budgetID BudgetID, id AccountID) error {
+	acc, err := service.repo.FindByID(budgetID)
 	if err != nil {
 		return err
 	}
@@ -97,8 +97,8 @@ func (service *accountService) Cancel(listID BudgetID, id AccountID) error {
 	return acc.Cancel(id)
 }
 
-func (service *accountService) Delete(listID BudgetID, id AccountID) error {
-	acc, err := service.repo.FindByID(listID)
+func (service *accountService) Delete(budgetID BudgetID, id AccountID) error {
+	acc, err := service.repo.FindByID(budgetID)
 	if err != nil {
 		return err
 	}

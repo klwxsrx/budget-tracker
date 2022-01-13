@@ -18,8 +18,8 @@ func (h *CreateAccountListHandler) Execute(c command.Command) error {
 	if !ok {
 		return errInvalidCommandType
 	}
-	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		return r.AccountListService().Create(domain.BudgetID{UUID: cmd.ListID})
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.BudgetID.String(), func(r service.DomainRegistry) error {
+		return r.AccountListService().Create(domain.BudgetID{UUID: cmd.BudgetID})
 	})
 }
 
@@ -33,8 +33,8 @@ func (h *AddAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errInvalidCommandType
 	}
-	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		_, err := r.AccountListService().Add(domain.BudgetID{UUID: cmd.ListID}, cmd.Title, domain.MoneyAmount(cmd.InitialBalance))
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.BudgetID.String(), func(r service.DomainRegistry) error {
+		_, err := r.AccountListService().Add(domain.BudgetID{UUID: cmd.BudgetID}, cmd.Title, domain.MoneyAmount(cmd.InitialBalance))
 		return err
 	})
 }
@@ -49,8 +49,8 @@ func (h *ReorderAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errInvalidCommandType
 	}
-	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		return r.AccountListService().Reorder(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID}, cmd.Position)
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.BudgetID.String(), func(r service.DomainRegistry) error {
+		return r.AccountListService().Reorder(domain.BudgetID{UUID: cmd.BudgetID}, domain.AccountID{UUID: cmd.AccountID}, cmd.Position)
 	})
 }
 
@@ -64,8 +64,8 @@ func (h *RenameAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errInvalidCommandType
 	}
-	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		return r.AccountListService().Rename(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID}, cmd.Title)
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.BudgetID.String(), func(r service.DomainRegistry) error {
+		return r.AccountListService().Rename(domain.BudgetID{UUID: cmd.BudgetID}, domain.AccountID{UUID: cmd.AccountID}, cmd.Title)
 	})
 }
 
@@ -79,8 +79,8 @@ func (h *ActivateAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errInvalidCommandType
 	}
-	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		return r.AccountListService().Activate(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID})
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.BudgetID.String(), func(r service.DomainRegistry) error {
+		return r.AccountListService().Activate(domain.BudgetID{UUID: cmd.BudgetID}, domain.AccountID{UUID: cmd.AccountID})
 	})
 }
 
@@ -94,8 +94,8 @@ func (h *CancelAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errInvalidCommandType
 	}
-	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		return r.AccountListService().Cancel(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID})
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.BudgetID.String(), func(r service.DomainRegistry) error {
+		return r.AccountListService().Cancel(domain.BudgetID{UUID: cmd.BudgetID}, domain.AccountID{UUID: cmd.AccountID})
 	})
 }
 
@@ -109,8 +109,8 @@ func (h *DeleteAccountHandler) Execute(c command.Command) error {
 	if !ok {
 		return errInvalidCommandType
 	}
-	return h.unitOfWork.Critical(updateAccountLockName+cmd.ListID.String(), func(r service.DomainRegistry) error {
-		return r.AccountListService().Delete(domain.BudgetID{UUID: cmd.ListID}, domain.AccountID{UUID: cmd.AccountID})
+	return h.unitOfWork.Critical(updateAccountLockName+cmd.BudgetID.String(), func(r service.DomainRegistry) error {
+		return r.AccountListService().Delete(domain.BudgetID{UUID: cmd.BudgetID}, domain.AccountID{UUID: cmd.AccountID})
 	})
 }
 

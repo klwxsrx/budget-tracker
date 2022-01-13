@@ -22,102 +22,102 @@ var errInvalidCommandType = errors.New("invalid command type")
 
 type CreateAccountList struct {
 	command.Base
-	ListID uuid.UUID
+	BudgetID uuid.UUID
 }
 
 type AddAccount struct {
 	command.Base
-	ListID         uuid.UUID
+	BudgetID       uuid.UUID
 	Title          string
 	InitialBalance int
 }
 
 type ReorderAccount struct {
 	command.Base
-	ListID    uuid.UUID
+	BudgetID  uuid.UUID
 	AccountID uuid.UUID
 	Position  int
 }
 
 type RenameAccount struct {
 	command.Base
-	ListID    uuid.UUID
+	BudgetID  uuid.UUID
 	AccountID uuid.UUID
 	Title     string
 }
 
 type ActivateAccount struct {
 	command.Base
-	ListID    uuid.UUID
+	BudgetID  uuid.UUID
 	AccountID uuid.UUID
 }
 
 type CancelAccount struct {
 	command.Base
-	ListID    uuid.UUID
+	BudgetID  uuid.UUID
 	AccountID uuid.UUID
 }
 
 type DeleteAccount struct {
 	command.Base
-	ListID    uuid.UUID
+	BudgetID  uuid.UUID
 	AccountID uuid.UUID
 }
 
-func NewAccountCreateList(listID uuid.UUID) command.Command {
+func NewAccountCreateList(budgetID uuid.UUID) command.Command {
 	return &CreateAccountList{
-		Base:   command.Base{CommandType: typeAccountCreateList},
-		ListID: listID,
+		Base:     command.Base{CommandType: typeAccountCreateList},
+		BudgetID: budgetID,
 	}
 }
 
-func NewAccountAdd(listID uuid.UUID, title string, initialBalance int) command.Command {
+func NewAccountAdd(budgetID uuid.UUID, title string, initialBalance int) command.Command {
 	return &AddAccount{
 		Base:           command.Base{CommandType: typeAccountAdd},
-		ListID:         listID,
+		BudgetID:       budgetID,
 		Title:          title,
 		InitialBalance: initialBalance,
 	}
 }
 
-func NewAccountReorder(listID, accountID uuid.UUID, position int) command.Command {
+func NewAccountReorder(budgetID, accountID uuid.UUID, position int) command.Command {
 	return &ReorderAccount{
 		Base:      command.Base{CommandType: typeAccountReorder},
-		ListID:    listID,
+		BudgetID:  budgetID,
 		AccountID: accountID,
 		Position:  position,
 	}
 }
 
-func NewAccountRename(listID, accountID uuid.UUID, title string) command.Command {
+func NewAccountRename(budgetID, accountID uuid.UUID, title string) command.Command {
 	return &RenameAccount{
 		Base:      command.Base{CommandType: typeAccountRename},
-		ListID:    listID,
+		BudgetID:  budgetID,
 		AccountID: accountID,
 		Title:     title,
 	}
 }
 
-func NewAccountActivate(listID, accountID uuid.UUID) command.Command {
+func NewAccountActivate(budgetID, accountID uuid.UUID) command.Command {
 	return &ActivateAccount{
 		Base:      command.Base{CommandType: typeAccountActivate},
-		ListID:    listID,
+		BudgetID:  budgetID,
 		AccountID: accountID,
 	}
 }
 
-func NewAccountCancel(listID, accountID uuid.UUID) command.Command {
+func NewAccountCancel(budgetID, accountID uuid.UUID) command.Command {
 	return &CancelAccount{
 		Base:      command.Base{CommandType: typeAccountCancel},
-		ListID:    listID,
+		BudgetID:  budgetID,
 		AccountID: accountID,
 	}
 }
 
-func NewAccountDelete(listID, accountID uuid.UUID) command.Command {
+func NewAccountDelete(budgetID, accountID uuid.UUID) command.Command {
 	return &DeleteAccount{
 		Base:      command.Base{CommandType: typeAccountDelete},
-		ListID:    listID,
+		BudgetID:  budgetID,
 		AccountID: accountID,
 	}
 }
