@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/event"
+	budgetappmessaging "github.com/klwxsrx/budget-tracker/pkg/budget/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
@@ -49,9 +50,9 @@ func registerCommandHandlers(bus commonappcommand.BusRegistry, unitOfWork servic
 	return bus
 }
 
-func integrationEventMessageHandler(bus commonappcommand.Bus) messaging.NamedMessageHandler {
-	deserializer := storedevent.NewDeserializer()
-	handler := messaging.NewCompositeTypedMessageHandler(integrationEventHandlerName)
+func integrationEventMessageHandler(bus commonappcommand.Bus) messaging.MessageHandler {
+	deserializer := budgetappmessaging.NewDomainEventDeserializer()
+	handler := messaging.NewCompositeTypedMessageHandler()
 	handler.Subscribe(
 		domain.EventTypeBudgetCreated,
 		messaging.NewDomainEventMessageHandler(event.NewBudgetCreatedEventHandler(bus), deserializer),
@@ -64,8 +65,8 @@ func NewContainer(
 	pulsarConn pulsar.Connection,
 	logger log.Logger,
 ) (Container, error) {
-	serializer := storedevent.NewSerializer()
-	deserializer := storedevent.NewDeserializer()
+	serializer := budgetappmessaging.NewDomainEventSerializer()
+	deserializer := budgetappmessaging.NewDomainEventDeserializer()
 	unitOfWork := mysql.NewUnitOfWork(mysqlClient, serializer, deserializer)
 
 	eventBus, err := pulsar.NewEventBus(pulsarConn, moduleName)
@@ -85,8 +86,9 @@ func NewContainer(
 
 	integrationEventMessageConsumer, err := pulsar.NewMessageConsumer(
 		pulsar.EventTopicsPattern,
-		integrationEventMessageHandler(bus),
+		integrationEventHandlerName,
 		false,
+		integrationEventMessageHandler(bus),
 		pulsarConn,
 		logger,
 	)

@@ -6,7 +6,6 @@ import (
 	budgetappcommand "github.com/klwxsrx/budget-tracker/pkg/budget/app/command"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/command"
-	commonappevent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
 	commondomain "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
@@ -17,7 +16,7 @@ type budgetCreatedEventHandler struct {
 func (handler *budgetCreatedEventHandler) Handle(event commondomain.Event) error {
 	budgetCreated, ok := event.(*domain.BudgetCreatedEvent)
 	if !ok {
-		return commonappevent.ErrUnexpectedEventType
+		return commondomain.ErrUnexpectedEventType
 	}
 
 	cmd := budgetappcommand.NewAccountCreateList(budgetCreated.EventAggregateID)
@@ -28,6 +27,6 @@ func (handler *budgetCreatedEventHandler) Handle(event commondomain.Event) error
 	return err
 }
 
-func NewBudgetCreatedEventHandler(bus command.Bus) commonappevent.DomainEventHandler {
+func NewBudgetCreatedEventHandler(bus command.Bus) commondomain.EventHandler {
 	return &budgetCreatedEventHandler{bus}
 }

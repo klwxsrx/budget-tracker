@@ -1,13 +1,10 @@
 package messaging
 
-import (
-	commonappevent "github.com/klwxsrx/budget-tracker/pkg/common/app/event"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
-)
+import "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 
 type domainEventMessageHandler struct {
-	eventHandler commonappevent.DomainEventHandler
-	deserializer storedevent.Deserializer
+	eventHandler domain.EventHandler
+	deserializer DomainEventDeserializer
 }
 
 func (handler *domainEventMessageHandler) Handle(msg Message) error {
@@ -18,6 +15,6 @@ func (handler *domainEventMessageHandler) Handle(msg Message) error {
 	return handler.eventHandler.Handle(event)
 }
 
-func NewDomainEventMessageHandler(handler commonappevent.DomainEventHandler, deserializer storedevent.Deserializer) MessageHandler {
+func NewDomainEventMessageHandler(handler domain.EventHandler, deserializer DomainEventDeserializer) MessageHandler {
 	return &domainEventMessageHandler{handler, deserializer}
 }

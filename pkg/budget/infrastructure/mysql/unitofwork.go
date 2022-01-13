@@ -4,14 +4,15 @@ import (
 	"fmt"
 
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/service"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 )
 
 type unitOfWork struct {
 	client       mysql.TransactionalClient
-	serializer   storedevent.Serializer
-	deserializer storedevent.Deserializer
+	serializer   messaging.DomainEventSerializer
+	deserializer messaging.DomainEventDeserializer
 }
 
 func (uw *unitOfWork) Execute(f func(r service.DomainRegistry) error) error {
@@ -46,8 +47,8 @@ func (uw *unitOfWork) newStore(client mysql.Client) storedevent.Store {
 
 func NewUnitOfWork(
 	client mysql.TransactionalClient,
-	serializer storedevent.Serializer,
-	deserializer storedevent.Deserializer,
+	serializer messaging.DomainEventSerializer,
+	deserializer messaging.DomainEventDeserializer,
 ) service.UnitOfWork {
 	return &unitOfWork{client, serializer, deserializer}
 }

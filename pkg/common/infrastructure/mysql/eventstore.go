@@ -7,13 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	"github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
 type store struct {
 	db         Client
-	serializer storedevent.Serializer
+	serializer messaging.DomainEventSerializer
 }
 
 func (s *store) GetByIDs(ids []storedevent.ID) ([]*storedevent.StoredEvent, error) {
@@ -84,6 +85,6 @@ func selectEvents(db Client, fromID storedevent.ID, conditions []string, args ..
 	return events, err
 }
 
-func NewEventStore(client Client, serializer storedevent.Serializer) storedevent.Store {
+func NewEventStore(client Client, serializer messaging.DomainEventSerializer) storedevent.Store {
 	return &store{client, serializer}
 }

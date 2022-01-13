@@ -1,4 +1,4 @@
-package storedevent
+package messaging
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	commondomain "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
@@ -222,6 +222,6 @@ func (s *eventSerializer) createAccountDeletedJSON(event commondomain.Event) (*a
 	}, nil
 }
 
-func NewSerializer() storedevent.Serializer {
+func NewDomainEventSerializer() messaging.DomainEventSerializer {
 	return &eventSerializer{}
 }

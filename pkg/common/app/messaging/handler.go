@@ -17,13 +17,7 @@ type MessageHandler interface {
 	Handle(msg Message) error
 }
 
-type NamedMessageHandler interface {
-	MessageHandler
-	Name() string
-}
-
 type CompositeTypedMessageHandler struct {
-	name     string
 	handlers map[string]MessageHandler
 }
 
@@ -35,17 +29,12 @@ func (h *CompositeTypedMessageHandler) Handle(msg Message) error {
 	return handler.Handle(msg)
 }
 
-func (h *CompositeTypedMessageHandler) Name() string {
-	return h.name
-}
-
 func (h *CompositeTypedMessageHandler) Subscribe(messageType string, handler MessageHandler) {
 	h.handlers[messageType] = handler
 }
 
-func NewCompositeTypedMessageHandler(name string) *CompositeTypedMessageHandler {
+func NewCompositeTypedMessageHandler() *CompositeTypedMessageHandler {
 	return &CompositeTypedMessageHandler{
-		name,
 		make(map[string]MessageHandler),
 	}
 }

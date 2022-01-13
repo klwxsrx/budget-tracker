@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	commondomain "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
@@ -30,7 +31,7 @@ func (r *accountListRepository) FindByID(id domain.BudgetID) (*domain.AccountLis
 
 func NewAccountRepository(
 	store storedevent.Store,
-	deserializer storedevent.Deserializer,
+	deserializer messaging.DomainEventDeserializer,
 ) domain.AccountListRepository {
 	return &accountListRepository{aggregateRepository{
 		store:        store,

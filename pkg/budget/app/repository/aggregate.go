@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	commondomain "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
@@ -15,7 +16,7 @@ var errAggregateNotFound = errors.New("aggregate not found")
 
 type aggregateRepository struct {
 	store        storedevent.Store
-	deserializer storedevent.Deserializer
+	deserializer messaging.DomainEventDeserializer
 }
 
 func (repo *aggregateRepository) storeChanges(aggregate domain.Aggregate) error {

@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/klwxsrx/budget-tracker/pkg/budget/app/repository"
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 )
 
@@ -25,7 +26,7 @@ func (dr *domainRegistry) AccountListService() domain.AccountListService {
 
 func NewDomainRegistry(
 	store storedevent.Store,
-	deserializer storedevent.Deserializer,
+	deserializer messaging.DomainEventDeserializer,
 ) DomainRegistry {
 	accountRepo := repository.NewAccountRepository(store, deserializer)
 	return &domainRegistry{domain.NewAccountListService(accountRepo)}

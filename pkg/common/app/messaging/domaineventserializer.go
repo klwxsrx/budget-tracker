@@ -1,11 +1,11 @@
-package storedevent
+package messaging
 
 import "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 
-type Serializer interface {
+type DomainEventSerializer interface {
 	Serialize(event domain.Event) (string, error)
 }
 
-type Deserializer interface {
+type DomainEventDeserializer interface {
 	Deserialize(eventType string, eventData []byte) (domain.Event, error)
 }

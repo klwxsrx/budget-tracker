@@ -60,14 +60,15 @@ func (c *MessageConsumer) processMessage(msg pulsar.ConsumerMessage) {
 
 func NewMessageConsumer(
 	topicsPattern string,
-	handler messaging.NamedMessageHandler,
+	subscriptionName string,
 	resetSubscription bool,
+	handler messaging.MessageHandler,
 	connection Connection,
 	logger log.Logger,
 ) (*MessageConsumer, error) {
 	pulsarConsumer, err := connection.Subscribe(&ConsumerConfig{
 		TopicsPattern:    topicsPattern,
-		SubscriptionName: handler.Name(),
+		SubscriptionName: subscriptionName,
 	})
 	if err != nil {
 		return nil, err
