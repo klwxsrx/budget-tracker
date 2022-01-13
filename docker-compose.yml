@@ -1,10 +1,7 @@
 version: "3.9"
 services:
   budget-app:
-    build:
-      context: .
-      dockerfile: ./docker/budget/Dockerfile
-    image: klwxsrx/budget-tracker
+    image: klwxsrx/budget-tracker:master
     container_name: budget-app
     hostname: budget-app
     environment:
@@ -19,10 +16,7 @@ services:
       - budget-mysql
       - budget-pulsar
   budget-view-app:
-    build:
-      context: .
-      dockerfile: ./docker/budgetview/Dockerfile
-    image: klwxsrx/budget-tracker-view
+    image: klwxsrx/budget-tracker-view:master
     container_name: budget-view-app
     hostname: budget-view-app
     environment:

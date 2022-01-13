@@ -1,9 +1,15 @@
 version: "3.9"
 services:
   budget-app:
+    build:
+      context: .
+      dockerfile: ./docker/budget/Dockerfile
     ports:
       - "127.0.0.1:8080:8080"
   budget-view-app:
+    build:
+      context: .
+      dockerfile: ./docker/budgetview/Dockerfile
     ports:
       - "127.0.0.1:8081:8080"
   budget-mysql:
