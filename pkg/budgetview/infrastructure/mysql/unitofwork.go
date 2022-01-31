@@ -3,11 +3,22 @@ package mysql
 import (
 	"fmt"
 
+	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/model"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 )
 
-type repoProvider struct{}
+type repoProvider struct {
+	client mysql.Client
+}
+
+func (p *repoProvider) BudgetRepository() model.BudgetRepository {
+	return NewBudgetRepository(p.client)
+}
+
+func newRepoProvider(client mysql.Client) service.RepositoryProvider {
+	return &repoProvider{client}
+}
 
 type unitOfWork struct {
 	client mysql.TransactionalClient
@@ -19,8 +30,8 @@ func (uw *unitOfWork) Execute(f func(r service.RepositoryProvider) error) error 
 		return fmt.Errorf("can't begin new transaction: %w", err)
 	}
 
-	registry := &repoProvider{}
-	err = f(registry)
+	repos := newRepoProvider(tx)
+	err = f(repos)
 	if err != nil {
 		_ = tx.Rollback()
 		return err

@@ -66,8 +66,15 @@ services:
     hostname: budget-pulsar
     volumes:
       - budget-pulsar-data:/pulsar/data:rw
+      - ./config/pulsar/standalone.conf:/pulsar/conf/standalone.conf:ro
     entrypoint: [ "bin/pulsar", "standalone" ]
     restart: unless-stopped
+    healthcheck:
+      test: /pulsar/bin/pulsar-admin brokers healthcheck
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
 volumes:
   budget-mysql-data:
   budget-view-mysql-data:

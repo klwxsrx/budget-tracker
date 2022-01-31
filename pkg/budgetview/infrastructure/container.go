@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	budgetviewapplogger "github.com/klwxsrx/budget-tracker/pkg/budgetview/app/logger"
+	budgetviewappmessaging "github.com/klwxsrx/budget-tracker/pkg/budgetview/app/messaging"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/query"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/mysql"
@@ -39,8 +40,12 @@ func (c *container) Stop() {
 	c.eventMessageConsumer.Stop()
 }
 
-func eventMessageHandler(unitOfWork service.UnitOfWork) messaging.MessageHandler { // nolint:unparam
+func eventMessageHandler(unitOfWork service.UnitOfWork) messaging.MessageHandler {
+	budgetService := service.NewBudgetService(unitOfWork)
+
 	handler := messaging.NewCompositeTypedMessageHandler()
+	handler.SubscribeTyped(budgetviewappmessaging.NewBudgetCreatedMessageHandler(budgetService))
+
 	return handler
 }
 
@@ -54,7 +59,7 @@ func NewContainer(
 	eventMessageConsumer, err := pulsar.NewMessageConsumer(
 		pulsar.EventTopicsPattern,
 		eventHandlerName,
-		false,
+		true,
 		eventMessageHandler(unitOfWork),
 		pulsarConn,
 		logger,

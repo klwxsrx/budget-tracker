@@ -1,6 +1,7 @@
 package messaging
 
 import (
+	"errors"
 	"time"
 )
 
@@ -17,6 +18,13 @@ type MessageHandler interface {
 	Handle(msg Message) error
 }
 
+var ErrUnsupportedMessage = errors.New("unsupported message")
+
+type TypedMessageHandler interface {
+	MessageHandler
+	MessageType() string
+}
+
 type CompositeTypedMessageHandler struct {
 	handlers map[string]MessageHandler
 }
@@ -31,6 +39,10 @@ func (h *CompositeTypedMessageHandler) Handle(msg Message) error {
 
 func (h *CompositeTypedMessageHandler) Subscribe(messageType string, handler MessageHandler) {
 	h.handlers[messageType] = handler
+}
+
+func (h *CompositeTypedMessageHandler) SubscribeTyped(handler TypedMessageHandler) {
+	h.handlers[handler.MessageType()] = handler
 }
 
 func NewCompositeTypedMessageHandler() *CompositeTypedMessageHandler {

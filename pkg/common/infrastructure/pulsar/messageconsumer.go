@@ -61,24 +61,18 @@ func (c *MessageConsumer) processMessage(msg pulsar.ConsumerMessage) {
 func NewMessageConsumer(
 	topicsPattern string,
 	subscriptionName string,
-	resetSubscription bool,
+	initialSubscriptionPositionEarliest bool,
 	handler messaging.MessageHandler,
 	connection Connection,
 	logger log.Logger,
 ) (*MessageConsumer, error) {
 	pulsarConsumer, err := connection.Subscribe(&ConsumerConfig{
-		TopicsPattern:    topicsPattern,
-		SubscriptionName: subscriptionName,
+		TopicsPattern:                       topicsPattern,
+		SubscriptionName:                    subscriptionName,
+		InitialSubscriptionPositionEarliest: initialSubscriptionPositionEarliest,
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	if resetSubscription {
-		err = pulsarConsumer.Seek(pulsar.EarliestMessageID())
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	consumer := &MessageConsumer{

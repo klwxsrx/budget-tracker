@@ -20,8 +20,9 @@ type ProducerConfig struct {
 }
 
 type ConsumerConfig struct {
-	TopicsPattern    string
-	SubscriptionName string
+	TopicsPattern                       string
+	SubscriptionName                    string
+	InitialSubscriptionPositionEarliest bool
 }
 
 type Connection interface {
@@ -45,6 +46,9 @@ func (c *connection) Subscribe(config *ConsumerConfig) (pulsar.Consumer, error) 
 		TopicsPattern:    config.TopicsPattern,
 		SubscriptionName: config.SubscriptionName,
 		Type:             pulsar.Failover,
+	}
+	if config.InitialSubscriptionPositionEarliest {
+		consumerConfig.SubscriptionInitialPosition = pulsar.SubscriptionPositionEarliest
 	}
 	return c.client.Subscribe(consumerConfig)
 }

@@ -87,7 +87,7 @@ func NewContainer(
 	eventMessageConsumer, err := pulsar.NewMessageConsumer(
 		pulsar.EventTopicsPattern,
 		eventHandlerName,
-		false,
+		true,
 		eventMessageHandler(bus),
 		pulsarConn,
 		logger,
