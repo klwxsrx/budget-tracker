@@ -42,9 +42,16 @@ func (c *container) Stop() {
 
 func eventMessageHandler(unitOfWork service.UnitOfWork) messaging.MessageHandler {
 	budgetService := service.NewBudgetService(unitOfWork)
+	accountService := service.NewAccountService(unitOfWork)
 
 	handler := messaging.NewCompositeTypedMessageHandler()
 	handler.SubscribeTyped(budgetviewappmessaging.NewBudgetCreatedMessageHandler(budgetService))
+	handler.SubscribeTyped(budgetviewappmessaging.NewAccountCreatedMessageHandler(accountService))
+	handler.SubscribeTyped(budgetviewappmessaging.NewAccountReorderedMessageHandler(accountService))
+	handler.SubscribeTyped(budgetviewappmessaging.NewAccountRenamedMessageHandler(accountService))
+	handler.SubscribeTyped(budgetviewappmessaging.NewAccountActivatedMessageHandler(accountService))
+	handler.SubscribeTyped(budgetviewappmessaging.NewAccountCancelledMessageHandler(accountService))
+	handler.SubscribeTyped(budgetviewappmessaging.NewAccountDeletedMessageHandler(accountService))
 
 	return handler
 }

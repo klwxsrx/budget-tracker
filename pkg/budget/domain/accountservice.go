@@ -50,7 +50,15 @@ func (service *accountService) Add(budgetID BudgetID, title string, initialBalan
 	if acc == nil {
 		return AccountID{uuid.Nil}, ErrAccountListDoesNotExist
 	}
-	return acc.Add(title, initialBalance)
+	id, err := acc.Add(title, initialBalance)
+	if err != nil {
+		return AccountID{uuid.Nil}, err
+	}
+	err = service.repo.Update(acc)
+	if err != nil {
+		return AccountID{uuid.Nil}, err
+	}
+	return id, nil
 }
 
 func (service *accountService) Reorder(budgetID BudgetID, id AccountID, position int) error {
@@ -61,7 +69,11 @@ func (service *accountService) Reorder(budgetID BudgetID, id AccountID, position
 	if acc == nil {
 		return ErrAccountListDoesNotExist
 	}
-	return acc.Reorder(id, position)
+	err = acc.Reorder(id, position)
+	if err != nil {
+		return err
+	}
+	return service.repo.Update(acc)
 }
 
 func (service *accountService) Rename(budgetID BudgetID, id AccountID, title string) error {
@@ -72,7 +84,11 @@ func (service *accountService) Rename(budgetID BudgetID, id AccountID, title str
 	if acc == nil {
 		return ErrAccountListDoesNotExist
 	}
-	return acc.Rename(id, title)
+	err = acc.Rename(id, title)
+	if err != nil {
+		return err
+	}
+	return service.repo.Update(acc)
 }
 
 func (service *accountService) Activate(budgetID BudgetID, id AccountID) error {
@@ -83,7 +99,11 @@ func (service *accountService) Activate(budgetID BudgetID, id AccountID) error {
 	if acc == nil {
 		return ErrAccountListDoesNotExist
 	}
-	return acc.Activate(id)
+	err = acc.Activate(id)
+	if err != nil {
+		return err
+	}
+	return service.repo.Update(acc)
 }
 
 func (service *accountService) Cancel(budgetID BudgetID, id AccountID) error {
@@ -94,7 +114,11 @@ func (service *accountService) Cancel(budgetID BudgetID, id AccountID) error {
 	if acc == nil {
 		return ErrAccountListDoesNotExist
 	}
-	return acc.Cancel(id)
+	err = acc.Cancel(id)
+	if err != nil {
+		return err
+	}
+	return service.repo.Update(acc)
 }
 
 func (service *accountService) Delete(budgetID BudgetID, id AccountID) error {
@@ -105,7 +129,11 @@ func (service *accountService) Delete(budgetID BudgetID, id AccountID) error {
 	if acc == nil {
 		return ErrAccountListDoesNotExist
 	}
-	return acc.Delete(id)
+	err = acc.Delete(id)
+	if err != nil {
+		return err
+	}
+	return service.repo.Update(acc)
 }
 
 func NewAccountListService(repo AccountListRepository) AccountListService {

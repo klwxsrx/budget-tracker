@@ -16,6 +16,10 @@ func (p *repoProvider) BudgetRepository() model.BudgetRepository {
 	return NewBudgetRepository(p.client)
 }
 
+func (p *repoProvider) AccountRepository() model.AccountRepository {
+	return NewAccountRepository(p.client)
+}
+
 func newRepoProvider(client mysql.Client) service.RepositoryProvider {
 	return &repoProvider{client}
 }

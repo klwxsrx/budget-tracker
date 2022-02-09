@@ -8,4 +8,5 @@ type UnitOfWork interface {
 
 type RepositoryProvider interface {
 	BudgetRepository() model.BudgetRepository
+	AccountRepository() model.AccountRepository
 }
