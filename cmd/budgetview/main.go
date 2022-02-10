@@ -5,6 +5,8 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/transport"
 	commonapplog "github.com/klwxsrx/budget-tracker/pkg/common/app/log"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/realtime"
+	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/centrifugo"
 	commoninfrastructurelogger "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/logger"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
@@ -36,7 +38,9 @@ func main() {
 	}
 	defer broker.Close()
 
-	container, err := infrastructure.NewContainer(client, broker, logger)
+	realtimeClient := getRealtimeClient(config)
+
+	container, err := infrastructure.NewContainer(client, broker, realtimeClient, logger)
 	if err != nil {
 		logger.WithError(err).Fatal(err.Error())
 	}
@@ -54,6 +58,13 @@ func getPulsarClient(config *config, logger commonapplog.Logger) (pulsar.Connect
 		Address:           config.MessageBrokerAddress,
 		ConnectionTimeout: config.MessageBrokerConnectionTimeout,
 	}, logger)
+}
+
+func getRealtimeClient(config *config) realtime.Client {
+	return centrifugo.NewRealtimeClient(centrifugo.Config{
+		Address: config.RealtimeAddress,
+		APIKey:  config.RealtimeAPIKey,
+	})
 }
 
 func getReadyDatabaseClient(config *config, migrations fs.ReadDirFS, logger commonapplog.Logger) (mysql.Connection, mysql.TransactionalClient, error) {

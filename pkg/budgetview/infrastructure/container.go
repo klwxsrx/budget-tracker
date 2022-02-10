@@ -6,8 +6,10 @@ import (
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/query"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/app/service"
 	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/mysql"
+	"github.com/klwxsrx/budget-tracker/pkg/budgetview/infrastructure/persistence"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/log"
 	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
+	"github.com/klwxsrx/budget-tracker/pkg/common/app/realtime"
 	commoninfrastructuremysql "github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/mysql"
 	"github.com/klwxsrx/budget-tracker/pkg/common/infrastructure/pulsar"
 )
@@ -59,9 +61,10 @@ func eventMessageHandler(unitOfWork service.UnitOfWork) messaging.MessageHandler
 func NewContainer(
 	mysqlClient commoninfrastructuremysql.TransactionalClient,
 	pulsarConn pulsar.Connection,
+	realtimeClient realtime.Client,
 	logger log.Logger,
 ) (Container, error) {
-	unitOfWork := mysql.NewUnitOfWork(mysqlClient)
+	unitOfWork := persistence.NewUnitOfWork(mysqlClient, realtimeClient, logger)
 
 	eventMessageConsumer, err := pulsar.NewMessageConsumer(
 		pulsar.EventTopicsPattern,

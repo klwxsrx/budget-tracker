@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/apache/pulsar-client-go v0.7.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/centrifugal/gocent/v3 v3.2.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0

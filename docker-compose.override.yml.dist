@@ -22,3 +22,9 @@ services:
     ports:
       - "127.0.0.1:8082:8080"
       - "127.0.0.1:6650:6650"
+  budget-centrifugo:
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      CENTRIFUGO_ADMIN: "true"
+      CENTRIFUGO_ADMIN_INSECURE: "true"

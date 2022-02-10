@@ -15,6 +15,8 @@ type config struct {
 	DBConnectionTimeout            time.Duration
 	MessageBrokerAddress           string
 	MessageBrokerConnectionTimeout time.Duration
+	RealtimeAddress                string
+	RealtimeAPIKey                 string
 }
 
 func parseEnvInt(key string, err error) (int, error) {
@@ -52,6 +54,8 @@ func parseConfig() (*config, error) {
 	dbConnTimeout, err := parseEnvInt("DATABASE_CONNECTION_TIMEOUT", err)
 	messageBrokerAddress, err := parseEnvString("MESSAGE_BROKER_ADDRESS", err)
 	messageBrokerConnTimeout, err := parseEnvInt("MESSAGE_BROKER_CONNECTION_TIMEOUT", err)
+	realtimeAddress, err := parseEnvString("REALTIME_ADDRESS", err)
+	realtimeAPIKey, err := parseEnvString("REALTIME_API_KEY", err)
 
 	if err != nil {
 		return nil, err
@@ -65,5 +69,7 @@ func parseConfig() (*config, error) {
 		time.Duration(dbConnTimeout) * time.Second,
 		messageBrokerAddress,
 		time.Duration(messageBrokerConnTimeout) * time.Second,
+		realtimeAddress,
+		realtimeAPIKey,
 	}, nil
 }

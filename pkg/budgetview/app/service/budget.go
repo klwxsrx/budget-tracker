@@ -23,6 +23,7 @@ func (s *BudgetService) HandleBudgetCreated(id uuid.UUID, title, currency string
 		if err != nil && !errors.Is(err, model.ErrBudgetAlreadyExists) {
 			return err
 		}
+		r.RealtimeService().BudgetCreated(id, title, currency)
 		return nil
 	})
 }
