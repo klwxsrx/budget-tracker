@@ -28,7 +28,7 @@ services:
       DATABASE_PASSWORD: 1234
       DATABASE_CONNECTION_TIMEOUT: 300
       REALTIME_ADDRESS: "budget-centrifugo:8000"
-      REALTIME_API_KEY: "some_api_key"
+      REALTIME_API_KEY: 07ceb863-0ae1-4d5f-a2de-fba2d2e6058b
     depends_on:
       - budget-view-mysql
       - budget-pulsar
@@ -79,16 +79,15 @@ services:
   budget-centrifugo:
     image: centrifugo/centrifugo:v3
     container_name: budget-centrifugo
-    volumes:
-      - ./config/centrifugo/config.json:/centrifugo/config.json
     command: centrifugo --health
     ulimits:
       nofile:
         soft: 65535
         hard: 65535
     environment:
-      CENTRIFUGO_TOKEN_HMAC_SECRET_KEY: some_secret
-      CENTRIFUGO_API_KEY: some_api_key
+      CENTRIFUGO_TOKEN_HMAC_SECRET_KEY: 3a6e2259-0fd9-41cc-91f2-565874952c6a
+      CENTRIFUGO_API_KEY: 07ceb863-0ae1-4d5f-a2de-fba2d2e6058b
+      CENTRIFUGO_ALLOWED_ORIGINS: "*" # TODO: use specific origin
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:8000/health || exit 1
       interval: 10s
