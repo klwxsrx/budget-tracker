@@ -28,3 +28,4 @@ services:
     environment:
       CENTRIFUGO_ADMIN: "true"
       CENTRIFUGO_ADMIN_INSECURE: "true"
+      CENTRIFUGO_ALLOWED_ORIGINS: "*"
