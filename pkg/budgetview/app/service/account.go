@@ -38,18 +38,20 @@ func (s *AccountService) HandleAccountCreated(budgetID, accountID uuid.UUID, tit
 		if err != nil && !errors.Is(err, model.ErrAccountAlreadyExists) {
 			return err
 		}
+
+		r.RealtimeService().AccountCreated(budgetID, acc)
 		return nil
 	})
 }
 
 func (s *AccountService) HandleAccountReordered(budgetID, accountID uuid.UUID, newPosition int) error {
 	return s.unitOfWork.Execute(func(r RepositoryProvider) error {
-		existedAccounts, err := r.AccountRepository().FindByBudgetID(budgetID)
+		accounts, err := r.AccountRepository().FindByBudgetID(budgetID)
 		if err != nil {
 			return err
 		}
 
-		specAcc := s.findAccInSlice(accountID, existedAccounts)
+		specAcc := s.findAccInSlice(accountID, accounts)
 		if specAcc == nil {
 			return fmt.Errorf("account from budget %v with id %v not found", budgetID, accountID)
 		}
@@ -59,8 +61,8 @@ func (s *AccountService) HandleAccountReordered(budgetID, accountID uuid.UUID, n
 			return nil
 		}
 
-		accountsToUpdate := make([]*model.Account, 0, len(existedAccounts))
-		for _, acc := range existedAccounts {
+		accountsToUpdate := make([]*model.Account, 0, len(accounts))
+		for _, acc := range accounts {
 			switch {
 			case acc.Position == lastPosition:
 				acc.Position = newPosition
@@ -80,6 +82,8 @@ func (s *AccountService) HandleAccountReordered(budgetID, accountID uuid.UUID, n
 				return err
 			}
 		}
+
+		s.handleAccountsReordered(r, budgetID, accounts)
 		return nil
 	})
 }
@@ -95,11 +99,17 @@ func (s *AccountService) HandleAccountRenamed(accountID uuid.UUID, title string)
 			return nil
 		}
 		acc.Title = title
-		return r.AccountRepository().Update(acc)
+		err = r.AccountRepository().Update(acc)
+		if err != nil {
+			return err
+		}
+
+		r.RealtimeService().AccountRenamed(acc.BudgetID, acc.AccountID, title)
+		return nil
 	})
 }
 
-func (s *AccountService) HandleAccountActivated(accountID uuid.UUID) error {
+func (s *AccountService) HandleAccountActivated(budgetID, accountID uuid.UUID) error {
 	return s.unitOfWork.Execute(func(r RepositoryProvider) error {
 		acc, err := r.AccountRepository().FindByID(accountID)
 		if err != nil {
@@ -110,11 +120,17 @@ func (s *AccountService) HandleAccountActivated(accountID uuid.UUID) error {
 			return nil
 		}
 		acc.Status = model.AccountStatusActive
-		return r.AccountRepository().Update(acc)
+		err = r.AccountRepository().Update(acc)
+		if err != nil {
+			return err
+		}
+
+		r.RealtimeService().AccountStatusChanged(budgetID, accountID, acc.Status)
+		return nil
 	})
 }
 
-func (s *AccountService) HandleAccountCancelled(accountID uuid.UUID) error {
+func (s *AccountService) HandleAccountCancelled(budgetID, accountID uuid.UUID) error {
 	return s.unitOfWork.Execute(func(r RepositoryProvider) error {
 		acc, err := r.AccountRepository().FindByID(accountID)
 		if err != nil {
@@ -125,7 +141,13 @@ func (s *AccountService) HandleAccountCancelled(accountID uuid.UUID) error {
 			return nil
 		}
 		acc.Status = model.AccountStatusCancelled
-		return r.AccountRepository().Update(acc)
+		err = r.AccountRepository().Update(acc)
+		if err != nil {
+			return err
+		}
+
+		r.RealtimeService().AccountStatusChanged(budgetID, accountID, acc.Status)
+		return nil
 	})
 }
 
@@ -143,15 +165,39 @@ func (s *AccountService) HandleAccountDeleted(budgetID, accountID uuid.UUID) err
 		for _, acc := range existedAccounts {
 			if acc.Position > specAcc.Position {
 				acc.Position--
-				err := r.AccountRepository().Update(acc)
-				if err != nil {
-					return err
+				err2 := r.AccountRepository().Update(acc)
+				if err2 != nil {
+					return err2
 				}
 			}
 		}
 
-		return r.AccountRepository().Delete(accountID)
+		err = r.AccountRepository().Delete(accountID)
+		if err != nil {
+			return err
+		}
+
+		r.RealtimeService().AccountDeleted(budgetID, accountID)
+		return nil
 	})
+}
+
+func (s *AccountService) handleAccountsReordered(r RepositoryProvider, budgetID uuid.UUID, accounts []*model.Account) {
+	if accounts == nil {
+		return
+	}
+
+	sliceLen := len(accounts)
+	orderedAccountIDs := make([]uuid.UUID, sliceLen)
+	for _, acc := range accounts {
+		pos := acc.Position
+		if sliceLen <= pos {
+			pos = sliceLen - 1
+		}
+		orderedAccountIDs[pos] = acc.AccountID
+	}
+
+	r.RealtimeService().AccountsReordered(budgetID, orderedAccountIDs)
 }
 
 func (s *AccountService) findAccInSlice(id uuid.UUID, accounts []*model.Account) *model.Account {

@@ -11,6 +11,7 @@ import (
 )
 
 type accountActivatedJSON struct {
+	BudgetID  uuid.UUID `json:"id"`
 	AccountID uuid.UUID `json:"acc_id"`
 }
 
@@ -33,7 +34,7 @@ func (h *accountActivatedMessageHandler) Handle(msg messaging.Message) error {
 		return fmt.Errorf("%w structure for %T: %v", messaging.ErrUnsupportedMessage, h, err)
 	}
 
-	return h.service.HandleAccountActivated(event.AccountID)
+	return h.service.HandleAccountActivated(event.BudgetID, event.AccountID)
 }
 
 func NewAccountActivatedMessageHandler(srv *service.AccountService) messaging.TypedMessageHandler {

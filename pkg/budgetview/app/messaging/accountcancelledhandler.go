@@ -11,6 +11,7 @@ import (
 )
 
 type accountCancelledJSON struct {
+	BudgetID  uuid.UUID `json:"id"`
 	AccountID uuid.UUID `json:"acc_id"`
 }
 
@@ -33,7 +34,7 @@ func (h *accountCancelledMessageHandler) Handle(msg messaging.Message) error {
 		return fmt.Errorf("%w structure for %T: %v", messaging.ErrUnsupportedMessage, h, err)
 	}
 
-	return h.service.HandleAccountCancelled(event.AccountID)
+	return h.service.HandleAccountCancelled(event.BudgetID, event.AccountID)
 }
 
 func NewAccountCancelledMessageHandler(srv *service.AccountService) messaging.TypedMessageHandler {
