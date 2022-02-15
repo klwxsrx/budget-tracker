@@ -1,0 +1,46 @@
+@startuml
+skinparam defaultTextAlignment center
+skinparam linetype ortho
+
+together {
+
+component Budget [
+Budget Service
+]
+
+component BudgetView [
+BudgetView Service
+]
+
+}
+
+agent Realtime [
+Realtime Messaging
+(centrifugo)
+]
+
+database EventStore [
+Event Store
+(mysql)
+]
+
+database ViewDB [
+View DB
+(mysql)
+]
+
+queue EventBus [
+Event Bus
+(apache pulsar)
+]
+
+Budget -down- EventStore
+Budget -down-> EventBus
+
+Budget -[hidden]right- BudgetView
+
+BudgetView <-down- EventBus
+BudgetView -down- ViewDB
+BudgetView -right-> Realtime
+
+@enduml
