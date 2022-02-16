@@ -28,6 +28,7 @@ func NewDomainRegistry(
 	store storedevent.Store,
 	deserializer messaging.DomainEventDeserializer,
 ) DomainRegistry {
-	accountRepo := repository.NewAccountRepository(store, deserializer)
+	aggregateRepo := repository.NewAggregateRepository(store, deserializer)
+	accountRepo := repository.NewAccountRepository(aggregateRepo)
 	return &domainRegistry{domain.NewAccountListService(accountRepo)}
 }

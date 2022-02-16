@@ -1,0 +1,71 @@
+@startuml
+hide empty fields
+hide empty methods
+skinparam linetype ortho
+
+package domain {
+
+interface AggregateState {
+ +Apply(event Event) error
+ +AggregateName() string
+}
+
+class AccountListState {
+ +Apply(event Event) error
+ +AggregateName() string
+}
+
+interface Aggregate {
+ +GetChanges() []Event
+}
+
+entity AccountList {
+ ...
+ -state AccountListState
+ -changes []Event
+}
+
+interface AccountListRepository {
+ +FindByID(id BudgetID) (AccountList, error)
+ +Update(list AccountList) error
+}
+
+}
+
+
+package application {
+
+class AccountListRepositoryImpl {
++FindByID(id BudgetID) (AccountList, error)
++Update(list AccountList) error
+}
+
+class AggregateRepository {
+ +storeChanges(aggregate domain.Aggregate) error
+ +loadChanges(id domain.AggregateID, state &domain.AggregateState) error
+}
+
+interface EventStore {
+ +GetByAggregate(id domain.AggregateID, name string) ([]domain.Event, error)
+ +Append(event domain.Event) error
+}
+
+}
+
+domain -[hidden]right- application
+
+AccountList .right.|> Aggregate
+AccountList *-down- AccountListState
+AccountListState .right.|> AggregateState
+AccountListRepository .down.> AccountList
+
+AccountListRepositoryImpl .left.> AccountList
+AccountListRepositoryImpl .left.> AccountListState
+AccountListRepositoryImpl .left.|> AccountListRepository
+AccountListRepositoryImpl *-down- AggregateRepository
+
+AggregateRepository .down.> Aggregate
+AggregateRepository .down.> AggregateState
+AggregateRepository o-right- EventStore
+
+@enduml

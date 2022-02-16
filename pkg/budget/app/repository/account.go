@@ -4,22 +4,20 @@ import (
 	"errors"
 
 	"github.com/klwxsrx/budget-tracker/pkg/budget/domain"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/messaging"
-	"github.com/klwxsrx/budget-tracker/pkg/common/app/storedevent"
 	commondomain "github.com/klwxsrx/budget-tracker/pkg/common/domain"
 )
 
 type accountListRepository struct {
-	aggregateRepository
+	aggregateRepo *AggregateRepository
 }
 
 func (r *accountListRepository) Update(list *domain.AccountList) error {
-	return r.storeChanges(list)
+	return r.aggregateRepo.storeChanges(list)
 }
 
 func (r *accountListRepository) FindByID(id domain.BudgetID) (*domain.AccountList, error) {
 	state := &domain.AccountListState{}
-	err := r.loadChanges(commondomain.AggregateID(id), state)
+	err := r.aggregateRepo.loadChanges(commondomain.AggregateID(id), state)
 	if errors.Is(err, errAggregateNotFound) {
 		return nil, nil
 	}
@@ -30,11 +28,7 @@ func (r *accountListRepository) FindByID(id domain.BudgetID) (*domain.AccountLis
 }
 
 func NewAccountRepository(
-	store storedevent.Store,
-	deserializer messaging.DomainEventDeserializer,
+	aggregateRepo *AggregateRepository,
 ) domain.AccountListRepository {
-	return &accountListRepository{aggregateRepository{
-		store:        store,
-		deserializer: deserializer,
-	}}
+	return &accountListRepository{aggregateRepo}
 }

@@ -14,12 +14,12 @@ import (
 
 var errAggregateNotFound = errors.New("aggregate not found")
 
-type aggregateRepository struct {
+type AggregateRepository struct {
 	store        storedevent.Store
 	deserializer messaging.DomainEventDeserializer
 }
 
-func (repo *aggregateRepository) storeChanges(aggregate domain.Aggregate) error {
+func (repo *AggregateRepository) storeChanges(aggregate domain.Aggregate) error {
 	for _, event := range aggregate.GetChanges() {
 		_, err := repo.store.Append(event)
 		if err != nil {
@@ -29,7 +29,7 @@ func (repo *aggregateRepository) storeChanges(aggregate domain.Aggregate) error 
 	return nil
 }
 
-func (repo *aggregateRepository) loadChanges(id commondomain.AggregateID, state domain.AggregateState) error {
+func (repo *AggregateRepository) loadChanges(id commondomain.AggregateID, state domain.AggregateState) error {
 	storedEvents, err := repo.store.GetByAggregate(id, state.AggregateName(), storedevent.ID{UUID: uuid.Nil})
 	if err != nil {
 		return fmt.Errorf("failed to get events: %w", err)
@@ -48,4 +48,11 @@ func (repo *aggregateRepository) loadChanges(id commondomain.AggregateID, state 
 		}
 	}
 	return nil
+}
+
+func NewAggregateRepository(
+	store storedevent.Store,
+	deserializer messaging.DomainEventDeserializer,
+) *AggregateRepository {
+	return &AggregateRepository{store, deserializer}
 }
