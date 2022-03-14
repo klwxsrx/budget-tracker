@@ -40,19 +40,19 @@ func getRoutes() []route {
 		},
 		{
 			"ReorderAccount",
-			http.MethodPut,
+			http.MethodPatch,
 			"/account/{budgetID}/{accountID}/order/{position}",
 			reorderAccountParser,
 		},
 		{
 			"RenameAccount",
-			http.MethodPut,
+			http.MethodPatch,
 			"/account/{budgetID}/{accountID}/title",
 			renameAccountParser,
 		},
 		{
 			"ChangeAccountStatus",
-			http.MethodPut,
+			http.MethodPatch,
 			"/account/{budgetID}/{accountID}/status/{status}",
 			changeAccountStatusParser,
 		},

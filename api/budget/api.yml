@@ -38,7 +38,7 @@ paths:
         409:
           description: 'Returns when the title is duplicated'
   /budget/account/{budgetID}/{accountID}/order/{position}:
-    put:
+    patch:
       tags:
         - Account
       summary: Change an order for an account to specific list
@@ -69,7 +69,7 @@ paths:
         404:
           description: 'Returns when the account is not exist or deleted'
   /budget/account/{budgetID}/{accountID}/title:
-    put:
+    patch:
       tags:
         - Account
       summary: Change a title for an account to specific list
@@ -108,7 +108,7 @@ paths:
         409:
           description: 'Returns when the title is duplicated'
   /budget/account/{budgetID}/{accountID}/status/{status}:
-    put:
+    patch:
       tags:
         - Account
       summary: Change a status for an account to specific list
